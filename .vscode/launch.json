@@ -1,0 +1,160 @@
+{
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "rcs5205sb 2h10 (mobile)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "0250605090749711"
+    },
+    {
+      "name": "Z1808-3 (mobile)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "1808ZX250321003"
+    },
+    {
+      "name": "Emulator-5554",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "emulator-5554",
+      "flutterMode": "debug",
+      "toolArgs": [
+        "--dart-define",
+        "ENV=develop",
+        "--verbose-system-logs"
+      ]
+    },
+    {
+      "name": " (Z1803-emulator_API_34)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "emulator-5554",
+      "flutterMode": "debug",
+      "toolArgs": [
+        "--dart-define",
+        "ENV=develop",
+        "--verbose-system-logs"
+      ]
+    },
+    {
+      "name": "Z1808-4 (mobile)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "192.168.0.143:5555"
+    },
+    {
+      "name": "Z1808-5 (mobile)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "1808ZX250321005"
+    },
+    {
+      "name": "Z1808-2 (mobile)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "1808ZX250321002"
+    },
+    {
+      "name": "Z1808-1 (mobile)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "1808ZX250321001"
+    },
+    {
+      "name": "Z1808-1808ZX250827004 (mobile)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "1808ZX250827004"
+    },
+    {
+      "name": "Android (无线调试)",
+      "request": "launch",
+      "type": "dart",
+      // "deviceId": "192.168.8.43:5555" // HUAWEI
+      // "deviceId": "192.168.0.57:5555" // SeedLight
+      // "deviceId": "192.168.8.89:5555" // SeedLight & 1808ZX250321002
+      "deviceId": "1808ZX250321004" // SeedLight & 1808ZX250321002
+    },
+    {
+      "name": "Android (无线调试)2",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "192.168.0.62:5555" // SeedLight
+      // "deviceId": "192.168.8.93:5555" // HUAWEI
+      // "deviceId": "192.168.0.70:5555" // SeedLight
+      // "deviceId": "192.168.0.151:5555" // SeedLight & 1808ZX250321002
+    },
+    {
+      "name": "1808ZX250321004",
+      "request": "launch",
+      "type": "dart",
+      // "deviceId": "192.168.8.43:5555" // HUAWEI
+      "deviceId": "1808ZX250321004" // SeedLight
+      // "deviceId": "192.168.0.151:5555" // SeedLight & 1808ZX250321002
+    },
+    {
+      "name": "Retroid Pocket 5 (小)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "a571f4ce"
+    },
+    {
+      "name": "Pocket EVO (大) ",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "0071ABH601009670"
+    },
+    {
+      "name": "RM510K",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "ff111f76efa75f68"
+    },
+    {
+      "name": "rcs5205sb 2h10(大) ",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "0123456789ABCDEF"
+    },
+
+    {
+      "name": "flutter_bluetooth",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "iOS - lpiPhone",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "00008101-001A51E40E52001E"
+    },
+    {
+      "name": "Chrome (Web)",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "chrome"
+    },
+    {
+      "name": "macOS Desktop",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "macos"
+    },
+    {
+      "name": "flutter_bluetooth (profile mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "flutter_bluetooth (release mode)",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    }
+  ]
+}

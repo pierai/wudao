@@ -1,0 +1,61 @@
+{
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "dart.flutterSdkPath": ".fvm/versions/stable",
+  /// large screen
+  // "window.zoomLevel": 1.2,
+  // "editor.fontSize": 14.5,
+  /// middle screen
+  "window.zoomLevel": 0.8,
+  "editor.fontSize": 14,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.markdownlint": "explicit",
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "Dart-Code.dart-code",
+
+  "[markdown]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+    "editor.formatOnSave": true
+  },
+  "[dart]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.suggest.insertMode": "replace",
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.inlayHints.enabled": "offUnlessPressed",
+    "editor.formatOnSave": true
+  },
+  "dart.lineLength": 135,
+  "dart.insertArgumentPlaceholders": false,
+  "dart.updateImportsOnRename": true,
+  "dart.enableSnippets": true,
+  "makefile.configureOnOpen": false,
+  "java.compile.nullAnalysis.mode": "automatic",
+  "[java]": {
+    "editor.defaultFormatter": "redhat.java"
+  },
+  "cSpell.words": [
+    "cmss",
+    "contenttype",
+    "Dimens",
+    "Faststop",
+    "fufd",
+    "glassmorphism",
+    "initialflatness",
+    "Keeped",
+    "objectbox",
+    "rightop",
+    "righttop",
+    "rtsp",
+    "seedlight",
+    "shortpath",
+    "stagehistory",
+    "Wating",
+    "zkxh"
+  ]
+}
