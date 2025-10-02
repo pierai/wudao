@@ -33,6 +33,7 @@ dependencies:
 
   # UI 组件
   glassmorphism: ^3.0.0
+  liquid_glass_bottom_bar: ^0.0.6
 
   # 工具类
   intl: ^0.19.0

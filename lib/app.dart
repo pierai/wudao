@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/cupertino_theme.dart';
 import 'core/constants/app_strings.dart';
+import 'features/home/presentation/screens/home_screen.dart';
 
 class WuDaoApp extends ConsumerWidget {
   const WuDaoApp({super.key});
@@ -18,22 +19,6 @@ class WuDaoApp extends ConsumerWidget {
         DefaultCupertinoLocalizations.delegate,
         DefaultWidgetsLocalizations.delegate,
       ],
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text('悟道'),
-      ),
-      child: Center(
-        child: Text('欢迎使用悟道'),
-      ),
     );
   }
 }
