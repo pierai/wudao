@@ -37,25 +37,18 @@ Phase 5: 高级功能（数据分析、导出等）
   - [x] 实现页面切换状态管理（Riverpod）
   - [x] 创建各功能模块占位页面
 
+- [x] **Task 1.3**: Go 后端项目初始化
+  - [x] 创建标准项目结构 (cmd/internal/pkg)
+  - [x] 配置 Gin 框架
+  - [x] 设置环境变量加载 (godotenv)
+  - [x] 实现健康检查端点 `/health`
+- [x] **Task 1.4**: PostgreSQL 数据库设置
+  - [x] 创建 Docker Compose 配置
+  - [x] 安装 ltree 扩展
+  - [x] 设计目标表结构
+  - [x] 编写初始化迁移脚本
+
 ### 进行中 🔄
-
-#### Week 1: 基础架构搭建
-
-- [ ] **Task 1.3**: Go 后端项目初始化
-  - [ ] 创建标准项目结构 (cmd/internal/pkg)
-  - [ ] 配置 Gin 框架
-  - [ ] 设置环境变量加载 (godotenv)
-  - [ ] 实现健康检查端点 `/health`
-  - **负责**: @go_backend
-  - **预计时间**: 2 小时
-
-- [ ] **Task 1.4**: PostgreSQL 数据库设置
-  - [ ] 创建 Docker Compose 配置
-  - [ ] 安装 ltree 扩展
-  - [ ] 设计目标表结构
-  - [ ] 编写初始化迁移脚本
-  - **负责**: @database_designer
-  - **预计时间**: 3 小时
 
 #### Week 2: 目标数据模型与存储
 

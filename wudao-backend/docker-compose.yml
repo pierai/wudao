@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    container_name: wudao-postgres
+    environment:
+      POSTGRES_USER: wudao
+      POSTGRES_PASSWORD: wudao_password
+      POSTGRES_DB: wudao_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wudao"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wudao-network
+
+  # Redis 缓存（可选，未来使用）
+  redis:
+    image: redis:7-alpine
+    container_name: wudao-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - wudao-network
+    profiles:
+      - full
+
+  # Go API 服务
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wudao-api
+    environment:
+      - PORT=8080
+      - GIN_MODE=release
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=wudao
+      - DB_PASSWORD=wudao_password
+      - DB_NAME=wudao_db
+      - DB_SSLMODE=disable
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - wudao-network
+    restart: unless-stopped
+    profiles:
+      - full
+
+networks:
+  wudao-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
