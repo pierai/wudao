@@ -48,6 +48,15 @@ Phase 5: 高级功能（数据分析、导出等）
   - [x] 设计目标表结构
   - [x] 编写初始化迁移脚本
 
+- [x] **Task 1.5**: 开发环境配置和调试
+  - [x] 配置 macOS 应用网络权限（entitlements）
+  - [x] 解决 VS Code 调试 VM Service 启动问题
+  - [x] 配置 FVM Flutter SDK 路径（.fvm/flutter_sdk）
+  - [x] 验证 Flutter 应用与 Go 后端连接
+  - [x] 升级 Riverpod 到 3.0 版本
+  - [x] 创建 API 客户端基础架构（Dio + Interceptors）
+  - [x] 实现健康检查端点测试
+
 ### 进行中 🔄
 
 #### Week 2: 目标数据模型与存储

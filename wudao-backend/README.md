@@ -48,13 +48,18 @@ cp .env.example .env
 ### 2. 启动数据库（Docker）
 
 ```bash
-docker-compose up -d postgres
+docker compose up -d postgres
+docker exec wudao-postgres psql -U wudao -d wudao_db -c "\dt"
 ```
 
 ### 3. 运行迁移
 
 ```bash
-go run cmd/migrate/main.go up
+go run cmd/api-server/main.go up
+
+# 检查 8080 端口被谁占用
+lsof -i :8080   
+kill 1685(PID)
 ```
 
 ### 4. 启动服务

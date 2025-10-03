@@ -181,6 +181,40 @@ docs: 更新 README
 test: 添加目标创建测试
 ```
 
+## FVM 配置
+
+### VS Code Flutter SDK 路径设置
+
+在 `.vscode/settings.json` 中配置：
+
+```json
+{
+  // ✅ 推荐：使用 FVM 符号链接
+  "dart.flutterSdkPath": ".fvm/flutter_sdk"
+}
+```
+
+**工作原理**：
+
+- FVM 在项目根目录创建 `.fvm/flutter_sdk` 符号链接
+- 该链接指向全局 FVM 缓存中的实际 SDK：`/Users/用户名/fvm/versions/3.35.5`
+- 切换版本时（`fvm use`），链接自动更新
+
+**为什么推荐这种方式**：
+
+| 配置方式 | 优点 | 缺点 |
+|---------|------|------|
+| ✅ `.fvm/flutter_sdk` | 跨设备兼容<br>版本切换自动生效<br>路径简洁 | 需要 FVM |
+| ❌ `.fvm/versions/3.35.5` | 无 | VS Code Dart 扩展可能无法识别 |
+| ⚠️ 绝对路径 | 明确清晰 | 不跨设备<br>需手动更新<br>路径冗长 |
+
+### 验证配置
+
+修改后在 VS Code 中：
+
+1. 重启 Dart Analysis Server：`Cmd+Shift+P` → "Dart: Restart Analysis Server"
+2. 验证 SDK：`Cmd+Shift+P` → "Flutter: Run Flutter Doctor"
+
 ## 依赖管理
 
 ### 核心依赖
@@ -265,6 +299,24 @@ dart run build_runner build --delete-conflicting-outputs
 
 **Q: Drift 查询报错？**
 A: 检查是否执行了数据库迁移，确保表结构最新
+
+**Q: VS Code 调试时 VM Service 无法启动（SocketException: Operation not permitted）？**
+A: 需要同时解决两个问题：
+
+1. **网络权限问题**：macOS App Sandbox 缺少网络权限
+   - `macos/Runner/DebugProfile.entitlements`：添加 `com.apple.security.network.server` 和 `com.apple.security.network.client`
+   - `macos/Runner/Release.entitlements`：添加 `com.apple.security.network.client`
+
+2. **Flutter SDK 路径配置**：`.vscode/settings.json` 中正确设置：
+   ```json
+   // ✅ 推荐：FVM 符号链接
+   "dart.flutterSdkPath": ".fvm/flutter_sdk"
+
+   // ❌ 避免：相对路径可能无法识别
+   // "dart.flutterSdkPath": ".fvm/versions/3.35.5"
+   ```
+
+3. 修改后执行 `flutter clean` 并重启 VS Code Dart Analysis Server
 
 ## 相关文档
 

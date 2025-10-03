@@ -344,6 +344,27 @@
   - 分级日志（Debug/Info/Error）
   - 错误追踪（崩溃报告）
 
+### 4.6 开发环境要求
+
+- **Flutter 版本管理**:
+  - 使用 FVM 管理 Flutter 版本
+  - VS Code 配置 `"dart.flutterSdkPath": ".fvm/flutter_sdk"` 使用符号链接
+  - 避免使用相对路径 `.fvm/versions/x.x.x`（可能导致 Dart 扩展无法识别）
+  - 修改配置后重启 Dart Analysis Server
+
+- **macOS 平台配置**:
+  - 调试模式需要网络权限：
+    - `DebugProfile.entitlements` 添加 `network.server` 和 `network.client`
+    - `Release.entitlements` 添加 `network.client`
+  - 修改 entitlements 后执行 `flutter clean`
+  - VS Code 调试配置需要正确的 SDK 路径
+
+- **开发工具**:
+  - VS Code 或 Android Studio + Dart/Flutter 插件
+  - Docker Desktop（用于 PostgreSQL）
+  - Postman 或 Swagger UI（用于 API 测试）
+  - Git（版本控制）
+
 ---
 
 ## 5. 约束条件

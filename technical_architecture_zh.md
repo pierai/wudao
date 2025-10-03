@@ -134,6 +134,14 @@ Freezed 提供带有联合类型的不可变数据模型
 
 Claude Code AI 助手与 Flutter 和 Go 项目的集成需要清晰的上下文和结构化的提示。使用包含架构决策的 CLAUDE.md、列出任务和进度的 PLAN.md 以及指定功能的 @docs/requirements.md 来初始化项目——这种持久性上下文提高了 AI 代码生成的准确性。 使用规划模式将大型功能分解为具体任务，每个任务完成后进行审查和提交以便于回滚，并利用内置终端实现无缝文件访问。每月 100 美元的 Claude Code Max 计划提供 Opus 4 访问权限，支持复杂的架构讨论和大型代码库重构。对于 Flutter 项目，描述所需的状态管理模式和组件组合；对于 Go 后端，指定路由结构和错误处理模式。
 
+FVM 版本管理需要正确的 VS Code 配置
+
+使用 FVM（Flutter Version Management）管理多个 Flutter 版本时，VS Code 的 Dart 扩展需要正确配置才能识别项目使用的 SDK。在 .vscode/settings.json 中，使用 FVM 创建的符号链接 "dart.flutterSdkPath": ".fvm/flutter_sdk" 而不是相对路径 ".fvm/versions/3.35.5"——后者可能导致 Dart Analysis Server 无法识别 SDK。FVM 在项目根目录自动创建 .fvm/flutter_sdk 符号链接，指向全局缓存中的实际 SDK 路径（如 /Users/用户名/fvm/versions/3.35.5）。这种配置方式具有跨设备兼容性，当其他开发者克隆项目后，符号链接会自动指向他们机器上的 FVM 路径，并且当运行 fvm use 切换版本时链接会自动更新。修改配置后需要重启 Dart Analysis Server（VS Code 命令面板 → "Dart: Restart Analysis Server"）才能生效。
+
+macOS 调试配置需要额外的网络权限
+
+在 macOS 平台通过 VS Code 调试 Flutter 应用时，可能遇到 VM Service 无法启动的问题，错误信息为 "SocketException: Failed to create server socket (OS Error: Operation not permitted, errno = 1)"。这是因为 macOS App Sandbox 默认不允许应用绑定网络端口，而 Flutter 的 VM Service（用于调试、热重载）需要监听本地端口。命令行 flutter run 不受影响是因为使用了不同的权限配置。解决方案是在 entitlements 文件中添加网络权限：在 macos/Runner/DebugProfile.entitlements 中添加 com.apple.security.network.server（允许监听端口）和 com.apple.security.network.client（允许连接网络），在 macos/Runner/Release.entitlements 中添加 com.apple.security.network.client。修改后执行 flutter clean 清理构建缓存，然后重新运行调试配置。这些权限不仅解决了调试问题，还为未来的 API 请求提供了必要的网络访问能力。
+
 开发期间的热重载保持流状态
 
 Flutter 的热重载功能在反映代码更改的同时保留应用程序状态，极大地加快了 UI 开发周期。在 VS Code 设置中启用保存时热重载，将组件拆分为更小的组件以加快重载编译，最大化使用 const 构造函数以跳过重建，对有状态更改使用热重载（⌘\），当热重载失败时使用热重启（⇧⌘\）。 对 main() 方法、全局变量初始化、const 构造函数修改和原生代码的更改，热重载会失败——这些需要热重启。构建代码以最小化重启需求：将初始化逻辑提取到延迟单例中，对全局状态使用依赖注入，并将 const 与动态组件树分离。

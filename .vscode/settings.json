@@ -1,6 +1,9 @@
 {
   "java.configuration.updateBuildConfiguration": "interactive",
-  "dart.flutterSdkPath": ".fvm/versions/stable",
+  // "dart.flutterSdkPath": ".fvm/versions/3.35.5", Dart 扩展可能没有正确识别 FVM 的相对路径，因此使用下面的绝对路径
+  // "dart.flutterSdkPath": "/Users/pierai/Development/projects/flutter/wudao/.fvm/versions/3.35.5",
+  "dart.flutterSdkPath": ".fvm/flutter_sdk",
+
   /// large screen
   // "window.zoomLevel": 1.2,
   // "editor.fontSize": 14.5,
@@ -16,7 +19,6 @@
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "Dart-Code.dart-code",
-
   "[markdown]": {
     "editor.tabSize": 4,
     "editor.insertSpaces": true,
@@ -59,5 +61,15 @@
     "stagehistory",
     "Wating",
     "zkxh"
+  ],
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "driver": "PostgreSQL",
+      "name": "wudao",
+      "connectString": "postgresql://wudao:wudao_password@localhost:5432/wudao_db"
+    }
   ]
 }
