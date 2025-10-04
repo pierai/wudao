@@ -8,6 +8,7 @@ class ReflectionsScreen extends StatelessWidget {
     return const CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text('灵感记录'),
+        transitionBetweenRoutes: false,
         trailing: Icon(CupertinoIcons.add),
       ),
       child: SafeArea(

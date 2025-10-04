@@ -1,0 +1,312 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'daily_plan.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+/// @nodoc
+mixin _$DailyPlan {
+
+/// 唯一标识符
+ String get id;/// 计划日期
+ DateTime get planDate;/// 关联的习惯 ID
+ String get habitId;/// 暗示任务：基于习惯的 cue 生成的具体任务描述
+ String get cueTask;/// 计划执行时间（可选）
+ DateTime? get scheduledTime;/// 优先级（0-10，数字越小优先级越高）
+ int get priority;/// 是否已完成
+ bool get isCompleted;/// 完成时间
+ DateTime? get completedAt;/// 关联的打卡记录 ID
+ String? get recordId;/// 创建时间
+ DateTime get createdAt;
+/// Create a copy of DailyPlan
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DailyPlanCopyWith<DailyPlan> get copyWith => _$DailyPlanCopyWithImpl<DailyPlan>(this as DailyPlan, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DailyPlan&&(identical(other.id, id) || other.id == id)&&(identical(other.planDate, planDate) || other.planDate == planDate)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.cueTask, cueTask) || other.cueTask == cueTask)&&(identical(other.scheduledTime, scheduledTime) || other.scheduledTime == scheduledTime)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.isCompleted, isCompleted) || other.isCompleted == isCompleted)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.recordId, recordId) || other.recordId == recordId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,planDate,habitId,cueTask,scheduledTime,priority,isCompleted,completedAt,recordId,createdAt);
+
+@override
+String toString() {
+  return 'DailyPlan(id: $id, planDate: $planDate, habitId: $habitId, cueTask: $cueTask, scheduledTime: $scheduledTime, priority: $priority, isCompleted: $isCompleted, completedAt: $completedAt, recordId: $recordId, createdAt: $createdAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DailyPlanCopyWith<$Res>  {
+  factory $DailyPlanCopyWith(DailyPlan value, $Res Function(DailyPlan) _then) = _$DailyPlanCopyWithImpl;
+@useResult
+$Res call({
+ String id, DateTime planDate, String habitId, String cueTask, DateTime? scheduledTime, int priority, bool isCompleted, DateTime? completedAt, String? recordId, DateTime createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class _$DailyPlanCopyWithImpl<$Res>
+    implements $DailyPlanCopyWith<$Res> {
+  _$DailyPlanCopyWithImpl(this._self, this._then);
+
+  final DailyPlan _self;
+  final $Res Function(DailyPlan) _then;
+
+/// Create a copy of DailyPlan
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? planDate = null,Object? habitId = null,Object? cueTask = null,Object? scheduledTime = freezed,Object? priority = null,Object? isCompleted = null,Object? completedAt = freezed,Object? recordId = freezed,Object? createdAt = null,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,planDate: null == planDate ? _self.planDate : planDate // ignore: cast_nullable_to_non_nullable
+as DateTime,habitId: null == habitId ? _self.habitId : habitId // ignore: cast_nullable_to_non_nullable
+as String,cueTask: null == cueTask ? _self.cueTask : cueTask // ignore: cast_nullable_to_non_nullable
+as String,scheduledTime: freezed == scheduledTime ? _self.scheduledTime : scheduledTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,priority: null == priority ? _self.priority : priority // ignore: cast_nullable_to_non_nullable
+as int,isCompleted: null == isCompleted ? _self.isCompleted : isCompleted // ignore: cast_nullable_to_non_nullable
+as bool,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,recordId: freezed == recordId ? _self.recordId : recordId // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [DailyPlan].
+extension DailyPlanPatterns on DailyPlan {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _DailyPlan value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _DailyPlan() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _DailyPlan value)  $default,){
+final _that = this;
+switch (_that) {
+case _DailyPlan():
+return $default(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _DailyPlan value)?  $default,){
+final _that = this;
+switch (_that) {
+case _DailyPlan() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DateTime planDate,  String habitId,  String cueTask,  DateTime? scheduledTime,  int priority,  bool isCompleted,  DateTime? completedAt,  String? recordId,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _DailyPlan() when $default != null:
+return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.scheduledTime,_that.priority,_that.isCompleted,_that.completedAt,_that.recordId,_that.createdAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DateTime planDate,  String habitId,  String cueTask,  DateTime? scheduledTime,  int priority,  bool isCompleted,  DateTime? completedAt,  String? recordId,  DateTime createdAt)  $default,) {final _that = this;
+switch (_that) {
+case _DailyPlan():
+return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.scheduledTime,_that.priority,_that.isCompleted,_that.completedAt,_that.recordId,_that.createdAt);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DateTime planDate,  String habitId,  String cueTask,  DateTime? scheduledTime,  int priority,  bool isCompleted,  DateTime? completedAt,  String? recordId,  DateTime createdAt)?  $default,) {final _that = this;
+switch (_that) {
+case _DailyPlan() when $default != null:
+return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.scheduledTime,_that.priority,_that.isCompleted,_that.completedAt,_that.recordId,_that.createdAt);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _DailyPlan extends DailyPlan {
+  const _DailyPlan({required this.id, required this.planDate, required this.habitId, required this.cueTask, this.scheduledTime, required this.priority, required this.isCompleted, this.completedAt, this.recordId, required this.createdAt}): super._();
+  
+
+/// 唯一标识符
+@override final  String id;
+/// 计划日期
+@override final  DateTime planDate;
+/// 关联的习惯 ID
+@override final  String habitId;
+/// 暗示任务：基于习惯的 cue 生成的具体任务描述
+@override final  String cueTask;
+/// 计划执行时间（可选）
+@override final  DateTime? scheduledTime;
+/// 优先级（0-10，数字越小优先级越高）
+@override final  int priority;
+/// 是否已完成
+@override final  bool isCompleted;
+/// 完成时间
+@override final  DateTime? completedAt;
+/// 关联的打卡记录 ID
+@override final  String? recordId;
+/// 创建时间
+@override final  DateTime createdAt;
+
+/// Create a copy of DailyPlan
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DailyPlanCopyWith<_DailyPlan> get copyWith => __$DailyPlanCopyWithImpl<_DailyPlan>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DailyPlan&&(identical(other.id, id) || other.id == id)&&(identical(other.planDate, planDate) || other.planDate == planDate)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.cueTask, cueTask) || other.cueTask == cueTask)&&(identical(other.scheduledTime, scheduledTime) || other.scheduledTime == scheduledTime)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.isCompleted, isCompleted) || other.isCompleted == isCompleted)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.recordId, recordId) || other.recordId == recordId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,id,planDate,habitId,cueTask,scheduledTime,priority,isCompleted,completedAt,recordId,createdAt);
+
+@override
+String toString() {
+  return 'DailyPlan(id: $id, planDate: $planDate, habitId: $habitId, cueTask: $cueTask, scheduledTime: $scheduledTime, priority: $priority, isCompleted: $isCompleted, completedAt: $completedAt, recordId: $recordId, createdAt: $createdAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DailyPlanCopyWith<$Res> implements $DailyPlanCopyWith<$Res> {
+  factory _$DailyPlanCopyWith(_DailyPlan value, $Res Function(_DailyPlan) _then) = __$DailyPlanCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, DateTime planDate, String habitId, String cueTask, DateTime? scheduledTime, int priority, bool isCompleted, DateTime? completedAt, String? recordId, DateTime createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$DailyPlanCopyWithImpl<$Res>
+    implements _$DailyPlanCopyWith<$Res> {
+  __$DailyPlanCopyWithImpl(this._self, this._then);
+
+  final _DailyPlan _self;
+  final $Res Function(_DailyPlan) _then;
+
+/// Create a copy of DailyPlan
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? planDate = null,Object? habitId = null,Object? cueTask = null,Object? scheduledTime = freezed,Object? priority = null,Object? isCompleted = null,Object? completedAt = freezed,Object? recordId = freezed,Object? createdAt = null,}) {
+  return _then(_DailyPlan(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,planDate: null == planDate ? _self.planDate : planDate // ignore: cast_nullable_to_non_nullable
+as DateTime,habitId: null == habitId ? _self.habitId : habitId // ignore: cast_nullable_to_non_nullable
+as String,cueTask: null == cueTask ? _self.cueTask : cueTask // ignore: cast_nullable_to_non_nullable
+as String,scheduledTime: freezed == scheduledTime ? _self.scheduledTime : scheduledTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,priority: null == priority ? _self.priority : priority // ignore: cast_nullable_to_non_nullable
+as int,isCompleted: null == isCompleted ? _self.isCompleted : isCompleted // ignore: cast_nullable_to_non_nullable
+as bool,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,recordId: freezed == recordId ? _self.recordId : recordId // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+
+}
+
+// dart format on

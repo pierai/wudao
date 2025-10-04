@@ -41,6 +41,14 @@
 - 无需 BuildContext，测试更简单
 - 与 code generation 完美集成
 
+**重要提示**（Riverpod 3.0+）:
+
+从 Riverpod 3.0 开始，`StateProvider`、`StateNotifierProvider` 和 `ChangeNotifierProvider` 已被视为 legacy API。虽然这些代码可能仍然可以工作，但从长远来看，为了更好的代码质量、可维护性以及利用 Riverpod 的最新特性，**强烈建议**：
+
+- ✅ **新项目**：直接使用 `NotifierProvider` 和 `AsyncNotifierProvider`
+- ⚠️ **现有项目**：逐步将 `StateProvider` 迁移到 `NotifierProvider`
+- 📚 **推荐使用**：`Provider`、`FutureProvider`、`StreamProvider`、`Notifier`、`AsyncNotifier`、`StreamNotifier`
+
 ### ADR-002: 使用 Drift 而非 Hive
 
 **原因**:
@@ -68,6 +76,7 @@
 ## 项目结构
 
 ```
+
 lib/
 ├── main.dart
 ├── app.dart                    # MaterialApp/CupertinoApp 配置
@@ -116,6 +125,7 @@ lib/
 │       └── sync_provider.dart
 └── routing/
     └── app_router.dart
+
 ```
 
 ## 当前开发阶段
@@ -163,6 +173,49 @@ class GoalListScreen extends StatefulWidget {
   // 不使用 StatefulWidget，除非必要
 }
 ```
+
+### 数据模型规范（Freezed）
+
+本项目使用 `freezed` 包管理数据模型。所有使用 `@freezed` 注解的类**必须**同时声明为 `sealed class`。
+
+**✅ 正确示例**:
+
+```dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'example_model.freezed.dart';
+
+@freezed
+sealed class ExampleModel with _$ExampleModel {
+  const factory ExampleModel({
+    required String id,
+    required String name,
+    String? description,
+  }) = _ExampleModel;
+
+  const ExampleModel._();
+
+  // 可以添加自定义方法
+  bool get isValid => name.isNotEmpty;
+}
+```
+
+**❌ 错误示例**:
+
+```dart
+// 缺少 sealed 关键字
+@freezed
+class ExampleModel with _$ExampleModel {
+  // ...
+}
+```
+
+**关键点**:
+
+- 使用 `sealed class` 确保编译时类型安全
+- 添加 `const ExampleModel._();` 以支持自定义方法和 getter
+- 使用 `part` 指令关联生成文件
+- 运行 `dart run build_runner build --delete-conflicting-outputs` 生成代码
 
 ### 命名规范
 
@@ -308,6 +361,7 @@ A: 需要同时解决两个问题：
    - `macos/Runner/Release.entitlements`：添加 `com.apple.security.network.client`
 
 2. **Flutter SDK 路径配置**：`.vscode/settings.json` 中正确设置：
+
    ```json
    // ✅ 推荐：FVM 符号链接
    "dart.flutterSdkPath": ".fvm/flutter_sdk"
@@ -333,7 +387,7 @@ A: 需要同时解决两个问题：
 
 ## 参考文档
 
-- technical_architecture.md
+- [中文技术架构](technical_architecture_zh.md)
 
 ---
 

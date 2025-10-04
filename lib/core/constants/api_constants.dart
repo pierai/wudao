@@ -3,7 +3,7 @@ class ApiConstants {
   ApiConstants._();
 
   // Base URL - 根据环境切换
-  static const String baseUrl = 'http://192.168.2.81:8080';
+  static const String baseUrl = 'http://192.168.2.95:8080';
 
   // API 版本
   static const String apiVersion = 'v1';

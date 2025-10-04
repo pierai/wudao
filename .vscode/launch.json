@@ -5,10 +5,16 @@
   "version": "0.2.0",
   "configurations": [
      {
-      "name": "MACOS",
+      "name": "MacOS",
       "request": "launch",
       "type": "dart",
       "deviceId": "macos"
+    },
+     {
+      "name": "iPHONE",
+      "request": "launch",
+      "type": "dart",
+      "deviceId": "00008101-001A51E40E52001E"
     },
     {
       "name": "rcs5205sb 2h10 (mobile)",

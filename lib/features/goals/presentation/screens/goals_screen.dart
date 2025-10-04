@@ -12,6 +12,7 @@ class GoalsScreen extends ConsumerWidget {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text('人生目标'),
+        transitionBetweenRoutes: false,
         trailing: Icon(CupertinoIcons.add),
       ),
       child: SafeArea(

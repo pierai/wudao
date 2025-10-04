@@ -8,6 +8,7 @@ class ProfileScreen extends StatelessWidget {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('我的'),
+        transitionBetweenRoutes: false,
       ),
       child: SafeArea(
         child: ListView(

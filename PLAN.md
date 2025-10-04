@@ -3,9 +3,9 @@
 ## 总体路线图
 
 ```
-Phase 1: 人生目标管理 MVP    ← 当前阶段
+Phase 1: 人生目标管理 MVP
     ↓
-Phase 2: 习惯追踪系统
+Phase 2: 习惯追踪系统    ← 当前阶段 (Week 1-2 已完成)
     ↓
 Phase 3: 灵感记录与反思
     ↓
@@ -245,18 +245,253 @@ Phase 5: 高级功能（数据分析、导出等）
 
 ---
 
-## Phase 2: 习惯追踪系统 (3-4 周)
+## Phase 2: 习惯追踪系统 (4 周)
 
 **目标**: 基于《习惯的力量》实现习惯追踪和触发机制管理
 
-### 待规划 ⏳
+**技术策略**:
+- Phase 2: 纯本地 Drift 存储（快速 MVP）
+- Phase 5+: 可选云端同步（Go 后端 + PostgreSQL）
 
-- [ ] 习惯定义（名称、频率、触发机制）
-- [ ] 每日打卡界面
-- [ ] 连续打卡统计
-- [ ] TimescaleDB 时间序列存储
-- [ ] 习惯趋势可视化（图表）
-- [ ] 提醒通知（本地通知）
+### Week 1: 数据层与领域层 (基础架构) ✅
+
+#### Task 2.1: Drift 数据库表设计 ✅
+- [x] 创建 `lib/core/database/tables/habits_table.dart`
+  - 习惯循环三要素（暗示 cue、惯常行为 routine、奖赏 reward）
+  - 习惯类型（正向习惯 POSITIVE、习惯替代 REPLACEMENT）
+  - 软删除支持
+  - **修复**: CHECK 约束使用下划线命名 `old_routine`
+- [x] 创建 `lib/core/database/tables/habit_records_table.dart`
+  - 执行记录（时间戳、质量评分 1-5、笔记）
+  - 支持补打卡标记 isBackfilled
+- [x] 创建 `lib/core/database/tables/daily_plans_table.dart`
+  - 次日计划（关联习惯、暗示任务、优先级）
+  - 计划完成状态与打卡记录关联
+- [x] 创建 `lib/core/database/tables/habit_frontmatters_table.dart`
+  - 习惯感悟（Markdown 内容、标签系统）
+- [x] 运行代码生成: `dart run build_runner build --delete-conflicting-outputs`
+- **负责**: @flutter_architect
+- **实际时间**: 4 小时
+
+#### Task 2.2: DAO 层实现 ✅
+- [x] 实现 `lib/core/database/daos/habit_dao.dart`
+  - watchActiveHabits(), getHabitById(), insertHabit(), updateHabit(), softDeleteHabit()
+  - 按分类筛选、搜索功能
+- [x] 实现 `lib/core/database/daos/habit_record_dao.dart`
+  - getRecordsByHabitId(), hasRecordOnDate(), insertRecord()
+  - 日期范围查询支持
+- [x] 实现 `lib/core/database/daos/daily_plan_dao.dart`
+  - watchPlansByDate(), insertPlans(), completePlan()
+- [x] 实现 `lib/core/database/daos/frontmatter_dao.dart`
+  - watchAllFrontmatters(), getLatestFrontmatter()
+- [x] 更新 `lib/core/database/app_database.dart` 注册所有表和 DAO
+- **负责**: @flutter_architect
+- **实际时间**: 5 小时
+
+#### Task 2.3: 领域实体定义（Freezed） ✅
+- [x] 定义 `lib/features/habits/domain/entities/habit.dart`
+  - Habit 实体 + HabitType 枚举
+- [x] 定义 `lib/features/habits/domain/entities/habit_record.dart`
+- [x] 定义 `lib/features/habits/domain/entities/daily_plan.dart`
+- [x] 定义 `lib/features/habits/domain/entities/habit_frontmatter.dart`
+- [x] 定义 `lib/features/habits/domain/entities/habit_stats.dart`
+  - 连续天数、总执行次数、完成率、最佳连续记录
+- [x] 运行 Freezed 代码生成
+- **负责**: @flutter_architect
+- **实际时间**: 3 小时
+
+#### Task 2.4: Repository 层实现 ✅
+- [x] 定义 `lib/features/habits/domain/repositories/habit_repository.dart` 接口
+  - 习惯 CRUD、执行记录、统计信息、次日计划、Frontmatter
+- [x] 实现 `lib/features/habits/data/repositories/habit_repository_impl.dart`
+  - 完整的业务逻辑实现
+  - 连续天数计算算法（_calculateCurrentStreak）
+  - 完成率计算算法（_calculateCompletionRate）
+- [x] 创建数据模型转换器
+  - `lib/features/habits/data/models/habit_model.dart`（toEntity/toData 扩展）
+  - 其他实体的转换器
+- **负责**: @flutter_architect
+- **实际时间**: 6 小时
+
+### Week 2: 核心 UI 实现 (基础功能) ✅
+
+#### Task 2.5: Riverpod Providers 配置 ✅
+- [x] 创建 `lib/features/habits/presentation/providers/habit_provider.dart`
+  - databaseProvider、habitRepositoryProvider
+  - activeHabitsProvider (StreamProvider)
+  - habitStatsProvider (FutureProvider.family)
+  - hasTodayRecordProvider (FutureProvider.family)
+  - searchHabitsProvider (FutureProvider.family)
+- [x] 更新 `lib/main.dart` 添加 ProviderScope
+- [x] 更新 `lib/app.dart` 使用 ConsumerWidget
+- **负责**: @flutter_architect
+- **实际时间**: 2 小时
+
+#### Task 2.6: 习惯列表页面 ✅
+- [x] 实现 `lib/features/habits/presentation/screens/habits_screen.dart`
+  - CupertinoPageScaffold + 导航栏（修复 Hero 标签冲突）
+  - StreamProvider 监听习惯列表
+  - 空状态设计（精美插图 + 引导文案）
+  - 下拉刷新支持
+  - 搜索功能（CupertinoSearchTextField）
+- [x] 创建 `lib/features/habits/presentation/widgets/habit_card.dart`
+  - 显示习惯名称、暗示、连续天数、完成率
+  - 习惯类型徽章（"正向习惯"/"习惯替代"）
+  - 快速打卡按钮（已打卡显示 ✓）
+  - **优化交互**: 点击卡片进入编辑、左滑删除（Dismissible）
+  - 修复布局约束问题（Column mainAxisSize）
+- **负责**: @flutter_architect
+- **实际时间**: 7 小时
+
+#### Task 2.7: 创建/编辑习惯表单 ✅
+- [x] 实现 `lib/features/habits/presentation/screens/habit_form_screen.dart`
+  - CupertinoSegmentedControl 选择习惯类型
+  - 表单字段：名称、暗示、惯常行为、奖赏、分类、备注
+  - 习惯替代模式：额外显示"原惯常行为"字段
+  - 表单验证（必填项检查）
+  - 保存逻辑（创建/更新）
+- [x] 添加提示文案（💡 暗示越具体，越容易触发）
+- **负责**: @flutter_architect
+- **实际时间**: 5 小时
+
+#### Task 2.8: 打卡对话框 ✅
+- [x] 创建 `lib/features/habits/presentation/widgets/check_in_dialog.dart`
+  - CupertinoAlertDialog 样式
+  - 执行时间选择（CupertinoDatePicker）
+  - 执行质量星级选择（1-5 星）
+  - 执行笔记输入框（可选）
+  - 打卡成功动画反馈
+  - 自动刷新 Provider（invalidate habitStatsProvider）
+- **负责**: @flutter_architect
+- **实际时间**: 4 小时
+
+### Week 3: 高级功能 (统计与可视化)
+
+#### Task 2.9: 习惯详情页面
+- [ ] 实现 `lib/features/habits/presentation/screens/habit_detail_screen.dart`
+  - 习惯循环三要素展示（卡片式布局）
+  - 执行统计卡片（连续天数、总次数、本周次数、完成率）
+  - 执行记录列表（时间、质量星级、笔记）
+  - 编辑/删除按钮
+- [ ] 创建 `lib/features/habits/presentation/widgets/habit_stats_card.dart`
+  - 4 格统计面板
+  - 数据自动更新
+- **负责**: @flutter_architect
+- **预计时间**: 5 小时
+
+#### Task 2.10: 统计计算逻辑完善
+- [ ] 优化 Repository 中的统计算法
+  - 连续天数计算（支持"今天或昨天"逻辑）
+  - 本周执行次数（周一为起始）
+  - 完成率计算（自首次记录以来）
+  - 最佳连续记录计算
+- [ ] 添加单元测试验证算法正确性
+- **负责**: @flutter_architect
+- **预计时间**: 3 小时
+
+#### Task 2.11: 日历热力图组件
+- [ ] 创建 `lib/features/habits/presentation/widgets/habit_calendar_heatmap.dart`
+  - GitHub 风格年度热力图
+  - 颜色深浅表示完成质量（1-5 星对应渐变色）
+  - 点击日期显示详情
+  - 支持滚动查看历史数据
+- [ ] 集成到习惯详情页
+- **负责**: @flutter_architect
+- **预计时间**: 6 小时
+
+#### Task 2.12: 次日计划功能
+- [ ] 实现 `lib/features/habits/presentation/screens/daily_plan_screen.dart`
+  - 显示次日计划列表（按优先级排序）
+  - "从习惯生成" Tab 和 "手动添加" Tab
+  - 计划完成勾选
+  - 关联习惯显示
+- [ ] 创建 `lib/features/habits/presentation/widgets/plan_generator_dialog.dart`
+  - 习惯选择对话框（多选）
+  - 为每个习惯设置建议时间
+  - 批量生成计划（将暗示作为任务）
+- [ ] 实现计划完成到打卡的关联逻辑
+  - 标记计划完成时弹出确认："暗示已完成，是否执行惯常行为并打卡？"
+  - 自动关联 recordId
+- **负责**: @flutter_architect
+- **预计时间**: 6 小时
+
+### Week 4: 完善与测试 (打磨体验)
+
+#### Task 2.13: Frontmatter 习惯感悟
+- [ ] 实现 `lib/features/habits/presentation/screens/frontmatter_screen.dart`
+  - Markdown 编辑器（使用 flutter_markdown）
+  - YAML frontmatter 编辑（title, created, updated, tags）
+  - 预览模式 / 编辑模式切换
+  - 自动保存草稿
+- [ ] 标签系统
+  - 标签选择器
+  - 按标签筛选
+- [ ] 时间线展示
+  - 按更新时间排序
+  - 与习惯关联显示
+- **负责**: @flutter_architect
+- **预计时间**: 5 小时
+
+#### Task 2.14: UI/UX 优化
+- [ ] 添加页面切换动画（CupertinoPageRoute）
+- [ ] 打卡成功动画（✓ 图标放大 + 震动反馈）
+- [ ] 成就通知（连续 7 天、30 天等里程碑）
+- [ ] 空状态优化（精美插图）
+- [ ] 加载状态优化（CupertinoActivityIndicator）
+- [ ] 错误状态设计（友好提示）
+- **负责**: @flutter_architect
+- **预计时间**: 4 小时
+
+#### Task 2.15: 路由配置
+- [ ] 更新 `lib/routing/app_router.dart`
+  - /habits - 习惯列表
+  - /habits/new - 创建习惯
+  - /habits/:id - 习惯详情
+  - /habits/:id/edit - 编辑习惯
+  - /habits/daily-plan - 次日计划
+  - /habits/frontmatter - 习惯感悟
+- [ ] 集成到底部导航栏
+- **负责**: @flutter_architect
+- **预计时间**: 2 小时
+
+#### Task 2.16: 测试与文档
+- [ ] 编写单元测试
+  - 实体测试（Habit, HabitRecord, HabitStats）
+  - Repository 测试（统计计算逻辑）
+- [ ] 编写 Widget 测试
+  - HabitCard 组件测试
+  - CheckInDialog 测试
+- [ ] 编写集成测试
+  - 创建习惯 → 打卡 → 查看统计 完整流程
+- [ ] 更新用户手册
+- **负责**: @flutter_architect
+- **预计时间**: 5 小时
+
+### Phase 2 验收标准 ✓
+
+**功能完整性**:
+- [ ] 可以创建正向习惯和习惯替代
+- [ ] 每日打卡流畅无误
+- [ ] 连续天数和完成率计算准确
+- [ ] 次日计划生成和管理正常
+- [ ] Frontmatter 习惯感悟可编辑
+
+**用户体验**:
+- [ ] iOS 风格 UI 美观流畅
+- [ ] 打卡操作 < 5 秒完成
+- [ ] 动画过渡自然
+- [ ] 空状态/错误状态友好
+
+**技术指标**:
+- [ ] 数据库操作无阻塞（后台线程）
+- [ ] 页面切换流畅 60fps
+- [ ] 测试覆盖率 > 60%
+- [ ] 0 严重 Bug
+
+**扩展性**:
+- [ ] Repository 接口清晰，易于后续接入云端同步
+- [ ] 数据模型与 UI 解耦
+- [ ] 为 Phase 5 云端同步预留接口
 
 ---
 
@@ -333,5 +568,31 @@ Phase 5: 高级功能（数据分析、导出等）
 
 ---
 
-**最后更新**: 2025-10-01  
-**当前冲刺**: Phase 1, Week 1
+## 本次更新总结 (2025-10-04)
+
+### Phase 2 Week 1-2 已完成 ✅
+
+**完成的功能**:
+- ✅ 习惯 CRUD（创建、编辑、删除）
+- ✅ 习惯打卡功能（质量评分 1-5 星、笔记）
+- ✅ 统计计算（连续天数、完成率）
+- ✅ 搜索和筛选
+- ✅ iOS 风格 UI（Cupertino 组件）
+
+**修复的问题**:
+- 🐛 Hero 标签冲突（导航栏动画）
+- 🐛 数据库 CHECK 约束命名问题
+- 🐛 布局约束问题（Column/Row）
+
+**UI/UX 优化**:
+- 🎨 点击卡片 → 直接编辑
+- 🎨 左滑 → 删除确认（Dismissible）
+- 🎨 独立打卡按钮（阻止事件冒泡）
+
+**新增文件数**: 48 个
+**代码行数**: ~3000+ 行
+
+---
+
+**最后更新**: 2025-10-04
+**当前冲刺**: Phase 2, Week 3（习惯详情页面开发中）
