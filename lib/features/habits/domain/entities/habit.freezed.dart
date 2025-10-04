@@ -24,7 +24,9 @@ mixin _$Habit {
  HabitType get type;/// 分类（可选）
  String? get category;/// 备注说明
  String? get notes;/// 是否活跃
- bool get isActive;/// 创建时间
+ bool get isActive;/// 是否为核心习惯（Keystone Habit）
+/// 核心习惯能引发连锁反应，带动其他习惯的形成
+ bool get isKeystone;/// 创建时间
  DateTime get createdAt;/// 最后更新时间
  DateTime get updatedAt;/// 软删除时间
  DateTime? get deletedAt;
@@ -38,16 +40,16 @@ $HabitCopyWith<Habit> get copyWith => _$HabitCopyWithImpl<Habit>(this as Habit, 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.cue, cue) || other.cue == cue)&&(identical(other.routine, routine) || other.routine == routine)&&(identical(other.oldRoutine, oldRoutine) || other.oldRoutine == oldRoutine)&&(identical(other.reward, reward) || other.reward == reward)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.cue, cue) || other.cue == cue)&&(identical(other.routine, routine) || other.routine == routine)&&(identical(other.oldRoutine, oldRoutine) || other.oldRoutine == oldRoutine)&&(identical(other.reward, reward) || other.reward == reward)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isKeystone, isKeystone) || other.isKeystone == isKeystone)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,cue,routine,oldRoutine,reward,type,category,notes,isActive,createdAt,updatedAt,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,name,cue,routine,oldRoutine,reward,type,category,notes,isActive,isKeystone,createdAt,updatedAt,deletedAt);
 
 @override
 String toString() {
-  return 'Habit(id: $id, name: $name, cue: $cue, routine: $routine, oldRoutine: $oldRoutine, reward: $reward, type: $type, category: $category, notes: $notes, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
+  return 'Habit(id: $id, name: $name, cue: $cue, routine: $routine, oldRoutine: $oldRoutine, reward: $reward, type: $type, category: $category, notes: $notes, isActive: $isActive, isKeystone: $isKeystone, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
 }
 
 
@@ -58,7 +60,7 @@ abstract mixin class $HabitCopyWith<$Res>  {
   factory $HabitCopyWith(Habit value, $Res Function(Habit) _then) = _$HabitCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String cue, String routine, String? oldRoutine, String reward, HabitType type, String? category, String? notes, bool isActive, DateTime createdAt, DateTime updatedAt, DateTime? deletedAt
+ String id, String name, String cue, String routine, String? oldRoutine, String reward, HabitType type, String? category, String? notes, bool isActive, bool isKeystone, DateTime createdAt, DateTime updatedAt, DateTime? deletedAt
 });
 
 
@@ -75,7 +77,7 @@ class _$HabitCopyWithImpl<$Res>
 
 /// Create a copy of Habit
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? cue = null,Object? routine = null,Object? oldRoutine = freezed,Object? reward = null,Object? type = null,Object? category = freezed,Object? notes = freezed,Object? isActive = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? cue = null,Object? routine = null,Object? oldRoutine = freezed,Object? reward = null,Object? type = null,Object? category = freezed,Object? notes = freezed,Object? isActive = null,Object? isKeystone = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -87,6 +89,7 @@ as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non
 as HabitType,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,isKeystone: null == isKeystone ? _self.isKeystone : isKeystone // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
@@ -172,10 +175,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String cue,  String routine,  String? oldRoutine,  String reward,  HabitType type,  String? category,  String? notes,  bool isActive,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String cue,  String routine,  String? oldRoutine,  String reward,  HabitType type,  String? category,  String? notes,  bool isActive,  bool isKeystone,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Habit() when $default != null:
-return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_that.reward,_that.type,_that.category,_that.notes,_that.isActive,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_that.reward,_that.type,_that.category,_that.notes,_that.isActive,_that.isKeystone,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   return orElse();
 
 }
@@ -193,10 +196,10 @@ return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String cue,  String routine,  String? oldRoutine,  String reward,  HabitType type,  String? category,  String? notes,  bool isActive,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String cue,  String routine,  String? oldRoutine,  String reward,  HabitType type,  String? category,  String? notes,  bool isActive,  bool isKeystone,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Habit():
-return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_that.reward,_that.type,_that.category,_that.notes,_that.isActive,_that.createdAt,_that.updatedAt,_that.deletedAt);}
+return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_that.reward,_that.type,_that.category,_that.notes,_that.isActive,_that.isKeystone,_that.createdAt,_that.updatedAt,_that.deletedAt);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -210,10 +213,10 @@ return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String cue,  String routine,  String? oldRoutine,  String reward,  HabitType type,  String? category,  String? notes,  bool isActive,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String cue,  String routine,  String? oldRoutine,  String reward,  HabitType type,  String? category,  String? notes,  bool isActive,  bool isKeystone,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Habit() when $default != null:
-return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_that.reward,_that.type,_that.category,_that.notes,_that.isActive,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
+return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_that.reward,_that.type,_that.category,_that.notes,_that.isActive,_that.isKeystone,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
   return null;
 
 }
@@ -225,7 +228,7 @@ return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_th
 
 
 class _Habit extends Habit {
-  const _Habit({required this.id, required this.name, required this.cue, required this.routine, this.oldRoutine, required this.reward, required this.type, this.category, this.notes, required this.isActive, required this.createdAt, required this.updatedAt, this.deletedAt}): super._();
+  const _Habit({required this.id, required this.name, required this.cue, required this.routine, this.oldRoutine, required this.reward, required this.type, this.category, this.notes, required this.isActive, this.isKeystone = false, required this.createdAt, required this.updatedAt, this.deletedAt}): super._();
   
 
 /// 唯一标识符
@@ -248,6 +251,9 @@ class _Habit extends Habit {
 @override final  String? notes;
 /// 是否活跃
 @override final  bool isActive;
+/// 是否为核心习惯（Keystone Habit）
+/// 核心习惯能引发连锁反应，带动其他习惯的形成
+@override@JsonKey() final  bool isKeystone;
 /// 创建时间
 @override final  DateTime createdAt;
 /// 最后更新时间
@@ -265,16 +271,16 @@ _$HabitCopyWith<_Habit> get copyWith => __$HabitCopyWithImpl<_Habit>(this, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.cue, cue) || other.cue == cue)&&(identical(other.routine, routine) || other.routine == routine)&&(identical(other.oldRoutine, oldRoutine) || other.oldRoutine == oldRoutine)&&(identical(other.reward, reward) || other.reward == reward)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.cue, cue) || other.cue == cue)&&(identical(other.routine, routine) || other.routine == routine)&&(identical(other.oldRoutine, oldRoutine) || other.oldRoutine == oldRoutine)&&(identical(other.reward, reward) || other.reward == reward)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isKeystone, isKeystone) || other.isKeystone == isKeystone)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,name,cue,routine,oldRoutine,reward,type,category,notes,isActive,createdAt,updatedAt,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,name,cue,routine,oldRoutine,reward,type,category,notes,isActive,isKeystone,createdAt,updatedAt,deletedAt);
 
 @override
 String toString() {
-  return 'Habit(id: $id, name: $name, cue: $cue, routine: $routine, oldRoutine: $oldRoutine, reward: $reward, type: $type, category: $category, notes: $notes, isActive: $isActive, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
+  return 'Habit(id: $id, name: $name, cue: $cue, routine: $routine, oldRoutine: $oldRoutine, reward: $reward, type: $type, category: $category, notes: $notes, isActive: $isActive, isKeystone: $isKeystone, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt)';
 }
 
 
@@ -285,7 +291,7 @@ abstract mixin class _$HabitCopyWith<$Res> implements $HabitCopyWith<$Res> {
   factory _$HabitCopyWith(_Habit value, $Res Function(_Habit) _then) = __$HabitCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String cue, String routine, String? oldRoutine, String reward, HabitType type, String? category, String? notes, bool isActive, DateTime createdAt, DateTime updatedAt, DateTime? deletedAt
+ String id, String name, String cue, String routine, String? oldRoutine, String reward, HabitType type, String? category, String? notes, bool isActive, bool isKeystone, DateTime createdAt, DateTime updatedAt, DateTime? deletedAt
 });
 
 
@@ -302,7 +308,7 @@ class __$HabitCopyWithImpl<$Res>
 
 /// Create a copy of Habit
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? cue = null,Object? routine = null,Object? oldRoutine = freezed,Object? reward = null,Object? type = null,Object? category = freezed,Object? notes = freezed,Object? isActive = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? cue = null,Object? routine = null,Object? oldRoutine = freezed,Object? reward = null,Object? type = null,Object? category = freezed,Object? notes = freezed,Object? isActive = null,Object? isKeystone = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(_Habit(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -314,6 +320,7 @@ as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non
 as HabitType,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
+as bool,isKeystone: null == isKeystone ? _self.isKeystone : isKeystone // ignore: cast_nullable_to_non_nullable
 as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable

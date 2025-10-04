@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/habit.dart';
 import '../providers/habit_provider.dart';
-import '../screens/habit_form_screen.dart';
+import '../screens/habit_detail_screen.dart';
 import 'check_in_dialog.dart';
 
 /// 习惯卡片组件
@@ -25,8 +25,12 @@ class HabitCard extends ConsumerWidget {
     }
   }
 
-  void _handleEdit(BuildContext context) {
-    Navigator.of(context).push(CupertinoPageRoute(builder: (context) => HabitFormScreen(habitId: habit.id)));
+  void _handleViewDetail(BuildContext context) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) => HabitDetailScreen(habitId: habit.id),
+      ),
+    );
   }
 
   @override
@@ -69,7 +73,7 @@ class HabitCard extends ConsumerWidget {
           child: const Icon(CupertinoIcons.delete, color: CupertinoColors.white, size: 28),
         ),
         child: GestureDetector(
-          onTap: () => _handleEdit(context),
+          onTap: () => _handleViewDetail(context),
           child: Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
@@ -91,22 +95,56 @@ class HabitCard extends ConsumerWidget {
                         children: [
                           Text(habit.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 4),
-                          // 习惯类型标签
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: habit.isPositive
-                                  ? CupertinoColors.activeGreen.withOpacity(0.1)
-                                  : CupertinoColors.activeBlue.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              habit.typeDisplayText,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: habit.isPositive ? CupertinoColors.activeGreen : CupertinoColors.activeBlue,
+                          // 习惯类型标签和核心习惯徽章
+                          Row(
+                            children: [
+                              // 习惯类型标签
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: habit.isPositive
+                                      ? CupertinoColors.activeGreen.withOpacity(0.1)
+                                      : CupertinoColors.activeBlue.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  habit.typeDisplayText,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: habit.isPositive ? CupertinoColors.activeGreen : CupertinoColors.activeBlue,
+                                  ),
+                                ),
                               ),
-                            ),
+                              // 核心习惯徽章
+                              if (habit.isKeystone) ...[
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: CupertinoColors.systemOrange.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '💎',
+                                        style: TextStyle(fontSize: 10),
+                                      ),
+                                      SizedBox(width: 2),
+                                      Text(
+                                        '核心习惯',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: CupertinoColors.systemOrange,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ],
                       ),

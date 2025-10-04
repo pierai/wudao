@@ -32,6 +32,9 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
   // 习惯类型选择
   HabitType _selectedType = HabitType.positive;
 
+  // 是否为核心习惯
+  bool _isKeystone = false;
+
   // 表单验证错误信息
   String? _nameError;
   String? _cueError;
@@ -164,6 +167,7 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
             ? _notesController.text.trim()
             : null,
         isActive: true,
+        isKeystone: _isKeystone,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
@@ -335,6 +339,50 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
                 controller: _categoryController,
                 placeholder: '例如：健康、学习、工作',
                 maxLength: 50,
+              ),
+              const SizedBox(height: 24),
+
+              // 核心习惯开关
+              Container(
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemGrey6,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '💎 核心习惯',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '核心习惯能引发连锁反应，带动其他习惯形成',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: CupertinoColors.systemGrey.resolveFrom(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    CupertinoSwitch(
+                      value: _isKeystone,
+                      onChanged: (value) {
+                        setState(() {
+                          _isKeystone = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
 

@@ -29,7 +29,11 @@ class HomeScreen extends ConsumerWidget {
 
     final List<Widget> pages = [const GoalsScreen(), const HabitsScreen(), const ReflectionsScreen(), const ProfileScreen()];
 
+    // 使用 viewPadding.bottom（设备物理安全区域，不受键盘影响）
+    // final bottomSafePadding = MediaQuery.of(context).viewPadding.bottom;
+
     return CupertinoPageScaffold(
+      resizeToAvoidBottomInset: false, // 防止键盘展开时，导航栏被顶起来
       child: Stack(
         children: [
           // 页面内容
@@ -39,11 +43,18 @@ class HomeScreen extends ConsumerWidget {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(
-              margin: const EdgeInsets.all(16),
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                // viewInsets: EdgeInsets.zero, // 移除键盘的影响
+                padding: MediaQuery.of(context).viewPadding.copyWith(
+                  bottom: 0, // 使用 0， 更贴近底部
+                  // bottom: bottomSafePadding, // 使用设备固有的底部安全区域
+                ),
+              ),
               child: Material(
                 color: Colors.transparent,
                 child: LiquidGlassBottomBar(
+                  margin: const EdgeInsets.all(16),
                   currentIndex: selectedIndex,
                   onTap: (index) {
                     ref.read(selectedIndexProvider.notifier).setIndex(index);

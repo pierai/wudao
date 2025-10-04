@@ -79,6 +79,8 @@ fvm dart run build_runner build --delete-conflicting-outputs
 
 fvm flutter pub upgrade --major-versions
 fvm dart analyze xx.dart
+# 初始化习惯
+dart run scripts/init_habits.dart
 
 # 检查环境
 1. 重启 Dart Analysis Server：
@@ -152,6 +154,7 @@ fvm flutter run -d macos
 ### 问题 4: VS Code 调试时 VM Service 无法启动
 
 **错误信息**：
+
 ```
 SocketException: Failed to create server socket (OS Error: Operation not permitted, errno = 1)
 ```
@@ -161,6 +164,7 @@ SocketException: Failed to create server socket (OS Error: Operation not permitt
 **解决方案**：在 entitlements 文件中添加网络权限：
 
 `macos/Runner/DebugProfile.entitlements`：
+
 ```xml
 <key>com.apple.security.network.server</key>
 <true/>
@@ -169,20 +173,24 @@ SocketException: Failed to create server socket (OS Error: Operation not permitt
 ```
 
 `macos/Runner/Release.entitlements`：
+
 ```xml
 <key>com.apple.security.network.client</key>
 <true/>
 ```
 
 修改后执行：
+
 ```bash
 flutter clean
 # 然后在 VS Code 中重新运行调试配置
 ```
 
 **注意**：
+
 - 命令行 `flutter run` 不受影响，因为使用了不同的权限配置
 - VS Code 中的 `.vscode/settings.json` 需要配置正确的 Flutter SDK 路径：
+
   ```json
   // ✅ 推荐：使用 FVM 符号链接（跨设备兼容）
   "dart.flutterSdkPath": ".fvm/flutter_sdk"

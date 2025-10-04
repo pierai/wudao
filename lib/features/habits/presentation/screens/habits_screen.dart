@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/habit_provider.dart';
 import '../widgets/habit_card.dart';
+import 'daily_plan_screen.dart';
 import 'habit_form_screen.dart';
 
 /// 习惯列表页面
@@ -31,6 +32,14 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     );
   }
 
+  void _navigateToDailyPlan(BuildContext context) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) => const DailyPlanScreen(),
+      ),
+    );
+  }
+
   Future<void> _handleRefresh() async {
     // 刷新习惯列表
     ref.invalidate(activeHabitsProvider);
@@ -38,18 +47,31 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final filterType = ref.watch(keystoneFilterProvider);
+
+    // 根据搜索查询和筛选条件选择数据源
     final habitsAsync = _searchQuery.isEmpty
-        ? ref.watch(activeHabitsProvider)
+        ? ref.watch(filteredHabitsProvider)
         : ref.watch(searchHabitsProvider(_searchQuery));
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('习惯追踪'),
         transitionBetweenRoutes: false,
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.add_circled),
-          onPressed: () => _navigateToHabitForm(context),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => _navigateToDailyPlan(context),
+              child: const Icon(CupertinoIcons.calendar_today),
+            ),
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => _navigateToHabitForm(context),
+              child: const Icon(CupertinoIcons.add_circled),
+            ),
+          ],
         ),
       ),
       child: SafeArea(
@@ -68,6 +90,32 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                 },
               ),
             ),
+            // 核心习惯筛选器（仅在非搜索状态显示）
+            if (_searchQuery.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: CupertinoSegmentedControl<KeystoneFilterType>(
+                  groupValue: filterType,
+                  onValueChanged: (value) {
+                    ref.read(keystoneFilterProvider.notifier).state = value;
+                  },
+                  children: const {
+                    KeystoneFilterType.all: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text('全部'),
+                    ),
+                    KeystoneFilterType.keystoneOnly: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text('💎 核心'),
+                    ),
+                    KeystoneFilterType.regularOnly: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text('普通'),
+                    ),
+                  },
+                ),
+              ),
+            if (_searchQuery.isEmpty) const SizedBox(height: 12),
             // 习惯列表
             Expanded(
               child: habitsAsync.when(
@@ -169,8 +217,8 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
           ),
           const SizedBox(height: 24),
           CupertinoButton(
-            child: const Text('重试'),
             onPressed: _handleRefresh,
+            child: const Text('重试'),
           ),
         ],
       ),

@@ -38,6 +38,10 @@ sealed class Habit with _$Habit {
     /// 是否活跃
     required bool isActive,
 
+    /// 是否为核心习惯（Keystone Habit）
+    /// 核心习惯能引发连锁反应，带动其他习惯的形成
+    @Default(false) bool isKeystone,
+
     /// 创建时间
     required DateTime createdAt,
 

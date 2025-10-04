@@ -128,6 +128,21 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _isKeystoneMeta = const VerificationMeta(
+    'isKeystone',
+  );
+  @override
+  late final GeneratedColumn<bool> isKeystone = GeneratedColumn<bool>(
+    'is_keystone',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_keystone" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -173,6 +188,7 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
     category,
     notes,
     isActive,
+    isKeystone,
     createdAt,
     updatedAt,
     deletedAt,
@@ -258,6 +274,12 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
       );
     }
+    if (data.containsKey('is_keystone')) {
+      context.handle(
+        _isKeystoneMeta,
+        isKeystone.isAcceptableOrUnknown(data['is_keystone']!, _isKeystoneMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -329,6 +351,10 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
+      isKeystone: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_keystone'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -385,6 +411,11 @@ class HabitData extends DataClass implements Insertable<HabitData> {
   /// 是否活跃（用于软删除和归档）
   final bool isActive;
 
+  /// 是否为核心习惯（Keystone Habit）
+  /// 核心习惯能引发连锁反应，带动其他习惯的形成
+  /// 示例：运动 → 健康饮食 + 良好睡眠 + 提高效率
+  final bool isKeystone;
+
   /// 创建时间
   final DateTime createdAt;
 
@@ -404,6 +435,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     this.category,
     this.notes,
     required this.isActive,
+    required this.isKeystone,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -427,6 +459,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       map['notes'] = Variable<String>(notes);
     }
     map['is_active'] = Variable<bool>(isActive);
+    map['is_keystone'] = Variable<bool>(isKeystone);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -453,6 +486,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           ? const Value.absent()
           : Value(notes),
       isActive: Value(isActive),
+      isKeystone: Value(isKeystone),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -477,6 +511,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       category: serializer.fromJson<String?>(json['category']),
       notes: serializer.fromJson<String?>(json['notes']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      isKeystone: serializer.fromJson<bool>(json['isKeystone']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -496,6 +531,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       'category': serializer.toJson<String?>(category),
       'notes': serializer.toJson<String?>(notes),
       'isActive': serializer.toJson<bool>(isActive),
+      'isKeystone': serializer.toJson<bool>(isKeystone),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -513,6 +549,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     Value<String?> category = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     bool? isActive,
+    bool? isKeystone,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -527,6 +564,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     category: category.present ? category.value : this.category,
     notes: notes.present ? notes.value : this.notes,
     isActive: isActive ?? this.isActive,
+    isKeystone: isKeystone ?? this.isKeystone,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -545,6 +583,9 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       category: data.category.present ? data.category.value : this.category,
       notes: data.notes.present ? data.notes.value : this.notes,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      isKeystone: data.isKeystone.present
+          ? data.isKeystone.value
+          : this.isKeystone,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -564,6 +605,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           ..write('category: $category, ')
           ..write('notes: $notes, ')
           ..write('isActive: $isActive, ')
+          ..write('isKeystone: $isKeystone, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt')
@@ -583,6 +625,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     category,
     notes,
     isActive,
+    isKeystone,
     createdAt,
     updatedAt,
     deletedAt,
@@ -601,6 +644,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           other.category == this.category &&
           other.notes == this.notes &&
           other.isActive == this.isActive &&
+          other.isKeystone == this.isKeystone &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt);
@@ -617,6 +661,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
   final Value<String?> category;
   final Value<String?> notes;
   final Value<bool> isActive;
+  final Value<bool> isKeystone;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -632,6 +677,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     this.category = const Value.absent(),
     this.notes = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.isKeystone = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -648,6 +694,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     this.category = const Value.absent(),
     this.notes = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.isKeystone = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -671,6 +718,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     Expression<String>? category,
     Expression<String>? notes,
     Expression<bool>? isActive,
+    Expression<bool>? isKeystone,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -687,6 +735,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
       if (category != null) 'category': category,
       if (notes != null) 'notes': notes,
       if (isActive != null) 'is_active': isActive,
+      if (isKeystone != null) 'is_keystone': isKeystone,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -705,6 +754,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     Value<String?>? category,
     Value<String?>? notes,
     Value<bool>? isActive,
+    Value<bool>? isKeystone,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -721,6 +771,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
       category: category ?? this.category,
       notes: notes ?? this.notes,
       isActive: isActive ?? this.isActive,
+      isKeystone: isKeystone ?? this.isKeystone,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -761,6 +812,9 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
     }
+    if (isKeystone.present) {
+      map['is_keystone'] = Variable<bool>(isKeystone.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -789,6 +843,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
           ..write('category: $category, ')
           ..write('notes: $notes, ')
           ..write('isActive: $isActive, ')
+          ..write('isKeystone: $isKeystone, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -2496,6 +2551,7 @@ typedef $$HabitsTableCreateCompanionBuilder =
       Value<String?> category,
       Value<String?> notes,
       Value<bool> isActive,
+      Value<bool> isKeystone,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
@@ -2513,6 +2569,7 @@ typedef $$HabitsTableUpdateCompanionBuilder =
       Value<String?> category,
       Value<String?> notes,
       Value<bool> isActive,
+      Value<bool> isKeystone,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -2616,6 +2673,11 @@ class $$HabitsTableFilterComposer
 
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isKeystone => $composableBuilder(
+    column: $table.isKeystone,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -2744,6 +2806,11 @@ class $$HabitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get isKeystone => $composableBuilder(
+    column: $table.isKeystone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -2800,6 +2867,11 @@ class $$HabitsTableAnnotationComposer
 
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<bool> get isKeystone => $composableBuilder(
+    column: $table.isKeystone,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -2899,6 +2971,7 @@ class $$HabitsTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<bool> isKeystone = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -2914,6 +2987,7 @@ class $$HabitsTableTableManager
                 category: category,
                 notes: notes,
                 isActive: isActive,
+                isKeystone: isKeystone,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -2931,6 +3005,7 @@ class $$HabitsTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<bool> isKeystone = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -2946,6 +3021,7 @@ class $$HabitsTableTableManager
                 category: category,
                 notes: notes,
                 isActive: isActive,
+                isKeystone: isKeystone,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,

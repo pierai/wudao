@@ -182,3 +182,37 @@ final habitSortTypeProvider =
 
 /// 习惯列表筛选分类 Provider（null 表示显示全部）
 final habitFilterCategoryProvider = StateProvider<String?>((ref) => null);
+
+/// 核心习惯筛选类型
+enum KeystoneFilterType {
+  all, // 全部习惯
+  keystoneOnly, // 仅核心习惯
+  regularOnly, // 仅普通习惯
+}
+
+/// 核心习惯筛选 Provider
+final keystoneFilterProvider =
+    StateProvider<KeystoneFilterType>((ref) => KeystoneFilterType.all);
+
+/// 根据核心习惯筛选条件过滤的活跃习惯列表 Provider
+final filteredHabitsProvider = StreamProvider<List<Habit>>((ref) {
+  final habitsAsync = ref.watch(activeHabitsProvider);
+  final filterType = ref.watch(keystoneFilterProvider);
+
+  return habitsAsync.when(
+    data: (habits) {
+      switch (filterType) {
+        case KeystoneFilterType.all:
+          return Stream.value(habits);
+        case KeystoneFilterType.keystoneOnly:
+          return Stream.value(
+              habits.where((habit) => habit.isKeystone).toList());
+        case KeystoneFilterType.regularOnly:
+          return Stream.value(
+              habits.where((habit) => !habit.isKeystone).toList());
+      }
+    },
+    loading: () => const Stream.empty(),
+    error: (error, stack) => Stream.error(error, stack),
+  );
+});
