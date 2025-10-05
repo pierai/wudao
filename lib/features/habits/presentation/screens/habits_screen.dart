@@ -5,6 +5,7 @@ import '../../../../shared/widgets/custom_segmented_control.dart';
 import '../providers/habit_provider.dart';
 import '../widgets/habit_card.dart';
 import 'daily_plan_screen.dart';
+import 'frontmatter_list_screen.dart';
 import 'habit_form_screen.dart';
 
 /// 习惯列表页面
@@ -41,6 +42,14 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
     );
   }
 
+  void _navigateToFrontmatter(BuildContext context) {
+    Navigator.of(context).push(
+      CupertinoPageRoute(
+        builder: (context) => const FrontmatterListScreen(),
+      ),
+    );
+  }
+
   Future<void> _handleRefresh() async {
     // 刷新习惯列表
     ref.invalidate(activeHabitsProvider);
@@ -62,6 +71,11 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => _navigateToFrontmatter(context),
+              child: const Icon(CupertinoIcons.doc_text),
+            ),
             CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: () => _navigateToDailyPlan(context),
