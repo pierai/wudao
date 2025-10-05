@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
-import '../../../habits/presentation/screens/export_screen.dart';
-import '../../../habits/presentation/screens/import_screen.dart';
+import '../../../../routing/app_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -54,26 +53,14 @@ class ProfileScreen extends StatelessWidget {
                   title: const Text('导出数据'),
                   subtitle: const Text('备份数据到文件'),
                   trailing: const CupertinoListTileChevron(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (context) => const ExportScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => AppRouter.toExportData(context),
                 ),
                 CupertinoListTile(
                   leading: const Icon(CupertinoIcons.square_arrow_down),
                   title: const Text('导入数据'),
                   subtitle: const Text('从文件恢复数据'),
                   trailing: const CupertinoListTileChevron(),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      CupertinoPageRoute(
-                        builder: (context) => const ImportScreen(),
-                      ),
-                    );
-                  },
+                  onTap: () => AppRouter.toImportData(context),
                 ),
               ],
             ),

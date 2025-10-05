@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'export_metadata.dart';
 import 'habit.dart';
 import 'habit_record.dart';
 import 'daily_plan.dart';

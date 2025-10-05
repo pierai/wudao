@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../routing/app_router.dart';
 import '../../domain/entities/habit.dart';
 import '../providers/habit_provider.dart';
 import '../widgets/habit_calendar_heatmap.dart';
 import '../widgets/habit_stats_card.dart';
-import 'habit_form_screen.dart';
 
 /// 习惯详情页面
 class HabitDetailScreen extends ConsumerWidget {
@@ -46,11 +46,7 @@ class HabitDetailScreen extends ConsumerWidget {
   }
 
   void _handleEdit(BuildContext context) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) => HabitFormScreen(habitId: habitId),
-      ),
-    );
+    AppRouter.toHabitEdit(context, habitId);
   }
 
   @override

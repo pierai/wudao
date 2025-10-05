@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../routing/app_router.dart';
 import '../../domain/entities/habit_frontmatter.dart';
 import '../providers/habit_provider.dart';
-import 'frontmatter_editor_screen.dart';
 
 /// Frontmatter 习惯感悟列表页面
 ///
@@ -28,13 +28,11 @@ class _FrontmatterListScreenState extends ConsumerState<FrontmatterListScreen> {
   }
 
   void _navigateToEditor({HabitFrontmatter? frontmatter}) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) => FrontmatterEditorScreen(
-          frontmatter: frontmatter,
-        ),
-      ),
-    );
+    if (frontmatter == null) {
+      AppRouter.toFrontmatterNew(context);
+    } else {
+      AppRouter.toFrontmatterEdit(context, frontmatter);
+    }
   }
 
   Future<void> _handleRefresh() async {

@@ -1,12 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../routing/app_router.dart';
 import '../../../../shared/widgets/custom_segmented_control.dart';
 import '../providers/habit_provider.dart';
 import '../widgets/habit_card.dart';
-import 'daily_plan_screen.dart';
-import 'frontmatter_list_screen.dart';
-import 'habit_form_screen.dart';
 
 /// 习惯列表页面
 class HabitsScreen extends ConsumerStatefulWidget {
@@ -27,27 +25,15 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   }
 
   void _navigateToHabitForm(BuildContext context) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) => const HabitFormScreen(),
-      ),
-    );
+    AppRouter.toHabitNew(context);
   }
 
   void _navigateToDailyPlan(BuildContext context) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) => const DailyPlanScreen(),
-      ),
-    );
+    AppRouter.toDailyPlan(context);
   }
 
   void _navigateToFrontmatter(BuildContext context) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) => const FrontmatterListScreen(),
-      ),
-    );
+    AppRouter.toFrontmatterList(context);
   }
 
   Future<void> _handleRefresh() async {

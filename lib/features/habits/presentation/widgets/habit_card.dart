@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../routing/app_router.dart';
 import '../../domain/entities/habit.dart';
 import '../providers/habit_provider.dart';
-import '../screens/habit_detail_screen.dart';
 import 'check_in_dialog.dart';
 
 /// 习惯卡片组件
@@ -32,11 +32,7 @@ class HabitCard extends ConsumerWidget {
   }
 
   void _handleViewDetail(BuildContext context) {
-    Navigator.of(context).push(
-      CupertinoPageRoute(
-        builder: (context) => HabitDetailScreen(habitId: habit.id),
-      ),
-    );
+    AppRouter.toHabitDetail(context, habit.id);
   }
 
   @override
