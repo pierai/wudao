@@ -103,8 +103,8 @@ class _FrontmatterListScreenState extends ConsumerState<FrontmatterListScreen> {
               ),
             ),
 
-            // 标签筛选（TODO: 后续实现）
-            // if (_searchQuery.isEmpty) _buildTagFilter(),
+            // 标签筛选
+            if (_searchQuery.isEmpty) _buildTagFilter(),
 
             // 感悟列表
             Expanded(
@@ -205,15 +205,46 @@ class _FrontmatterListScreenState extends ConsumerState<FrontmatterListScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 标题
-                Text(
-                  frontmatter.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                // 标题和草稿标记
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        frontmatter.title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    // 草稿标记
+                    if (frontmatter.getMetadata<bool>('isDraft') == true)
+                      Container(
+                        margin: const EdgeInsets.only(left: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemOrange.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: CupertinoColors.systemOrange,
+                            width: 1,
+                          ),
+                        ),
+                        child: const Text(
+                          '草稿',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: CupertinoColors.systemOrange,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: 8),
 
@@ -382,5 +413,102 @@ class _FrontmatterListScreenState extends ConsumerState<FrontmatterListScreen> {
     } else {
       return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
     }
+  }
+
+  /// 构建标签筛选器
+  Widget _buildTagFilter() {
+    final availableTagsAsync = ref.watch(allAvailableTagsProvider);
+
+    return availableTagsAsync.when(
+      data: (tags) {
+        if (tags.isEmpty) return const SizedBox.shrink();
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Text(
+                    '按标签筛选',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: CupertinoColors.systemGrey,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (_selectedTag != null)
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        setState(() {
+                          _selectedTag = null;
+                        });
+                      },
+                      child: const Text(
+                        '清除筛选',
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: tags.map((tag) {
+                    final isSelected = _selectedTag == tag;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedTag = isSelected ? null : tag;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? CupertinoColors.activeBlue
+                                : CupertinoColors.systemGrey5,
+                            borderRadius: BorderRadius.circular(20),
+                            border: isSelected
+                                ? null
+                                : Border.all(
+                                    color: CupertinoColors.systemGrey4,
+                                    width: 1,
+                                  ),
+                          ),
+                          child: Text(
+                            tag,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isSelected
+                                  ? CupertinoColors.white
+                                  : CupertinoColors.label,
+                              fontWeight:
+                                  isSelected ? FontWeight.w600 : FontWeight.normal,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (error, stack) => const SizedBox.shrink(),
+    );
   }
 }

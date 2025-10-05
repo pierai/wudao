@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/habit_frontmatter.dart';
 import '../providers/habit_provider.dart';
+import '../widgets/tag_selector_widget.dart';
 
 /// Frontmatter 编辑器页面
 ///
@@ -25,10 +28,16 @@ class _FrontmatterEditorScreenState
     extends ConsumerState<FrontmatterEditorScreen> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
-  late TextEditingController _tagsController;
+  late List<String> _selectedTags;
 
   bool _isPreviewMode = false;
   bool _hasUnsavedChanges = false;
+  bool _isSavingDraft = false;
+  DateTime? _lastAutoSaveTime;
+  Timer? _autoSaveTimer;
+
+  // 自动保存间隔（30秒）
+  static const _autoSaveDuration = Duration(seconds: 30);
 
   @override
   void initState() {
@@ -37,21 +46,21 @@ class _FrontmatterEditorScreenState
         TextEditingController(text: widget.frontmatter?.title ?? '');
     _contentController =
         TextEditingController(text: widget.frontmatter?.content ?? '');
-    _tagsController = TextEditingController(
-      text: widget.frontmatter?.tags.join(', ') ?? '',
-    );
+    _selectedTags = widget.frontmatter?.tags ?? [];
 
     // 监听内容变化
     _titleController.addListener(_onContentChanged);
     _contentController.addListener(_onContentChanged);
-    _tagsController.addListener(_onContentChanged);
+
+    // 启动自动保存定时器
+    _startAutoSave();
   }
 
   @override
   void dispose() {
+    _autoSaveTimer?.cancel();
     _titleController.dispose();
     _contentController.dispose();
-    _tagsController.dispose();
     super.dispose();
   }
 
@@ -59,6 +68,69 @@ class _FrontmatterEditorScreenState
     if (!_hasUnsavedChanges) {
       setState(() {
         _hasUnsavedChanges = true;
+      });
+    }
+  }
+
+  /// 启动自动保存定时器
+  void _startAutoSave() {
+    _autoSaveTimer = Timer.periodic(_autoSaveDuration, (timer) {
+      if (_hasUnsavedChanges && !_isSavingDraft) {
+        _saveDraft();
+      }
+    });
+  }
+
+  /// 自动保存草稿
+  Future<void> _saveDraft() async {
+    // 如果标题为空，不保存草稿
+    if (_titleController.text.trim().isEmpty) {
+      return;
+    }
+
+    setState(() {
+      _isSavingDraft = true;
+    });
+
+    try {
+      final repository = ref.read(habitRepositoryProvider);
+      final now = DateTime.now();
+
+      if (widget.frontmatter == null) {
+        // 创建新草稿
+        final frontmatter = HabitFrontmatter(
+          id: 'frontmatter_${now.millisecondsSinceEpoch}',
+          title: _titleController.text.trim(),
+          content: _contentController.text.trim(),
+          tags: _selectedTags,
+          createdAt: now,
+          updatedAt: now,
+          metadata: {'isDraft': true}, // 标记为草稿
+        );
+
+        await repository.createFrontmatter(frontmatter);
+      } else {
+        // 更新现有草稿
+        final frontmatter = widget.frontmatter!.copyWith(
+          title: _titleController.text.trim(),
+          content: _contentController.text.trim(),
+          tags: _selectedTags,
+          updatedAt: now,
+          metadata: widget.frontmatter!.metadata ?? {'isDraft': true},
+        );
+
+        await repository.updateFrontmatter(frontmatter);
+      }
+
+      setState(() {
+        _hasUnsavedChanges = false;
+        _lastAutoSaveTime = now;
+      });
+    } catch (e) {
+      // 自动保存失败，不显示错误提示，静默失败
+    } finally {
+      setState(() {
+        _isSavingDraft = false;
       });
     }
   }
@@ -112,32 +184,27 @@ class _FrontmatterEditorScreenState
       final repository = ref.read(habitRepositoryProvider);
       final now = DateTime.now();
 
-      // 解析标签
-      final tags = _tagsController.text
-          .split(',')
-          .map((tag) => tag.trim())
-          .where((tag) => tag.isNotEmpty)
-          .toList();
-
       if (widget.frontmatter == null) {
-        // 创建新感悟
+        // 创建新感悟（非草稿）
         final frontmatter = HabitFrontmatter(
           id: 'frontmatter_${now.millisecondsSinceEpoch}',
           title: _titleController.text.trim(),
           content: _contentController.text.trim(),
-          tags: tags,
+          tags: _selectedTags,
           createdAt: now,
           updatedAt: now,
+          metadata: {'isDraft': false}, // 正式发布，非草稿
         );
 
         await repository.createFrontmatter(frontmatter);
       } else {
-        // 更新现有感悟
+        // 更新现有感悟（移除草稿标记）
         final frontmatter = widget.frontmatter!.copyWith(
           title: _titleController.text.trim(),
           content: _contentController.text.trim(),
-          tags: tags,
+          tags: _selectedTags,
           updatedAt: now,
+          metadata: {...?widget.frontmatter!.metadata, 'isDraft': false},
         );
 
         await repository.updateFrontmatter(frontmatter);
@@ -198,7 +265,28 @@ class _FrontmatterEditorScreenState
       },
       child: CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
-          middle: Text(widget.frontmatter == null ? '新建感悟' : '编辑感悟'),
+          middle: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(widget.frontmatter == null ? '新建感悟' : '编辑感悟'),
+              if (_lastAutoSaveTime != null)
+                Text(
+                  '已自动保存 ${_formatAutoSaveTime(_lastAutoSaveTime!)}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: CupertinoColors.systemGrey,
+                  ),
+                ),
+              if (_isSavingDraft)
+                const Text(
+                  '保存中...',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: CupertinoColors.systemGrey,
+                  ),
+                ),
+            ],
+          ),
           leading: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () async {
@@ -272,28 +360,40 @@ class _FrontmatterEditorScreenState
 
           const SizedBox(height: 16),
 
-          // 标签输入
-          Row(
-            children: [
-              const Text(
-                '标签: ',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: CupertinoColors.systemGrey,
+          // 标签选择器
+          Consumer(
+            builder: (context, ref, child) {
+              final availableTagsAsync = ref.watch(allAvailableTagsProvider);
+
+              return availableTagsAsync.when(
+                data: (availableTags) {
+                  return TagSelectorWidget(
+                    selectedTags: _selectedTags,
+                    availableTags: availableTags,
+                    onTagsChanged: (newTags) {
+                      setState(() {
+                        _selectedTags = newTags;
+                        _hasUnsavedChanges = true;
+                      });
+                    },
+                  );
+                },
+                loading: () => const CupertinoActivityIndicator(),
+                error: (error, stack) => TagSelectorWidget(
+                  selectedTags: _selectedTags,
+                  availableTags: const [],
+                  onTagsChanged: (newTags) {
+                    setState(() {
+                      _selectedTags = newTags;
+                      _hasUnsavedChanges = true;
+                    });
+                  },
                 ),
-              ),
-              Expanded(
-                child: CupertinoTextField(
-                  controller: _tagsController,
-                  placeholder: '多个标签用逗号分隔',
-                  style: const TextStyle(fontSize: 14),
-                  decoration: null,
-                ),
-              ),
-            ],
+              );
+            },
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: 24),
 
           // Markdown 内容输入
           CupertinoTextField(
@@ -334,14 +434,11 @@ class _FrontmatterEditorScreenState
           const SizedBox(height: 8),
 
           // 标签
-          if (_tagsController.text.isNotEmpty)
+          if (_selectedTags.isNotEmpty)
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _tagsController.text.split(',').map((tag) {
-                final trimmedTag = tag.trim();
-                if (trimmedTag.isEmpty) return const SizedBox.shrink();
-
+              children: _selectedTags.map((tag) {
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -352,7 +449,7 @@ class _FrontmatterEditorScreenState
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    trimmedTag,
+                    tag,
                     style: const TextStyle(
                       fontSize: 14,
                       color: CupertinoColors.systemGrey,
@@ -407,5 +504,19 @@ class _FrontmatterEditorScreenState
         ],
       ),
     );
+  }
+
+  /// 格式化自动保存时间
+  String _formatAutoSaveTime(DateTime time) {
+    final now = DateTime.now();
+    final difference = now.difference(time);
+
+    if (difference.inSeconds < 60) {
+      return '刚刚';
+    } else if (difference.inMinutes < 60) {
+      return '${difference.inMinutes} 分钟前';
+    } else {
+      return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+    }
   }
 }

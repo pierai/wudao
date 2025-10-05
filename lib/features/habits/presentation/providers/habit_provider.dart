@@ -162,6 +162,26 @@ final latestFrontmatterProvider =
   return repository.getLatestFrontmatter();
 });
 
+/// 所有可用标签 Provider（从所有 frontmatters 中提取）
+final allAvailableTagsProvider = StreamProvider<List<String>>((ref) {
+  final frontmattersAsync = ref.watch(allFrontmattersProvider);
+
+  return frontmattersAsync.when(
+    data: (frontmatters) {
+      // 从所有 frontmatters 中提取所有标签
+      final allTags = <String>{};
+      for (final frontmatter in frontmatters) {
+        allTags.addAll(frontmatter.tags);
+      }
+      // 按字母顺序排序
+      final sortedTags = allTags.toList()..sort();
+      return Stream.value(sortedTags);
+    },
+    loading: () => Stream.value(<String>[]),
+    error: (error, stack) => Stream.error(error, stack),
+  );
+});
+
 // ========== UI 状态 Providers ==========
 
 /// 当前选中的习惯 ID Provider（用于详情页）
