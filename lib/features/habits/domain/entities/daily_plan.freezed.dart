@@ -11,6 +11,7 @@ part of 'daily_plan.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$DailyPlan {
 
@@ -31,6 +32,8 @@ mixin _$DailyPlan {
 @pragma('vm:prefer-inline')
 $DailyPlanCopyWith<DailyPlan> get copyWith => _$DailyPlanCopyWithImpl<DailyPlan>(this as DailyPlan, _$identity);
 
+  /// Serializes this DailyPlan to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
@@ -38,7 +41,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is DailyPlan&&(identical(other.id, id) || other.id == id)&&(identical(other.planDate, planDate) || other.planDate == planDate)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.cueTask, cueTask) || other.cueTask == cueTask)&&(identical(other.scheduledTime, scheduledTime) || other.scheduledTime == scheduledTime)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.isCompleted, isCompleted) || other.isCompleted == isCompleted)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.recordId, recordId) || other.recordId == recordId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,planDate,habitId,cueTask,scheduledTime,priority,isCompleted,completedAt,recordId,createdAt);
 
@@ -216,11 +219,11 @@ return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.schedu
 }
 
 /// @nodoc
-
+@JsonSerializable()
 
 class _DailyPlan extends DailyPlan {
   const _DailyPlan({required this.id, required this.planDate, required this.habitId, required this.cueTask, this.scheduledTime, required this.priority, required this.isCompleted, this.completedAt, this.recordId, required this.createdAt}): super._();
-  
+  factory _DailyPlan.fromJson(Map<String, dynamic> json) => _$DailyPlanFromJson(json);
 
 /// 唯一标识符
 @override final  String id;
@@ -249,14 +252,17 @@ class _DailyPlan extends DailyPlan {
 @pragma('vm:prefer-inline')
 _$DailyPlanCopyWith<_DailyPlan> get copyWith => __$DailyPlanCopyWithImpl<_DailyPlan>(this, _$identity);
 
-
+@override
+Map<String, dynamic> toJson() {
+  return _$DailyPlanToJson(this, );
+}
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _DailyPlan&&(identical(other.id, id) || other.id == id)&&(identical(other.planDate, planDate) || other.planDate == planDate)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.cueTask, cueTask) || other.cueTask == cueTask)&&(identical(other.scheduledTime, scheduledTime) || other.scheduledTime == scheduledTime)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.isCompleted, isCompleted) || other.isCompleted == isCompleted)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.recordId, recordId) || other.recordId == recordId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,planDate,habitId,cueTask,scheduledTime,priority,isCompleted,completedAt,recordId,createdAt);
 

@@ -11,6 +11,7 @@ part of 'habit_record.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$HabitRecord {
 
@@ -28,6 +29,8 @@ mixin _$HabitRecord {
 @pragma('vm:prefer-inline')
 $HabitRecordCopyWith<HabitRecord> get copyWith => _$HabitRecordCopyWithImpl<HabitRecord>(this as HabitRecord, _$identity);
 
+  /// Serializes this HabitRecord to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
@@ -35,7 +38,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is HabitRecord&&(identical(other.id, id) || other.id == id)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.executedAt, executedAt) || other.executedAt == executedAt)&&(identical(other.quality, quality) || other.quality == quality)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isBackfilled, isBackfilled) || other.isBackfilled == isBackfilled)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,habitId,executedAt,quality,notes,isBackfilled,createdAt);
 
@@ -210,11 +213,11 @@ return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.note
 }
 
 /// @nodoc
-
+@JsonSerializable()
 
 class _HabitRecord extends HabitRecord {
   const _HabitRecord({required this.id, required this.habitId, required this.executedAt, this.quality, this.notes, required this.isBackfilled, required this.createdAt}): super._();
-  
+  factory _HabitRecord.fromJson(Map<String, dynamic> json) => _$HabitRecordFromJson(json);
 
 /// 唯一标识符
 @override final  String id;
@@ -237,14 +240,17 @@ class _HabitRecord extends HabitRecord {
 @pragma('vm:prefer-inline')
 _$HabitRecordCopyWith<_HabitRecord> get copyWith => __$HabitRecordCopyWithImpl<_HabitRecord>(this, _$identity);
 
-
+@override
+Map<String, dynamic> toJson() {
+  return _$HabitRecordToJson(this, );
+}
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _HabitRecord&&(identical(other.id, id) || other.id == id)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.executedAt, executedAt) || other.executedAt == executedAt)&&(identical(other.quality, quality) || other.quality == quality)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isBackfilled, isBackfilled) || other.isBackfilled == isBackfilled)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,habitId,executedAt,quality,notes,isBackfilled,createdAt);
 

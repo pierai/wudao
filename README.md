@@ -1,3 +1,10 @@
+# TODO LIST
+
+1. 本地数据的导入&导出
+2. 习惯列表的今日打卡（惯常行为）和完成暗示并打卡有什么区别？
+3. 准备好习惯感悟MD笔记
+5. 使用 Github SpecKit 开发新项目：提供了思考的框架、实现路径、大模型间共享、存档
+
 # wudao
 
 A new Flutter project.
@@ -17,9 +24,31 @@ samples, guidance on mobile development, and a full API reference.
 
 # Claude 使用
 
+## 指令
+
+/rewind 选中回滚
+
+/usage 查看用量
+
+tab 切换思考模式
+ultrathink 开启ultrathink模式
+搜索发送的历史消息 Ctrl +R
+VSCode插件
+
+## 自定义命令
+
+项目级别：.claude/commands/xx.md 自定义命令的文档
+全局级别：~/.claude/commands/.md 全局自定义命令的文档
+放在目录(更好的整理自定义命名）时如何访问：目录名:文档名.md
+
+ARGUMENTS 传递参数
+@ 引用文件，在哪里使用命令，就引用哪个文件
+
 ## MCP配置
 
 claude --dangerously-skip-permissions
+      --allowed-tools
+
 claude mcp add-json github '{"command":"npx","args":["-y","@modelcontex
       tprotocol/server-github"],"env":{"GITHUB_PERSONAL_ACCESS_TOKEN":""}}'
 

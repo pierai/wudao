@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'habit.freezed.dart';
+part 'habit.g.dart';
 
 /// 习惯实体 - 基于《习惯的力量》理论
 ///
@@ -53,6 +54,8 @@ sealed class Habit with _$Habit {
   }) = _Habit;
 
   const Habit._();
+
+  factory Habit.fromJson(Map<String, dynamic> json) => _$HabitFromJson(json);
 
   /// 是否为习惯替代类型
   bool get isReplacement => type == HabitType.replacement;

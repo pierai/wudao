@@ -162,4 +162,11 @@ class DailyPlanDao extends DatabaseAccessor<AppDatabase>
 
     return completed / total;
   }
+
+  /// 获取所有计划
+  Future<List<DailyPlanData>> getAllPlans() {
+    return (select(dailyPlans)
+          ..orderBy([(t) => OrderingTerm.desc(t.planDate)]))
+        .get();
+  }
 }

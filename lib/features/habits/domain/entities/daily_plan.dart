@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'daily_plan.freezed.dart';
+part 'daily_plan.g.dart';
 
 /// 次日计划实体
 ///
@@ -40,6 +41,9 @@ sealed class DailyPlan with _$DailyPlan {
   }) = _DailyPlan;
 
   const DailyPlan._();
+
+  factory DailyPlan.fromJson(Map<String, dynamic> json) =>
+      _$DailyPlanFromJson(json);
 
   /// 获取计划日期（忽略时间部分）
   DateTime get planDateOnly => DateTime(planDate.year, planDate.month, planDate.day);

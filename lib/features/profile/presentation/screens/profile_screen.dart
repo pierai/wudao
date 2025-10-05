@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 
+import '../../../habits/presentation/screens/export_screen.dart';
+import '../../../habits/presentation/screens/import_screen.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -41,18 +44,49 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 40),
+
+            // 数据管理
+            CupertinoListSection.insetGrouped(
+              header: const Text('数据管理'),
+              children: [
+                CupertinoListTile(
+                  leading: const Icon(CupertinoIcons.square_arrow_up),
+                  title: const Text('导出数据'),
+                  subtitle: const Text('备份数据到文件'),
+                  trailing: const CupertinoListTileChevron(),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (context) => const ExportScreen(),
+                      ),
+                    );
+                  },
+                ),
+                CupertinoListTile(
+                  leading: const Icon(CupertinoIcons.square_arrow_down),
+                  title: const Text('导入数据'),
+                  subtitle: const Text('从文件恢复数据'),
+                  trailing: const CupertinoListTileChevron(),
+                  onTap: () {
+                    Navigator.of(context).push(
+                      CupertinoPageRoute(
+                        builder: (context) => const ImportScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
             // 设置列表
             CupertinoListSection.insetGrouped(
+              header: const Text('其他'),
               children: [
                 CupertinoListTile(
                   leading: const Icon(CupertinoIcons.settings),
                   title: const Text('设置'),
-                  trailing: const CupertinoListTileChevron(),
-                  onTap: () {},
-                ),
-                CupertinoListTile(
-                  leading: const Icon(CupertinoIcons.cloud),
-                  title: const Text('数据同步'),
                   trailing: const CupertinoListTileChevron(),
                   onTap: () {},
                 ),

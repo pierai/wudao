@@ -11,6 +11,7 @@ part of 'habit_frontmatter.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$HabitFrontmatter {
 
@@ -28,6 +29,8 @@ mixin _$HabitFrontmatter {
 @pragma('vm:prefer-inline')
 $HabitFrontmatterCopyWith<HabitFrontmatter> get copyWith => _$HabitFrontmatterCopyWithImpl<HabitFrontmatter>(this as HabitFrontmatter, _$identity);
 
+  /// Serializes this HabitFrontmatter to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
@@ -35,7 +38,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is HabitFrontmatter&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.content, content) || other.content == content)&&const DeepCollectionEquality().equals(other.tags, tags)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other.metadata, metadata));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,title,content,const DeepCollectionEquality().hash(tags),createdAt,updatedAt,const DeepCollectionEquality().hash(metadata));
 
@@ -210,11 +213,11 @@ return $default(_that.id,_that.title,_that.content,_that.tags,_that.createdAt,_t
 }
 
 /// @nodoc
-
+@JsonSerializable()
 
 class _HabitFrontmatter extends HabitFrontmatter {
   const _HabitFrontmatter({required this.id, required this.title, required this.content, required final  List<String> tags, required this.createdAt, required this.updatedAt, final  Map<String, dynamic>? metadata}): _tags = tags,_metadata = metadata,super._();
-  
+  factory _HabitFrontmatter.fromJson(Map<String, dynamic> json) => _$HabitFrontmatterFromJson(json);
 
 /// 唯一标识符
 @override final  String id;
@@ -253,14 +256,17 @@ class _HabitFrontmatter extends HabitFrontmatter {
 @pragma('vm:prefer-inline')
 _$HabitFrontmatterCopyWith<_HabitFrontmatter> get copyWith => __$HabitFrontmatterCopyWithImpl<_HabitFrontmatter>(this, _$identity);
 
-
+@override
+Map<String, dynamic> toJson() {
+  return _$HabitFrontmatterToJson(this, );
+}
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _HabitFrontmatter&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.content, content) || other.content == content)&&const DeepCollectionEquality().equals(other._tags, _tags)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&const DeepCollectionEquality().equals(other._metadata, _metadata));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,title,content,const DeepCollectionEquality().hash(_tags),createdAt,updatedAt,const DeepCollectionEquality().hash(_metadata));
 

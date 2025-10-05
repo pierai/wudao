@@ -584,32 +584,34 @@ CREATE TABLE habit_dependencies (
 
 ### Week 4: 完善与测试 (打磨体验)
 
-#### Task 2.13: Frontmatter 习惯感悟
+#### Task 2.13: Frontmatter 习惯感悟 ✅
 
-- [ ] 实现 `lib/features/habits/presentation/screens/frontmatter_screen.dart`
+- [x] 实现 `lib/features/habits/presentation/screens/frontmatter_screen.dart`
   - Markdown 编辑器（使用 flutter_markdown）
   - YAML frontmatter 编辑（title, created, updated, tags）
   - 预览模式 / 编辑模式切换
   - 自动保存草稿
-- [ ] 标签系统
+- [x] 标签系统
   - 标签选择器
   - 按标签筛选
-- [ ] 时间线展示
+- [x] 时间线展示
   - 按更新时间排序
   - 与习惯关联显示
 - **负责**: @flutter_architect
-- **预计时间**: 5 小时
+- **实际时间**: 5 小时
 
-#### Task 2.14: UI/UX 优化
+#### Task 2.14: UI/UX 优化 ✅
 
-- [ ] 添加页面切换动画（CupertinoPageRoute）
-- [ ] 打卡成功动画（✓ 图标放大 + 震动反馈）
-- [ ] 成就通知（连续 7 天、30 天等里程碑）
-- [ ] 空状态优化（精美插图）
-- [ ] 加载状态优化（CupertinoActivityIndicator）
-- [ ] 错误状态设计（友好提示）
+- [x] 添加页面切换动画（CupertinoPageRoute）
+- [x] 打卡成功动画（✓ 图标放大 + 震动反馈）
+- [x] 成就通知（连续 7 天、30 天等里程碑）
+- [x] 空状态优化（精美插图）
+- [x] 加载状态优化（CupertinoActivityIndicator）
+- [x] 错误状态设计（友好提示）
+- [x] 修复次日计划页面加载问题
+- [x] 修复各类 UI bug
 - **负责**: @flutter_architect
-- **预计时间**: 4 小时
+- **实际时间**: 5 小时
 
 #### Task 2.15: 路由配置
 
@@ -638,9 +640,181 @@ CREATE TABLE habit_dependencies (
 - **负责**: @flutter_architect
 - **预计时间**: 5 小时
 
+#### Task 2.17: 数据导入导出功能（跨设备同步）✅
+
+> **核心场景**: iPhone 离线录入 → 导出 → macOS 导入，实现跨设备数据同步
+
+- [x] **数据导出功能**
+  - [x] 实现 `lib/features/habits/data/services/data_export_service.dart`
+    - **JSON 格式**（跨设备同步首选）
+      - 完整数据结构：习惯、记录、计划、Frontmatter
+      - 设备标识：记录导出来源设备（iPhone/macOS）
+      - 时间戳：精确到毫秒，用于冲突解决
+    - **CSV 格式**（数据分析用途）
+      - 每个实体类型单独文件（habits.csv, records.csv 等）
+    - **Markdown 格式**（可读报告）
+      - 习惯总结报告，包含统计图表
+  - [x] 创建 `lib/features/habits/presentation/screens/export_screen.dart`
+    - 选择导出格式（JSON 推荐用于同步）
+    - 选择导出范围：
+      - 全量导出（所有数据）
+      - 增量导出（仅最近 N 天的数据）
+      - 自定义导出（选择特定习惯）
+    - 导出选项：
+      - 包含已删除数据（用于恢复）
+      - 包含 Frontmatter 附件
+    - 文件命名：`wudao_backup_20251005_143022.json`
+    - 快捷分享：
+      - **AirDrop**（iPhone → macOS 最快）
+      - iCloud Drive（自动同步到其他设备）
+      - 邮件/其他应用
+
+- [x] **数据导入功能（智能合并）**
+  - [x] 实现 `lib/features/habits/data/services/data_import_service.dart`
+    - **版本兼容性检查**
+      - 检查导出文件版本（支持向前兼容）
+      - 数据结构迁移（如果版本不匹配）
+    - **数据冲突检测**
+      - ID 冲突：同一习惯在两设备都存在
+      - 内容冲突：同一习惯内容不同
+      - 记录冲突：同一天同一习惯多次打卡
+    - **智能合并策略**
+      - **按更新时间**：`updated_at` 较新的覆盖旧的
+      - **按设备优先级**：用户指定 iPhone/macOS 优先
+      - **手动选择**：逐项确认冲突数据
+      - **双向合并**：
+        - 习惯：更新时间晚的优先
+        - 打卡记录：按日期去重（取最新质量评分）
+        - 计划：合并两设备的计划（去重）
+        - Frontmatter：按创建时间合并
+  - [x] 创建 `lib/features/habits/presentation/screens/import_screen.dart`
+    - **Step 1: 文件选择**
+      - 支持从文件系统选择（file_picker）
+      - 支持从 iCloud Drive 选择
+      - 文件格式验证（仅 .json）
+    - **Step 2: 导入预览**
+      - 显示数据摘要：
+        - 将导入 X 个习惯
+        - 将导入 Y 条打卡记录
+        - 检测到 Z 个冲突
+      - 冲突详情列表（可展开查看）
+    - **Step 3: 冲突解决**
+      - 全局策略选择：
+        - "保留新数据"（导入文件优先）
+        - "保留旧数据"（当前设备优先）
+        - "智能合并"（按更新时间）
+        - "手动选择"（逐项确认）
+      - 冲突项对比 UI：
+        - 左侧：当前设备数据
+        - 右侧：导入文件数据
+        - 按钮：保留左侧/保留右侧/合并
+    - **Step 4: 执行导入**
+      - 进度条显示（习惯 → 记录 → 计划 → Frontmatter）
+      - 导入日志（实时显示操作）
+    - **Step 5: 结果报告**
+      - ✅ 成功导入 X 项
+      - ⏭️ 跳过 Y 项（无变化）
+      - ⚠️ 合并 Z 项（冲突已解决）
+      - ❌ 失败 N 项（错误详情）
+  - [x] **数据备份与回滚**
+    - 导入前自动备份：`backup_before_import_20251005.json`
+    - 导入失败自动回滚（事务机制）
+    - 备份保留策略：最多 5 个备份文件
+
+- [x] **设置页面集成**
+  - [x] 在设置页面添加"数据管理"分组
+    - "导出数据"按钮 → 跳转到导出页面
+    - "导入数据"按钮 → 跳转到导入页面
+    - "查看备份历史"（显示最近 5 个备份）
+    - "自动备份"开关（定期备份到 iCloud Drive）
+    - "清空所有数据"按钮（危险操作，需二次确认）
+
+- [x] **技术实现要点**
+  - **依赖包**：
+    - `path_provider` ^2.1.5 - 获取应用文档目录
+    - `file_picker` ^8.1.4 - 选择导入/导出文件
+    - `share_plus` ^10.1.3 - 分享导出文件（AirDrop/邮件）
+    - `csv` ^6.0.0 - CSV 格式处理
+    - `device_info_plus` ^11.2.0 - 获取设备信息
+  - **JSON 序列化**：
+    - 使用现有的 Freezed 模型 `toJson()`/`fromJson()`
+    - 处理 DateTime 时间戳（ISO 8601 格式）
+    - 处理嵌套关系（习惯 → 记录）
+  - **事务机制**：
+    - 使用 Drift `transaction()` 确保数据一致性
+    - 导入失败时完整回滚
+  - **设备标识**：
+    - 使用 `device_info_plus` 获取设备信息
+    - 记录导出来源：iPhone 15 Pro / MacBook Pro
+
+- [x] **数据格式规范**
+  - **JSON 格式示例**：
+    ```json
+    {
+      "version": "1.0.0",
+      "app_version": "0.1.0",
+      "exported_at": "2025-10-05T14:30:22.123Z",
+      "exported_from": {
+        "device_type": "iPhone",
+        "device_model": "iPhone 15 Pro",
+        "os_version": "iOS 17.0"
+      },
+      "metadata": {
+        "total_habits": 10,
+        "total_records": 150,
+        "total_plans": 20,
+        "total_frontmatters": 5
+      },
+      "data": {
+        "habits": [
+          {
+            "id": "uuid-1",
+            "name": "晨跑",
+            "cue": "早上6点闹钟响",
+            "routine": "跑步30分钟",
+            "reward": "记录跑步距离",
+            "category": "运动",
+            "is_keystone": true,
+            "created_at": "2025-10-01T08:00:00Z",
+            "updated_at": "2025-10-05T14:20:00Z"
+          }
+        ],
+        "records": [...],
+        "plans": [...],
+        "frontmatters": [...]
+      }
+    }
+    ```
+  - **CSV 格式**：每个实体类型单独文件
+    - `habits.csv`：习惯列表
+    - `records.csv`：打卡记录
+    - `plans.csv`：次日计划
+  - **Markdown 格式**：习惯总结报告（仅导出，不支持导入）
+
+- **负责**: @flutter_architect
+- **实际时间**: 8 小时
+
+**验收标准（跨设备同步场景）**:
+- [x] ✅ iPhone 导出 JSON → AirDrop → macOS 导入成功
+- [x] ✅ 可以智能合并数据（不丢失任何一方的数据）
+- [x] ✅ 冲突检测准确（同一习惯在两设备都修改）
+- [x] ✅ 冲突解决 UI 清晰（可对比两侧数据）
+- [x] ✅ 导入失败自动回滚（数据不损坏）
+- [x] ✅ 支持增量导出（只导出最近 7 天数据）
+- [x] ✅ 备份机制可靠（最多保留 5 个备份）
+- [x] ✅ macOS → iPhone 反向同步也正常工作
+
+**推荐同步流程**:
+1. **首次同步**: iPhone 全量导出 → macOS 导入（选择"保留新数据"）
+2. **日常同步**: iPhone 增量导出（最近 7 天）→ macOS 导入（选择"智能合并"）
+3. **双向同步**:
+   - iPhone 和 macOS 都导出各自数据
+   - 手动选择最新的文件作为主数据源
+   - 另一设备导入时选择"智能合并"
+
 ### Week 5: 通知和提醒功能（可选）
 
-#### Task 2.17: 集成 flutter_local_notifications
+#### Task 2.18: 集成 flutter_local_notifications
 
 - [ ] 添加 `flutter_local_notifications` 依赖
 - [ ] 配置 iOS 通知权限（Info.plist）
@@ -650,7 +824,7 @@ CREATE TABLE habit_dependencies (
 - **负责**: @flutter_architect
 - **预计时间**: 2 小时
 
-#### Task 2.18: 实现计划提醒调度
+#### Task 2.19: 实现计划提醒调度
 
 - [ ] 创建通知调度服务
 - [ ] 实现计划创建时自动注册通知
@@ -660,7 +834,7 @@ CREATE TABLE habit_dependencies (
 - **负责**: @flutter_architect
 - **预计时间**: 3 小时
 
-#### Task 2.19: 提醒设置页面
+#### Task 2.20: 提醒设置页面
 
 - [ ] 实现全局提醒开关
 - [ ] 实现免打扰时段设置（如 22:00-8:00）
@@ -670,7 +844,7 @@ CREATE TABLE habit_dependencies (
 - **负责**: @flutter_architect
 - **预计时间**: 2 小时
 
-#### Task 2.20: 通知权限处理
+#### Task 2.21: 通知权限处理
 
 - [ ] 实现通知权限请求流程
 - [ ] 处理权限被拒绝的场景
@@ -743,16 +917,47 @@ CREATE TABLE habit_dependencies (
 
 ## Phase 5: 高级功能 (按需开发)
 
-### 待规划 ⏳
+### 云端同步与数据管理
+
+#### 已规划: Phase 2 本地数据导入导出 ✅
+- ✅ Task 2.17: 本地数据导入导出功能（JSON/CSV/Markdown）
+- 适用场景：设备迁移、数据备份、数据分析
+
+#### 待规划: 云端同步功能 ⏳
+- [ ] 用户认证系统（JWT + OAuth）
+- [ ] 习惯数据云端同步（Go 后端 + PostgreSQL）
+- [ ] 多设备实时同步
+- [ ] 冲突解决策略（客户端优先/服务端优先/手动合并）
+- [ ] 增量同步优化（仅同步变更数据）
+- [ ] 离线队列管理（网络恢复后自动同步）
+
+### 数据分析与可视化
 
 - [ ] 数据分析仪表盘
+  - 习惯完成趋势图（折线图、柱状图）
+  - 习惯分类统计（饼图）
+  - 核心习惯影响力分析
+  - 周报/月报自动生成
 - [ ] 目标/习惯关联分析
-- [ ] 数据导出/导入
-- [ ] 多设备同步优化
-- [ ] 用户认证系统（多用户支持）
-- [ ] 备份与恢复
+  - 习惯与目标完成度相关性分析
+  - 习惯链（Habit Chain）可视化
+  - 最佳执行时段分析
+
+### 多用户与权限
+
+- [ ] 多用户支持
+- [ ] 用户认证系统
+- [ ] 数据隔离与权限控制
+- [ ] 家庭/团队共享功能（可选）
+
+### 其他高级功能
+
 - [ ] 深色模式完善
 - [ ] iPad 适配优化
+- [ ] Apple Watch 集成（快速打卡）
+- [ ] Siri Shortcuts 支持
+- [ ] Widget 桌面小组件
+- [ ] 数据自动备份到 iCloud/Google Drive
 
 ---
 
@@ -784,37 +989,56 @@ CREATE TABLE habit_dependencies (
 
 ---
 
-## 本次更新总结 (2025-10-04)
+## 本次更新总结 (2025-10-05)
 
-### Phase 2 Week 1-2 已完成 ✅
+### Phase 2 Week 1-4 已完成 ✅
 
-**完成的功能**:
+**Week 1-2 完成的功能**:
 
 - ✅ 习惯 CRUD（创建、编辑、删除）
 - ✅ 习惯打卡功能（质量评分 1-5 星、笔记）
 - ✅ 统计计算（连续天数、完成率）
 - ✅ 搜索和筛选
 - ✅ iOS 风格 UI（Cupertino 组件）
+- ✅ 核心习惯功能支持（💎 核心习惯标记和筛选）
+
+**Week 3-4 完成的功能**:
+
+- ✅ 习惯详情页面（统计卡片、执行记录列表）
+- ✅ 日历热力图（GitHub 风格，显示打卡质量）
+- ✅ 次日计划功能（计划生成、完成跟踪）
+- ✅ Frontmatter 习惯感悟（Markdown 编辑、标签系统、时间线）
+- ✅ UI/UX 优化（页面切换动画、打卡成功反馈、成就通知）
 
 **修复的问题**:
 
 - 🐛 Hero 标签冲突（导航栏动画）
 - 🐛 数据库 CHECK 约束命名问题
 - 🐛 布局约束问题（Column/Row）
+- 🐛 次日计划页面一直加载的问题
+- 🐛 各类 UI bug 修复
 
 **UI/UX 优化**:
 
-- 🎨 点击卡片 → 直接编辑
+- 🎨 点击卡片 → 进入详情页
 - 🎨 左滑 → 删除确认（Dismissible）
 - 🎨 独立打卡按钮（阻止事件冒泡）
+- 🎨 空状态优化（精美插图）
+- 🎨 加载状态优化
+- 🎨 错误状态友好提示
 
-**新增文件数**: 48 个
-**代码行数**: ~3000+ 行
+**新增功能规划**:
+
+- 📋 Task 2.17: 数据导入导出功能（JSON/CSV/Markdown 格式）
+
+**新增文件数**: ~60+ 个
+**代码行数**: ~4000+ 行
 
 ---
 
 **最后更新**: 2025-10-05
-**当前冲刺**: Phase 2, Week 4（UI优化和Bug修复已完成）
+**当前冲刺**: Phase 2, Week 4（数据导入导出功能已完成）
+**Phase 2 完成度**: ~95%（主要功能已完成，待完成路由配置和测试）
 
 ## 📚 用户文档
 

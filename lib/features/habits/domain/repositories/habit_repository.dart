@@ -44,6 +44,9 @@ abstract class HabitRepository {
   /// 统计活跃习惯数量
   Future<int> countActiveHabits();
 
+  /// 获取所有习惯（包括已删除的，可选）
+  Future<List<Habit>> getAllHabits({bool includeDeleted = false});
+
   // ========== 执行记录管理 ==========
 
   /// 记录习惯执行（打卡）
@@ -132,6 +135,9 @@ abstract class HabitRepository {
 
   /// 清理旧计划（指定日期之前）
   Future<void> deleteOldPlans(DateTime beforeDate);
+
+  /// 获取所有计划
+  Future<List<DailyPlan>> getAllPlans();
 
   // ========== Frontmatter 管理 ==========
 

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'habit_record.freezed.dart';
+part 'habit_record.g.dart';
 
 /// 习惯执行记录实体
 ///
@@ -31,6 +32,9 @@ sealed class HabitRecord with _$HabitRecord {
   }) = _HabitRecord;
 
   const HabitRecord._();
+
+  factory HabitRecord.fromJson(Map<String, dynamic> json) =>
+      _$HabitRecordFromJson(json);
 
   /// 获取执行日期（忽略时间部分）
   DateTime get executedDate => DateTime(executedAt.year, executedAt.month, executedAt.day);

@@ -11,6 +11,7 @@ part of 'habit.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$Habit {
 
@@ -36,6 +37,8 @@ mixin _$Habit {
 @pragma('vm:prefer-inline')
 $HabitCopyWith<Habit> get copyWith => _$HabitCopyWithImpl<Habit>(this as Habit, _$identity);
 
+  /// Serializes this Habit to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
@@ -43,7 +46,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.cue, cue) || other.cue == cue)&&(identical(other.routine, routine) || other.routine == routine)&&(identical(other.oldRoutine, oldRoutine) || other.oldRoutine == oldRoutine)&&(identical(other.reward, reward) || other.reward == reward)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isKeystone, isKeystone) || other.isKeystone == isKeystone)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,name,cue,routine,oldRoutine,reward,type,category,notes,isActive,isKeystone,createdAt,updatedAt,deletedAt);
 
@@ -225,11 +228,11 @@ return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_th
 }
 
 /// @nodoc
-
+@JsonSerializable()
 
 class _Habit extends Habit {
   const _Habit({required this.id, required this.name, required this.cue, required this.routine, this.oldRoutine, required this.reward, required this.type, this.category, this.notes, required this.isActive, this.isKeystone = false, required this.createdAt, required this.updatedAt, this.deletedAt}): super._();
-  
+  factory _Habit.fromJson(Map<String, dynamic> json) => _$HabitFromJson(json);
 
 /// 唯一标识符
 @override final  String id;
@@ -267,14 +270,17 @@ class _Habit extends Habit {
 @pragma('vm:prefer-inline')
 _$HabitCopyWith<_Habit> get copyWith => __$HabitCopyWithImpl<_Habit>(this, _$identity);
 
-
+@override
+Map<String, dynamic> toJson() {
+  return _$HabitToJson(this, );
+}
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _Habit&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.cue, cue) || other.cue == cue)&&(identical(other.routine, routine) || other.routine == routine)&&(identical(other.oldRoutine, oldRoutine) || other.oldRoutine == oldRoutine)&&(identical(other.reward, reward) || other.reward == reward)&&(identical(other.type, type) || other.type == type)&&(identical(other.category, category) || other.category == category)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.isKeystone, isKeystone) || other.isKeystone == isKeystone)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,name,cue,routine,oldRoutine,reward,type,category,notes,isActive,isKeystone,createdAt,updatedAt,deletedAt);
 

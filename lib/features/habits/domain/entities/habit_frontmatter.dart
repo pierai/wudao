@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'habit_frontmatter.freezed.dart';
+part 'habit_frontmatter.g.dart';
 
 /// 习惯 Frontmatter 实体
 ///
@@ -31,6 +32,9 @@ sealed class HabitFrontmatter with _$HabitFrontmatter {
   }) = _HabitFrontmatter;
 
   const HabitFrontmatter._();
+
+  factory HabitFrontmatter.fromJson(Map<String, dynamic> json) =>
+      _$HabitFrontmatterFromJson(json);
 
   /// 是否包含指定标签
   bool hasTag(String tag) => tags.contains(tag);

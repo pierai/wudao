@@ -100,6 +100,12 @@ class HabitRepositoryImpl implements HabitRepository {
     return _habitDao.countActiveHabits();
   }
 
+  @override
+  Future<List<Habit>> getAllHabits({bool includeDeleted = false}) async {
+    final list = await _habitDao.getAllHabits(includeDeleted: includeDeleted);
+    return list.map((data) => data.toEntity()).toList();
+  }
+
   // ========== 执行记录管理 ==========
 
   @override
@@ -431,6 +437,12 @@ class HabitRepositoryImpl implements HabitRepository {
   @override
   Future<void> deleteOldPlans(DateTime beforeDate) async {
     await _planDao.deleteOldPlans(beforeDate);
+  }
+
+  @override
+  Future<List<DailyPlan>> getAllPlans() async {
+    final list = await _planDao.getAllPlans();
+    return list.map((data) => data.toEntity()).toList();
   }
 
   // ========== Frontmatter 管理 ==========

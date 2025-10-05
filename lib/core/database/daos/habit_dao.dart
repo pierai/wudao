@@ -109,4 +109,16 @@ class HabitDao extends DatabaseAccessor<AppDatabase> with _$HabitDaoMixin {
     final result = await query.getSingle();
     return result.read(habits.id.count()) ?? 0;
   }
+
+  /// 获取所有习惯（包括已删除的，可选）
+  Future<List<HabitData>> getAllHabits({bool includeDeleted = false}) {
+    final query = select(habits)
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
+
+    if (!includeDeleted) {
+      query.where((tbl) => tbl.deletedAt.isNull());
+    }
+
+    return query.get();
+  }
 }
