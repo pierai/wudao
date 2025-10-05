@@ -21,9 +21,12 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
 
   Future<void> _handleRefresh() async {
     // 根据选中的日期刷新对应的计划列表
+    // 注意：必须去掉时间部分，保持与build方法中的日期格式一致
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final date = _selectedSegment == 0
-        ? DateTime.now()
-        : DateTime.now().add(const Duration(days: 1));
+        ? today
+        : today.add(const Duration(days: 1));
     ref.invalidate(plansByDateProvider(date));
   }
 
@@ -114,9 +117,13 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
   @override
   Widget build(BuildContext context) {
     // 根据选中的日期获取对应的计划列表
+    // 注意：必须去掉时间部分，否则每次build都会创建新的DateTime对象
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final date = _selectedSegment == 0
-        ? DateTime.now()
-        : DateTime.now().add(const Duration(days: 1));
+        ? today
+        : today.add(const Duration(days: 1));
+
     final plansAsync = ref.watch(plansByDateProvider(date));
 
     return CupertinoPageScaffold(

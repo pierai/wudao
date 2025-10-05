@@ -209,3 +209,15 @@ flutter clean
 fvm flutter precache --ios
 
 ```
+
+# 项目文档
+
+📂 文档结构现在更清晰
+
+  docs/
+  ├── habit/
+  │   ├── README_HABITS.md           # 📚 文档导航中心
+  │   ├── HABIT_QUICK_START.md       # ⚡ 快速开始
+  │   └── DAILY_PLAN_USER_GUIDE.md   # ✨ 次日计划用户指南（新增）
+  ├── habit_module_requirements.md   # 📋 完整需求文档
+  └── requirements.md                # 📊 项目总体需求
