@@ -613,18 +613,23 @@ CREATE TABLE habit_dependencies (
 - **负责**: @flutter_architect
 - **实际时间**: 5 小时
 
-#### Task 2.15: 路由配置
+#### Task 2.15: 路由配置 ✅
 
-- [ ] 更新 `lib/routing/app_router.dart`
+- [x] 创建 `lib/routing/app_router.dart`
   - /habits - 习惯列表
   - /habits/new - 创建习惯
-  - /habits/:id - 习惯详情
-  - /habits/:id/edit - 编辑习惯
+  - /habits/detail - 习惯详情（参数：habitId）
+  - /habits/edit - 编辑习惯（参数：habitId）
   - /habits/daily-plan - 次日计划
-  - /habits/frontmatter - 习惯感悟
-- [ ] 集成到底部导航栏
+  - /habits/frontmatter - 习惯感悟列表
+  - /habits/frontmatter/new - 创建感悟
+  - /habits/frontmatter/edit - 编辑感悟（参数：frontmatter）
+  - /habits/export - 导出数据
+  - /habits/import - 导入数据
+- [x] 集成到 CupertinoApp（onGenerateRoute、onUnknownRoute）
+- [x] 更新所有导航调用使用路由
 - **负责**: @flutter_architect
-- **预计时间**: 2 小时
+- **实际时间**: 1.5 小时
 
 #### Task 2.16: 测试与文档
 
@@ -1037,8 +1042,8 @@ CREATE TABLE habit_dependencies (
 ---
 
 **最后更新**: 2025-10-05
-**当前冲刺**: Phase 2, Week 4（数据导入导出功能已完成）
-**Phase 2 完成度**: ~95%（主要功能已完成，待完成路由配置和测试）
+**当前冲刺**: Phase 2, Week 4（路由配置已完成）
+**Phase 2 完成度**: ~98%（核心功能全部完成，仅待测试与文档）
 
 ## 📚 用户文档
 
