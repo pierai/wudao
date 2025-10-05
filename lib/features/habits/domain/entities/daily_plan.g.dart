@@ -15,12 +15,24 @@ _DailyPlan _$DailyPlanFromJson(Map<String, dynamic> json) => _DailyPlan(
       ? null
       : DateTime.parse(json['scheduledTime'] as String),
   priority: (json['priority'] as num).toInt(),
-  isCompleted: json['isCompleted'] as bool,
+  status:
+      $enumDecodeNullable(_$PlanCompletionStatusEnumMap, json['status']) ??
+      PlanCompletionStatus.pending,
+  cueCompletedAt: json['cueCompletedAt'] == null
+      ? null
+      : DateTime.parse(json['cueCompletedAt'] as String),
+  checkedInAt: json['checkedInAt'] == null
+      ? null
+      : DateTime.parse(json['checkedInAt'] as String),
+  recordId: json['recordId'] as String?,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
+  isCompleted: json['isCompleted'] as bool? ?? false,
   completedAt: json['completedAt'] == null
       ? null
       : DateTime.parse(json['completedAt'] as String),
-  recordId: json['recordId'] as String?,
-  createdAt: DateTime.parse(json['createdAt'] as String),
 );
 
 Map<String, dynamic> _$DailyPlanToJson(_DailyPlan instance) =>
@@ -31,8 +43,19 @@ Map<String, dynamic> _$DailyPlanToJson(_DailyPlan instance) =>
       'cueTask': instance.cueTask,
       'scheduledTime': ?instance.scheduledTime?.toIso8601String(),
       'priority': instance.priority,
-      'isCompleted': instance.isCompleted,
-      'completedAt': ?instance.completedAt?.toIso8601String(),
+      'status': _$PlanCompletionStatusEnumMap[instance.status]!,
+      'cueCompletedAt': ?instance.cueCompletedAt?.toIso8601String(),
+      'checkedInAt': ?instance.checkedInAt?.toIso8601String(),
       'recordId': ?instance.recordId,
       'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': ?instance.updatedAt?.toIso8601String(),
+      'isCompleted': instance.isCompleted,
+      'completedAt': ?instance.completedAt?.toIso8601String(),
     };
+
+const _$PlanCompletionStatusEnumMap = {
+  PlanCompletionStatus.pending: 'pending',
+  PlanCompletionStatus.cueCompleted: 'cueCompleted',
+  PlanCompletionStatus.checkedIn: 'checkedIn',
+  PlanCompletionStatus.skipped: 'skipped',
+};

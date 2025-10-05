@@ -109,10 +109,52 @@ abstract class HabitRepository {
   /// 更新次日计划
   Future<void> updateDailyPlan(DailyPlan plan);
 
-  /// 完成次日计划（关联打卡记录）
+  // ========== 次日计划状态管理 (Phase 2 新增) ==========
+
+  /// 标记暗示已完成 (pending → cueCompleted)
+  Future<void> markCueCompleted(String planId);
+
+  /// 取消暗示完成 (cueCompleted → pending)
+  Future<void> markCueIncomplete(String planId);
+
+  /// 标记计划已打卡 (cueCompleted → checkedIn)
+  /// @param planId 计划 ID
+  /// @param recordId 关联的打卡记录 ID
+  Future<void> markPlanCheckedIn(String planId, String recordId);
+
+  /// 标记计划已跳过 (pending → skipped)
+  /// 当用户在习惯列表直接打卡时调用
+  Future<void> markPlanSkipped(String planId);
+
+  /// 取消打卡 (checkedIn → cueCompleted)
+  /// 同时删除关联的打卡记录
+  Future<void> cancelCheckIn(String recordId);
+
+  /// 检查今日是否已打卡
+  Future<bool> hasTodayRecord(String habitId, DateTime date);
+
+  /// 获取今日打卡记录
+  Future<HabitRecord?> getTodayRecord(String habitId, DateTime date);
+
+  /// 同步计划状态(习惯列表打卡后调用)
+  /// 自动将关联的计划标记为 skipped 或 checkedIn
+  Future<void> syncPlanStatusAfterCheckIn(
+    String habitId,
+    DateTime date,
+    String recordId,
+  );
+
+  /// 根据习惯ID和日期获取计划
+  Future<DailyPlan?> getPlanByHabitAndDate(String habitId, DateTime date);
+
+  // ========== 废弃方法(向后兼容) ==========
+
+  /// @deprecated 使用 markPlanCheckedIn 替代
+  @Deprecated('Use markPlanCheckedIn instead')
   Future<void> completeDailyPlan(String planId, String? recordId);
 
-  /// 取消完成状态
+  /// @deprecated 使用 markCueIncomplete 替代
+  @Deprecated('Use markCueIncomplete instead')
   Future<void> uncompleteDailyPlan(String planId);
 
   /// 删除次日计划

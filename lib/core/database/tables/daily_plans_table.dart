@@ -28,11 +28,15 @@ class DailyPlans extends Table {
   /// 优先级（0-10，数字越小优先级越高，默认 0）
   IntColumn get priority => integer().withDefault(const Constant(0))();
 
-  /// 是否已完成
-  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+  /// 计划完成状态（pending/cueCompleted/checkedIn/skipped）
+  TextColumn get status =>
+      text().withDefault(const Constant('pending'))();
 
-  /// 完成时间（打卡时间）
-  DateTimeColumn get completedAt => dateTime().nullable()();
+  /// 暗示完成时间
+  DateTimeColumn get cueCompletedAt => dateTime().nullable()();
+
+  /// 打卡时间
+  DateTimeColumn get checkedInAt => dateTime().nullable()();
 
   /// 关联的打卡记录 ID（外键，可选）
   /// 当计划完成时，创建 HabitRecord 并关联
@@ -43,6 +47,16 @@ class DailyPlans extends Table {
 
   /// 创建时间
   DateTimeColumn get createdAt => dateTime()();
+
+  /// 更新时间
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+
+  // ==================== 废弃字段(向后兼容) ====================
+  /// @deprecated 使用 status 替代
+  BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();
+
+  /// @deprecated 使用 checkedInAt 替代
+  DateTimeColumn get completedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

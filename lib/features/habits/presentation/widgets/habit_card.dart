@@ -15,18 +15,51 @@ class HabitCard extends ConsumerWidget {
   Future<void> _handleCheckIn(BuildContext context, WidgetRef ref) async {
     final repository = ref.read(habitRepositoryProvider);
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
 
     // 检查今天是否已经打卡
-    final hasRecord = await repository.hasRecordOnDate(habit.id, now);
+    final hasRecord = await repository.hasTodayRecord(habit.id, today);
+
+    if (hasRecord && context.mounted) {
+      // 今日已打卡,显示提示对话框
+      await showCupertinoDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('提示'),
+          content: const Text('今天已经打卡过了，不可重复打卡'),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('确定'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
     if (!hasRecord && context.mounted) {
       // 显示打卡对话框
       final result = await showCheckInDialog(context, habit);
 
-      // 如果打卡成功，刷新今日打卡状态和统计数据
-      if (result == true) {
+      // 如果打卡成功，刷新今日打卡状态和统计数据,并同步计划状态
+      if (result == true && context.mounted) {
+        // 获取今日打卡记录
+        final todayRecord = await repository.getTodayRecord(habit.id, today);
+
+        if (todayRecord != null) {
+          // 同步计划状态(将关联的计划标记为 skipped 或 checkedIn)
+          await repository.syncPlanStatusAfterCheckIn(
+            habit.id,
+            today,
+            todayRecord.id,
+          );
+        }
+
+        // 刷新相关 Provider
         ref.invalidate(hasTodayRecordProvider(habit.id));
         ref.invalidate(habitStatsProvider(habit.id));
+        ref.invalidate(plansByDateProvider(today));
       }
     }
   }

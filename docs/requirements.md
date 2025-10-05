@@ -319,11 +319,65 @@
 - 支持手动删除计划
 - 支持调整计划顺序（拖拽排序）
 
-**计划与打卡关联**:
+**计划与打卡关联** ✅:
 
-- daily_plans 表的 recordId 字段关联 habit_records
-- 已关联打卡的计划显示 ✓ 图标
-- 计划完成时间 completedAt 自动记录
+**DailyPlan 数据模型**:
+```dart
+@freezed
+sealed class DailyPlan with _$DailyPlan {
+  const factory DailyPlan({
+    required String id,
+    required String habitId,
+    required String cueTask,
+    required DateTime date,
+    required int priority,
+    DateTime? scheduledTime,
+
+    // 状态机字段
+    required PlanCompletionStatus status,  // 计划状态
+    String? recordId,                      // 关联的打卡记录ID
+    DateTime? cueCompletedAt,              // 暗示完成时间
+    DateTime? checkedInAt,                 // 打卡时间
+
+    required DateTime createdAt,
+    DateTime? updatedAt,
+  }) = _DailyPlan;
+}
+```
+
+**HabitRecord 数据模型**:
+```dart
+@freezed
+sealed class HabitRecord with _$HabitRecord {
+  const factory HabitRecord({
+    required String id,
+    required String habitId,
+    required DateTime date,
+    required DateTime executedAt,
+    required int quality,
+    String? note,
+
+    // 打卡来源追踪
+    required RecordSource source,  // 打卡来源(计划/列表)
+    String? planId,                // 如果来自计划,记录计划ID
+
+    @Default(false) bool isBackfilled,
+    required DateTime createdAt,
+    DateTime? updatedAt,
+  }) = _HabitRecord;
+}
+
+enum RecordSource {
+  fromPlan,   // 通过次日计划打卡
+  fromList,   // 在习惯列表直接打卡
+}
+```
+
+**双向同步机制**:
+- 习惯列表打卡 → 计划自动标记为 `skipped`
+- 计划打卡 → 习惯列表显示"已打卡"
+- 取消打卡 → 双向状态恢复
+- 防重复打卡：同一天同一习惯只能打卡一次
 
 **次日计划页面详细功能** ✅:
 
@@ -341,6 +395,36 @@
   - 点击卡片：标记完成/取消完成，弹出打卡确认对话框
   - 左滑删除：Dismissible 组件实现删除确认
   - 下拉刷新：重新加载计划列表
+
+**1.1 计划状态机设计** ✅:
+
+基于《习惯的力量》理论，明确区分暗示完成和习惯打卡：
+
+```dart
+enum PlanCompletionStatus {
+  pending,        // ⏳ 待执行(初始状态)
+  cueCompleted,   // ✅ 暗示已完成(未打卡)
+  checkedIn,      // ✅ 已打卡(通过计划打卡)
+  skipped,        // ⚠️ 已跳过(在习惯列表直接打卡)
+}
+```
+
+**状态流转规则**:
+```
+pending
+  ├─→ cueCompleted (点击卡片标记暗示完成)
+  │     └─→ checkedIn (点击"打卡"按钮)
+  ├─→ skipped (在习惯列表直接打卡)
+  └─→ 可逆操作: checkedIn ←→ cueCompleted ←→ pending
+```
+
+**卡片状态展示**:
+- **pending**: 空心圆圈 ○，点击卡片标记暗示完成
+- **cueCompleted**: 绿色勾 ✓ + "打卡"按钮，点击按钮弹出打卡对话框
+- **checkedIn**: 绿色勾 ✓ + "已打卡"徽章 + 星级显示
+- **skipped**: 删除线文字 + "已跳过"徽章（不可逆）
+
+**明日计划只读**: 明日计划 Tab 中的卡片置灰（透明度 0.6），不可点击操作
 
 **2. 计划生成器对话框**：
 

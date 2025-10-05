@@ -21,8 +21,11 @@ mixin _$HabitRecord {
  DateTime get executedAt;/// 执行质量评分（1-5 星，可选）
  int? get quality;/// 执行笔记（可选）
  String? get notes;/// 是否为补打卡
- bool get isBackfilled;/// 创建时间
- DateTime get createdAt;
+ bool get isBackfilled;/// 打卡来源(计划/列表)
+ RecordSource get source;/// 如果来自计划,记录计划 ID
+ String? get planId;/// 创建时间
+ DateTime get createdAt;/// 更新时间
+ DateTime? get updatedAt;
 /// Create a copy of HabitRecord
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -35,16 +38,16 @@ $HabitRecordCopyWith<HabitRecord> get copyWith => _$HabitRecordCopyWithImpl<Habi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HabitRecord&&(identical(other.id, id) || other.id == id)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.executedAt, executedAt) || other.executedAt == executedAt)&&(identical(other.quality, quality) || other.quality == quality)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isBackfilled, isBackfilled) || other.isBackfilled == isBackfilled)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HabitRecord&&(identical(other.id, id) || other.id == id)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.executedAt, executedAt) || other.executedAt == executedAt)&&(identical(other.quality, quality) || other.quality == quality)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isBackfilled, isBackfilled) || other.isBackfilled == isBackfilled)&&(identical(other.source, source) || other.source == source)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,habitId,executedAt,quality,notes,isBackfilled,createdAt);
+int get hashCode => Object.hash(runtimeType,id,habitId,executedAt,quality,notes,isBackfilled,source,planId,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'HabitRecord(id: $id, habitId: $habitId, executedAt: $executedAt, quality: $quality, notes: $notes, isBackfilled: $isBackfilled, createdAt: $createdAt)';
+  return 'HabitRecord(id: $id, habitId: $habitId, executedAt: $executedAt, quality: $quality, notes: $notes, isBackfilled: $isBackfilled, source: $source, planId: $planId, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -55,7 +58,7 @@ abstract mixin class $HabitRecordCopyWith<$Res>  {
   factory $HabitRecordCopyWith(HabitRecord value, $Res Function(HabitRecord) _then) = _$HabitRecordCopyWithImpl;
 @useResult
 $Res call({
- String id, String habitId, DateTime executedAt, int? quality, String? notes, bool isBackfilled, DateTime createdAt
+ String id, String habitId, DateTime executedAt, int? quality, String? notes, bool isBackfilled, RecordSource source, String? planId, DateTime createdAt, DateTime? updatedAt
 });
 
 
@@ -72,7 +75,7 @@ class _$HabitRecordCopyWithImpl<$Res>
 
 /// Create a copy of HabitRecord
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? habitId = null,Object? executedAt = null,Object? quality = freezed,Object? notes = freezed,Object? isBackfilled = null,Object? createdAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? habitId = null,Object? executedAt = null,Object? quality = freezed,Object? notes = freezed,Object? isBackfilled = null,Object? source = null,Object? planId = freezed,Object? createdAt = null,Object? updatedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,habitId: null == habitId ? _self.habitId : habitId // ignore: cast_nullable_to_non_nullable
@@ -80,8 +83,11 @@ as String,executedAt: null == executedAt ? _self.executedAt : executedAt // igno
 as DateTime,quality: freezed == quality ? _self.quality : quality // ignore: cast_nullable_to_non_nullable
 as int?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,isBackfilled: null == isBackfilled ? _self.isBackfilled : isBackfilled // ignore: cast_nullable_to_non_nullable
-as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as bool,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
+as RecordSource,planId: freezed == planId ? _self.planId : planId // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 
@@ -163,10 +169,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String habitId,  DateTime executedAt,  int? quality,  String? notes,  bool isBackfilled,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String habitId,  DateTime executedAt,  int? quality,  String? notes,  bool isBackfilled,  RecordSource source,  String? planId,  DateTime createdAt,  DateTime? updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HabitRecord() when $default != null:
-return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.notes,_that.isBackfilled,_that.createdAt);case _:
+return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.notes,_that.isBackfilled,_that.source,_that.planId,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -184,10 +190,10 @@ return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.note
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String habitId,  DateTime executedAt,  int? quality,  String? notes,  bool isBackfilled,  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String habitId,  DateTime executedAt,  int? quality,  String? notes,  bool isBackfilled,  RecordSource source,  String? planId,  DateTime createdAt,  DateTime? updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _HabitRecord():
-return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.notes,_that.isBackfilled,_that.createdAt);}
+return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.notes,_that.isBackfilled,_that.source,_that.planId,_that.createdAt,_that.updatedAt);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -201,10 +207,10 @@ return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.note
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String habitId,  DateTime executedAt,  int? quality,  String? notes,  bool isBackfilled,  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String habitId,  DateTime executedAt,  int? quality,  String? notes,  bool isBackfilled,  RecordSource source,  String? planId,  DateTime createdAt,  DateTime? updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _HabitRecord() when $default != null:
-return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.notes,_that.isBackfilled,_that.createdAt);case _:
+return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.notes,_that.isBackfilled,_that.source,_that.planId,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -216,7 +222,7 @@ return $default(_that.id,_that.habitId,_that.executedAt,_that.quality,_that.note
 @JsonSerializable()
 
 class _HabitRecord extends HabitRecord {
-  const _HabitRecord({required this.id, required this.habitId, required this.executedAt, this.quality, this.notes, required this.isBackfilled, required this.createdAt}): super._();
+  const _HabitRecord({required this.id, required this.habitId, required this.executedAt, this.quality, this.notes, required this.isBackfilled, this.source = RecordSource.fromList, this.planId, required this.createdAt, this.updatedAt}): super._();
   factory _HabitRecord.fromJson(Map<String, dynamic> json) => _$HabitRecordFromJson(json);
 
 /// 唯一标识符
@@ -231,8 +237,14 @@ class _HabitRecord extends HabitRecord {
 @override final  String? notes;
 /// 是否为补打卡
 @override final  bool isBackfilled;
+/// 打卡来源(计划/列表)
+@override@JsonKey() final  RecordSource source;
+/// 如果来自计划,记录计划 ID
+@override final  String? planId;
 /// 创建时间
 @override final  DateTime createdAt;
+/// 更新时间
+@override final  DateTime? updatedAt;
 
 /// Create a copy of HabitRecord
 /// with the given fields replaced by the non-null parameter values.
@@ -247,16 +259,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HabitRecord&&(identical(other.id, id) || other.id == id)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.executedAt, executedAt) || other.executedAt == executedAt)&&(identical(other.quality, quality) || other.quality == quality)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isBackfilled, isBackfilled) || other.isBackfilled == isBackfilled)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HabitRecord&&(identical(other.id, id) || other.id == id)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.executedAt, executedAt) || other.executedAt == executedAt)&&(identical(other.quality, quality) || other.quality == quality)&&(identical(other.notes, notes) || other.notes == notes)&&(identical(other.isBackfilled, isBackfilled) || other.isBackfilled == isBackfilled)&&(identical(other.source, source) || other.source == source)&&(identical(other.planId, planId) || other.planId == planId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,habitId,executedAt,quality,notes,isBackfilled,createdAt);
+int get hashCode => Object.hash(runtimeType,id,habitId,executedAt,quality,notes,isBackfilled,source,planId,createdAt,updatedAt);
 
 @override
 String toString() {
-  return 'HabitRecord(id: $id, habitId: $habitId, executedAt: $executedAt, quality: $quality, notes: $notes, isBackfilled: $isBackfilled, createdAt: $createdAt)';
+  return 'HabitRecord(id: $id, habitId: $habitId, executedAt: $executedAt, quality: $quality, notes: $notes, isBackfilled: $isBackfilled, source: $source, planId: $planId, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -267,7 +279,7 @@ abstract mixin class _$HabitRecordCopyWith<$Res> implements $HabitRecordCopyWith
   factory _$HabitRecordCopyWith(_HabitRecord value, $Res Function(_HabitRecord) _then) = __$HabitRecordCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String habitId, DateTime executedAt, int? quality, String? notes, bool isBackfilled, DateTime createdAt
+ String id, String habitId, DateTime executedAt, int? quality, String? notes, bool isBackfilled, RecordSource source, String? planId, DateTime createdAt, DateTime? updatedAt
 });
 
 
@@ -284,7 +296,7 @@ class __$HabitRecordCopyWithImpl<$Res>
 
 /// Create a copy of HabitRecord
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? habitId = null,Object? executedAt = null,Object? quality = freezed,Object? notes = freezed,Object? isBackfilled = null,Object? createdAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? habitId = null,Object? executedAt = null,Object? quality = freezed,Object? notes = freezed,Object? isBackfilled = null,Object? source = null,Object? planId = freezed,Object? createdAt = null,Object? updatedAt = freezed,}) {
   return _then(_HabitRecord(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,habitId: null == habitId ? _self.habitId : habitId // ignore: cast_nullable_to_non_nullable
@@ -292,8 +304,11 @@ as String,executedAt: null == executedAt ? _self.executedAt : executedAt // igno
 as DateTime,quality: freezed == quality ? _self.quality : quality // ignore: cast_nullable_to_non_nullable
 as int?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,isBackfilled: null == isBackfilled ? _self.isBackfilled : isBackfilled // ignore: cast_nullable_to_non_nullable
-as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
-as DateTime,
+as bool,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
+as RecordSource,planId: freezed == planId ? _self.planId : planId // ignore: cast_nullable_to_non_nullable
+as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 

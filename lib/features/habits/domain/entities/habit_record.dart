@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'record_source.dart';
 
 part 'habit_record.freezed.dart';
 part 'habit_record.g.dart';
@@ -27,8 +28,17 @@ sealed class HabitRecord with _$HabitRecord {
     /// 是否为补打卡
     required bool isBackfilled,
 
+    /// 打卡来源(计划/列表)
+    @Default(RecordSource.fromList) RecordSource source,
+
+    /// 如果来自计划,记录计划 ID
+    String? planId,
+
     /// 创建时间
     required DateTime createdAt,
+
+    /// 更新时间
+    DateTime? updatedAt,
   }) = _HabitRecord;
 
   const HabitRecord._();
@@ -60,4 +70,10 @@ sealed class HabitRecord with _$HabitRecord {
     if (quality! >= 4) return '超预期完成';
     return '未评分';
   }
+
+  /// 是否来自计划
+  bool get isFromPlan => source.isFromPlan;
+
+  /// 是否来自列表
+  bool get isFromList => source.isFromList;
 }

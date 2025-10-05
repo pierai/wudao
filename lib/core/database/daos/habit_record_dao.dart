@@ -88,6 +88,11 @@ class HabitRecordDao extends DatabaseAccessor<AppDatabase>
     return (delete(habitRecords)..where((tbl) => tbl.id.equals(id))).go();
   }
 
+  /// 获取所有打卡记录
+  Future<List<HabitRecordData>> getAllRecords() {
+    return select(habitRecords).get();
+  }
+
   /// 获取指定月份的打卡日历数据
   /// 返回 Map<日期, 记录列表>
   Future<Map<DateTime, List<HabitRecordData>>> getMonthCalendar(

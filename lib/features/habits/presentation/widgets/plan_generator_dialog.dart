@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/daily_plan.dart';
 import '../../domain/entities/habit.dart';
+import '../../domain/entities/plan_completion_status.dart';
 import '../providers/habit_provider.dart';
 
 /// 计划生成器对话框
@@ -404,10 +405,12 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
           cueTask: habit.cue, // 将暗示作为任务
           scheduledTime: _suggestedTimes[habitId],
           priority: _priorities[habitId] ?? 5,
-          isCompleted: false,
-          completedAt: null,
+          status: PlanCompletionStatus.pending, // 初始状态为待执行
+          cueCompletedAt: null,
+          checkedInAt: null,
           recordId: null,
           createdAt: DateTime.now(),
+          updatedAt: null,
         );
 
         plans.add(plan);

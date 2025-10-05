@@ -29,8 +29,18 @@ class HabitRecords extends Table {
   /// false：当时实时打卡
   BoolColumn get isBackfilled => boolean().withDefault(const Constant(false))();
 
+  /// 打卡来源（fromPlan/fromList，默认 fromList）
+  TextColumn get source =>
+      text().withDefault(const Constant('fromList'))();
+
+  /// 如果来自计划，记录计划 ID
+  TextColumn get planId => text().nullable()();
+
   /// 创建时间（记录创建时间，非执行时间）
   DateTimeColumn get createdAt => dateTime()();
+
+  /// 更新时间
+  DateTimeColumn get updatedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};

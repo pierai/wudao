@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/habit_record.dart';
+import '../../domain/entities/record_source.dart';
 
 /// HabitRecord 数据模型转换器
 
@@ -16,6 +17,9 @@ extension HabitRecordDataToEntity on HabitRecordData {
       notes: notes,
       isBackfilled: isBackfilled,
       createdAt: createdAt,
+      source: source == 'fromPlan' ? RecordSource.fromPlan : RecordSource.fromList,
+      planId: planId,
+      updatedAt: updatedAt,
     );
   }
 }
@@ -31,6 +35,9 @@ extension HabitRecordEntityToData on HabitRecord {
       notes: notes,
       isBackfilled: isBackfilled,
       createdAt: createdAt,
+      source: source == RecordSource.fromPlan ? 'fromPlan' : 'fromList',
+      planId: planId,
+      updatedAt: updatedAt,
     );
   }
 
@@ -44,6 +51,9 @@ extension HabitRecordEntityToData on HabitRecord {
       notes: notes != null ? Value(notes) : const Value(null),
       isBackfilled: Value(isBackfilled),
       createdAt: createdAt,
+      source: Value(source == RecordSource.fromPlan ? 'fromPlan' : 'fromList'),
+      planId: planId != null ? Value(planId) : const Value(null),
+      updatedAt: updatedAt != null ? Value(updatedAt) : const Value(null),
     );
   }
 }

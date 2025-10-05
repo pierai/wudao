@@ -7,6 +7,7 @@ import '../../domain/entities/habit.dart';
 import '../../domain/entities/habit_record.dart';
 import '../../domain/entities/habit_stats.dart';
 import '../../domain/entities/daily_plan.dart';
+import '../../domain/entities/plan_completion_status.dart';
 import '../../domain/entities/habit_frontmatter.dart';
 import '../../domain/repositories/habit_repository.dart';
 import '../models/habit_model.dart';
@@ -388,14 +389,141 @@ class HabitRepositoryImpl implements HabitRepository {
     await _planDao.updatePlan(plan.toData());
   }
 
+  // ========== 次日计划状态管理 (Phase 2 新增) ==========
+
+  @override
+  Future<void> markCueCompleted(String planId) async {
+    final plan = await _planDao.getPlanById(planId);
+    if (plan == null) return;
+
+    final updatedPlan = plan.toEntity().copyWith(
+      status: PlanCompletionStatus.cueCompleted,
+      cueCompletedAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    await _planDao.updatePlan(updatedPlan.toData());
+  }
+
+  @override
+  Future<void> markCueIncomplete(String planId) async {
+    final plan = await _planDao.getPlanById(planId);
+    if (plan == null) return;
+
+    final updatedPlan = plan.toEntity().copyWith(
+      status: PlanCompletionStatus.pending,
+      cueCompletedAt: null,
+      updatedAt: DateTime.now(),
+    );
+
+    await _planDao.updatePlan(updatedPlan.toData());
+  }
+
+  @override
+  Future<void> markPlanCheckedIn(String planId, String recordId) async {
+    final plan = await _planDao.getPlanById(planId);
+    if (plan == null) return;
+
+    final updatedPlan = plan.toEntity().copyWith(
+      status: PlanCompletionStatus.checkedIn,
+      recordId: recordId,
+      checkedInAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    await _planDao.updatePlan(updatedPlan.toData());
+  }
+
+  @override
+  Future<void> markPlanSkipped(String planId) async {
+    final plan = await _planDao.getPlanById(planId);
+    if (plan == null) return;
+
+    final updatedPlan = plan.toEntity().copyWith(
+      status: PlanCompletionStatus.skipped,
+      updatedAt: DateTime.now(),
+    );
+
+    await _planDao.updatePlan(updatedPlan.toData());
+  }
+
+  @override
+  Future<void> cancelCheckIn(String recordId) async {
+    // 1. 获取打卡记录
+    final records = await _recordDao.getAllRecords();
+    final record = records.firstWhere(
+      (r) => r.id == recordId,
+      orElse: () => throw Exception('Record not found: $recordId'),
+    );
+
+    // 2. 如果来自计划，恢复计划状态
+    if (record.planId != null) {
+      await markCueCompleted(record.planId!);
+    }
+
+    // 3. 删除打卡记录
+    await _recordDao.deleteRecord(recordId);
+  }
+
+  @override
+  Future<bool> hasTodayRecord(String habitId, DateTime date) async {
+    return await _recordDao.hasRecordOnDate(habitId, date);
+  }
+
+  @override
+  Future<HabitRecord?> getTodayRecord(String habitId, DateTime date) async {
+    final recordData = await _recordDao.getRecordOnDate(habitId, date);
+    return recordData?.toEntity();
+  }
+
+  @override
+  Future<void> syncPlanStatusAfterCheckIn(
+    String habitId,
+    DateTime date,
+    String recordId,
+  ) async {
+    // 1. 查找今日该习惯的计划
+    final plan = await getPlanByHabitAndDate(habitId, date);
+    if (plan == null) return;
+
+    // 2. 根据计划当前状态决定同步策略
+    if (plan.status == PlanCompletionStatus.pending) {
+      // pending → skipped (跳过计划，直接打卡)
+      await markPlanSkipped(plan.id);
+    } else if (plan.status == PlanCompletionStatus.cueCompleted) {
+      // cueCompleted → checkedIn (暗示已完成，现在打卡)
+      await markPlanCheckedIn(plan.id, recordId);
+    }
+  }
+
+  @override
+  Future<DailyPlan?> getPlanByHabitAndDate(
+      String habitId, DateTime date) async {
+    final plans = await _planDao.getPlansByDate(date);
+    try {
+      final planData = plans.firstWhere((p) => p.habitId == habitId);
+      return planData.toEntity();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ========== 废弃方法(向后兼容) ==========
+
   @override
   Future<void> completeDailyPlan(String planId, String? recordId) async {
-    await _planDao.completePlan(planId, recordId);
+    // 向后兼容：等同于 markPlanCheckedIn
+    if (recordId != null) {
+      await markPlanCheckedIn(planId, recordId);
+    } else {
+      await markCueCompleted(planId);
+    }
   }
 
   @override
   Future<void> uncompleteDailyPlan(String planId) async {
-    await _planDao.uncompletePlan(planId);
+    // 向后兼容：等同于 markCueIncomplete
+    await markCueIncomplete(planId);
   }
 
   @override

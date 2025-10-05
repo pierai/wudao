@@ -44,6 +44,12 @@ class DailyPlanDao extends DatabaseAccessor<AppDatabase>
         .get();
   }
 
+  /// 根据 ID 获取计划
+  Future<DailyPlanData?> getPlanById(String id) {
+    return (select(dailyPlans)..where((tbl) => tbl.id.equals(id)))
+        .getSingleOrNull();
+  }
+
   /// 监听指定习惯的所有未完成计划
   Stream<List<DailyPlanData>> watchUncompletedPlansByHabit(String habitId) {
     return (select(dailyPlans)

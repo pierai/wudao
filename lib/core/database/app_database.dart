@@ -47,7 +47,46 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase._internal() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (Migrator m) async {
+          await m.createAll();
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            await _migrateToV2(m);
+          }
+        },
+      );
+
+  /// 迁移到版本 2: 次日计划状态机重构
+  Future<void> _migrateToV2(Migrator m) async {
+    // 1. daily_plans 表新增字段
+    await m.addColumn(dailyPlans, dailyPlans.status);
+    await m.addColumn(dailyPlans, dailyPlans.cueCompletedAt);
+    await m.addColumn(dailyPlans, dailyPlans.checkedInAt);
+    await m.addColumn(dailyPlans, dailyPlans.updatedAt);
+
+    // 2. habit_records 表新增字段
+    await m.addColumn(habitRecords, habitRecords.source);
+    await m.addColumn(habitRecords, habitRecords.planId);
+    await m.addColumn(habitRecords, habitRecords.updatedAt);
+
+    // 3. 迁移旧数据: is_completed = true → status = 'checkedIn'
+    await customUpdate(
+      'UPDATE daily_plans SET status = ? WHERE is_completed = 1',
+      updates: {dailyPlans},
+      variables: [Variable.withString('checkedIn')],
+    );
+
+    // 4. 迁移旧数据: completed_at → checked_in_at
+    await customUpdate(
+      'UPDATE daily_plans SET checked_in_at = completed_at WHERE completed_at IS NOT NULL',
+      updates: {dailyPlans},
+    );
+  }
 
   /// 打开数据库连接
   static LazyDatabase _openConnection() {

@@ -928,6 +928,25 @@ class $HabitRecordsTable extends HabitRecords
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('fromList'),
+  );
+  static const VerificationMeta _planIdMeta = const VerificationMeta('planId');
+  @override
+  late final GeneratedColumn<String> planId = GeneratedColumn<String>(
+    'plan_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -939,6 +958,17 @@ class $HabitRecordsTable extends HabitRecords
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -947,7 +977,10 @@ class $HabitRecordsTable extends HabitRecords
     quality,
     notes,
     isBackfilled,
+    source,
+    planId,
     createdAt,
+    updatedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1003,6 +1036,18 @@ class $HabitRecordsTable extends HabitRecords
         ),
       );
     }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('plan_id')) {
+      context.handle(
+        _planIdMeta,
+        planId.isAcceptableOrUnknown(data['plan_id']!, _planIdMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1010,6 +1055,12 @@ class $HabitRecordsTable extends HabitRecords
       );
     } else if (isInserting) {
       context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
     }
     return context;
   }
@@ -1044,10 +1095,22 @@ class $HabitRecordsTable extends HabitRecords
         DriftSqlType.bool,
         data['${effectivePrefix}is_backfilled'],
       )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      planId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}plan_id'],
+      ),
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
     );
   }
 
@@ -1082,8 +1145,17 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
   /// false：当时实时打卡
   final bool isBackfilled;
 
+  /// 打卡来源（fromPlan/fromList，默认 fromList）
+  final String source;
+
+  /// 如果来自计划，记录计划 ID
+  final String? planId;
+
   /// 创建时间（记录创建时间，非执行时间）
   final DateTime createdAt;
+
+  /// 更新时间
+  final DateTime? updatedAt;
   const HabitRecordData({
     required this.id,
     required this.habitId,
@@ -1091,7 +1163,10 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
     this.quality,
     this.notes,
     required this.isBackfilled,
+    required this.source,
+    this.planId,
     required this.createdAt,
+    this.updatedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1106,7 +1181,14 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
       map['notes'] = Variable<String>(notes);
     }
     map['is_backfilled'] = Variable<bool>(isBackfilled);
+    map['source'] = Variable<String>(source);
+    if (!nullToAbsent || planId != null) {
+      map['plan_id'] = Variable<String>(planId);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
     return map;
   }
 
@@ -1122,7 +1204,14 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
           ? const Value.absent()
           : Value(notes),
       isBackfilled: Value(isBackfilled),
+      source: Value(source),
+      planId: planId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(planId),
       createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
     );
   }
 
@@ -1138,7 +1227,10 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
       quality: serializer.fromJson<int?>(json['quality']),
       notes: serializer.fromJson<String?>(json['notes']),
       isBackfilled: serializer.fromJson<bool>(json['isBackfilled']),
+      source: serializer.fromJson<String>(json['source']),
+      planId: serializer.fromJson<String?>(json['planId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
     );
   }
   @override
@@ -1151,7 +1243,10 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
       'quality': serializer.toJson<int?>(quality),
       'notes': serializer.toJson<String?>(notes),
       'isBackfilled': serializer.toJson<bool>(isBackfilled),
+      'source': serializer.toJson<String>(source),
+      'planId': serializer.toJson<String?>(planId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
     };
   }
 
@@ -1162,7 +1257,10 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
     Value<int?> quality = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     bool? isBackfilled,
+    String? source,
+    Value<String?> planId = const Value.absent(),
     DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
   }) => HabitRecordData(
     id: id ?? this.id,
     habitId: habitId ?? this.habitId,
@@ -1170,7 +1268,10 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
     quality: quality.present ? quality.value : this.quality,
     notes: notes.present ? notes.value : this.notes,
     isBackfilled: isBackfilled ?? this.isBackfilled,
+    source: source ?? this.source,
+    planId: planId.present ? planId.value : this.planId,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
   );
   HabitRecordData copyWithCompanion(HabitRecordsCompanion data) {
     return HabitRecordData(
@@ -1184,7 +1285,10 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
       isBackfilled: data.isBackfilled.present
           ? data.isBackfilled.value
           : this.isBackfilled,
+      source: data.source.present ? data.source.value : this.source,
+      planId: data.planId.present ? data.planId.value : this.planId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
 
@@ -1197,7 +1301,10 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
           ..write('quality: $quality, ')
           ..write('notes: $notes, ')
           ..write('isBackfilled: $isBackfilled, ')
-          ..write('createdAt: $createdAt')
+          ..write('source: $source, ')
+          ..write('planId: $planId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -1210,7 +1317,10 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
     quality,
     notes,
     isBackfilled,
+    source,
+    planId,
     createdAt,
+    updatedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1222,7 +1332,10 @@ class HabitRecordData extends DataClass implements Insertable<HabitRecordData> {
           other.quality == this.quality &&
           other.notes == this.notes &&
           other.isBackfilled == this.isBackfilled &&
-          other.createdAt == this.createdAt);
+          other.source == this.source &&
+          other.planId == this.planId &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
 }
 
 class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
@@ -1232,7 +1345,10 @@ class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
   final Value<int?> quality;
   final Value<String?> notes;
   final Value<bool> isBackfilled;
+  final Value<String> source;
+  final Value<String?> planId;
   final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
   final Value<int> rowid;
   const HabitRecordsCompanion({
     this.id = const Value.absent(),
@@ -1241,7 +1357,10 @@ class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
     this.quality = const Value.absent(),
     this.notes = const Value.absent(),
     this.isBackfilled = const Value.absent(),
+    this.source = const Value.absent(),
+    this.planId = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   HabitRecordsCompanion.insert({
@@ -1251,7 +1370,10 @@ class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
     this.quality = const Value.absent(),
     this.notes = const Value.absent(),
     this.isBackfilled = const Value.absent(),
+    this.source = const Value.absent(),
+    this.planId = const Value.absent(),
     required DateTime createdAt,
+    this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        habitId = Value(habitId),
@@ -1264,7 +1386,10 @@ class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
     Expression<int>? quality,
     Expression<String>? notes,
     Expression<bool>? isBackfilled,
+    Expression<String>? source,
+    Expression<String>? planId,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1274,7 +1399,10 @@ class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
       if (quality != null) 'quality': quality,
       if (notes != null) 'notes': notes,
       if (isBackfilled != null) 'is_backfilled': isBackfilled,
+      if (source != null) 'source': source,
+      if (planId != null) 'plan_id': planId,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1286,7 +1414,10 @@ class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
     Value<int?>? quality,
     Value<String?>? notes,
     Value<bool>? isBackfilled,
+    Value<String>? source,
+    Value<String?>? planId,
     Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
     Value<int>? rowid,
   }) {
     return HabitRecordsCompanion(
@@ -1296,7 +1427,10 @@ class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
       quality: quality ?? this.quality,
       notes: notes ?? this.notes,
       isBackfilled: isBackfilled ?? this.isBackfilled,
+      source: source ?? this.source,
+      planId: planId ?? this.planId,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1322,8 +1456,17 @@ class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
     if (isBackfilled.present) {
       map['is_backfilled'] = Variable<bool>(isBackfilled.value);
     }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (planId.present) {
+      map['plan_id'] = Variable<String>(planId.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1340,7 +1483,10 @@ class HabitRecordsCompanion extends UpdateCompanion<HabitRecordData> {
           ..write('quality: $quality, ')
           ..write('notes: $notes, ')
           ..write('isBackfilled: $isBackfilled, ')
+          ..write('source: $source, ')
+          ..write('planId: $planId, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1426,27 +1572,34 @@ class $DailyPlansTable extends DailyPlans
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
-  static const VerificationMeta _isCompletedMeta = const VerificationMeta(
-    'isCompleted',
-  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
-    'is_completed',
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
     aliasedName,
     false,
-    type: DriftSqlType.bool,
+    type: DriftSqlType.string,
     requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_completed" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
+    defaultValue: const Constant('pending'),
   );
-  static const VerificationMeta _completedAtMeta = const VerificationMeta(
-    'completedAt',
+  static const VerificationMeta _cueCompletedAtMeta = const VerificationMeta(
+    'cueCompletedAt',
   );
   @override
-  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
-    'completed_at',
+  late final GeneratedColumn<DateTime> cueCompletedAt =
+      GeneratedColumn<DateTime>(
+        'cue_completed_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _checkedInAtMeta = const VerificationMeta(
+    'checkedInAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> checkedInAt = GeneratedColumn<DateTime>(
+    'checked_in_at',
     aliasedName,
     true,
     type: DriftSqlType.dateTime,
@@ -1477,6 +1630,43 @@ class $DailyPlansTable extends DailyPlans
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isCompletedMeta = const VerificationMeta(
+    'isCompleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
+    'is_completed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_completed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _completedAtMeta = const VerificationMeta(
+    'completedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> completedAt = GeneratedColumn<DateTime>(
+    'completed_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1485,10 +1675,14 @@ class $DailyPlansTable extends DailyPlans
     cueTask,
     scheduledTime,
     priority,
-    isCompleted,
-    completedAt,
+    status,
+    cueCompletedAt,
+    checkedInAt,
     recordId,
     createdAt,
+    updatedAt,
+    isCompleted,
+    completedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1546,6 +1740,50 @@ class $DailyPlansTable extends DailyPlans
         priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
       );
     }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('cue_completed_at')) {
+      context.handle(
+        _cueCompletedAtMeta,
+        cueCompletedAt.isAcceptableOrUnknown(
+          data['cue_completed_at']!,
+          _cueCompletedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('checked_in_at')) {
+      context.handle(
+        _checkedInAtMeta,
+        checkedInAt.isAcceptableOrUnknown(
+          data['checked_in_at']!,
+          _checkedInAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('record_id')) {
+      context.handle(
+        _recordIdMeta,
+        recordId.isAcceptableOrUnknown(data['record_id']!, _recordIdMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
     if (data.containsKey('is_completed')) {
       context.handle(
         _isCompletedMeta,
@@ -1563,20 +1801,6 @@ class $DailyPlansTable extends DailyPlans
           _completedAtMeta,
         ),
       );
-    }
-    if (data.containsKey('record_id')) {
-      context.handle(
-        _recordIdMeta,
-        recordId.isAcceptableOrUnknown(data['record_id']!, _recordIdMeta),
-      );
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
     }
     return context;
   }
@@ -1611,13 +1835,17 @@ class $DailyPlansTable extends DailyPlans
         DriftSqlType.int,
         data['${effectivePrefix}priority'],
       )!,
-      isCompleted: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_completed'],
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
       )!,
-      completedAt: attachedDatabase.typeMapping.read(
+      cueCompletedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
-        data['${effectivePrefix}completed_at'],
+        data['${effectivePrefix}cue_completed_at'],
+      ),
+      checkedInAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}checked_in_at'],
       ),
       recordId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -1627,6 +1855,18 @@ class $DailyPlansTable extends DailyPlans
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      isCompleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_completed'],
+      )!,
+      completedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}completed_at'],
+      ),
     );
   }
 
@@ -1657,11 +1897,14 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
   /// 优先级（0-10，数字越小优先级越高，默认 0）
   final int priority;
 
-  /// 是否已完成
-  final bool isCompleted;
+  /// 计划完成状态（pending/cueCompleted/checkedIn/skipped）
+  final String status;
 
-  /// 完成时间（打卡时间）
-  final DateTime? completedAt;
+  /// 暗示完成时间
+  final DateTime? cueCompletedAt;
+
+  /// 打卡时间
+  final DateTime? checkedInAt;
 
   /// 关联的打卡记录 ID（外键，可选）
   /// 当计划完成时，创建 HabitRecord 并关联
@@ -1670,6 +1913,15 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
 
   /// 创建时间
   final DateTime createdAt;
+
+  /// 更新时间
+  final DateTime? updatedAt;
+
+  /// @deprecated 使用 status 替代
+  final bool isCompleted;
+
+  /// @deprecated 使用 checkedInAt 替代
+  final DateTime? completedAt;
   const DailyPlanData({
     required this.id,
     required this.planDate,
@@ -1677,10 +1929,14 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
     required this.cueTask,
     this.scheduledTime,
     required this.priority,
-    required this.isCompleted,
-    this.completedAt,
+    required this.status,
+    this.cueCompletedAt,
+    this.checkedInAt,
     this.recordId,
     required this.createdAt,
+    this.updatedAt,
+    required this.isCompleted,
+    this.completedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1693,14 +1949,24 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
       map['scheduled_time'] = Variable<DateTime>(scheduledTime);
     }
     map['priority'] = Variable<int>(priority);
-    map['is_completed'] = Variable<bool>(isCompleted);
-    if (!nullToAbsent || completedAt != null) {
-      map['completed_at'] = Variable<DateTime>(completedAt);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || cueCompletedAt != null) {
+      map['cue_completed_at'] = Variable<DateTime>(cueCompletedAt);
+    }
+    if (!nullToAbsent || checkedInAt != null) {
+      map['checked_in_at'] = Variable<DateTime>(checkedInAt);
     }
     if (!nullToAbsent || recordId != null) {
       map['record_id'] = Variable<String>(recordId);
     }
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    map['is_completed'] = Variable<bool>(isCompleted);
+    if (!nullToAbsent || completedAt != null) {
+      map['completed_at'] = Variable<DateTime>(completedAt);
+    }
     return map;
   }
 
@@ -1714,14 +1980,24 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
           ? const Value.absent()
           : Value(scheduledTime),
       priority: Value(priority),
-      isCompleted: Value(isCompleted),
-      completedAt: completedAt == null && nullToAbsent
+      status: Value(status),
+      cueCompletedAt: cueCompletedAt == null && nullToAbsent
           ? const Value.absent()
-          : Value(completedAt),
+          : Value(cueCompletedAt),
+      checkedInAt: checkedInAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(checkedInAt),
       recordId: recordId == null && nullToAbsent
           ? const Value.absent()
           : Value(recordId),
       createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      isCompleted: Value(isCompleted),
+      completedAt: completedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedAt),
     );
   }
 
@@ -1737,10 +2013,14 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
       cueTask: serializer.fromJson<String>(json['cueTask']),
       scheduledTime: serializer.fromJson<DateTime?>(json['scheduledTime']),
       priority: serializer.fromJson<int>(json['priority']),
-      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
-      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
+      status: serializer.fromJson<String>(json['status']),
+      cueCompletedAt: serializer.fromJson<DateTime?>(json['cueCompletedAt']),
+      checkedInAt: serializer.fromJson<DateTime?>(json['checkedInAt']),
       recordId: serializer.fromJson<String?>(json['recordId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
+      completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
     );
   }
   @override
@@ -1753,10 +2033,14 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
       'cueTask': serializer.toJson<String>(cueTask),
       'scheduledTime': serializer.toJson<DateTime?>(scheduledTime),
       'priority': serializer.toJson<int>(priority),
-      'isCompleted': serializer.toJson<bool>(isCompleted),
-      'completedAt': serializer.toJson<DateTime?>(completedAt),
+      'status': serializer.toJson<String>(status),
+      'cueCompletedAt': serializer.toJson<DateTime?>(cueCompletedAt),
+      'checkedInAt': serializer.toJson<DateTime?>(checkedInAt),
       'recordId': serializer.toJson<String?>(recordId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'isCompleted': serializer.toJson<bool>(isCompleted),
+      'completedAt': serializer.toJson<DateTime?>(completedAt),
     };
   }
 
@@ -1767,10 +2051,14 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
     String? cueTask,
     Value<DateTime?> scheduledTime = const Value.absent(),
     int? priority,
-    bool? isCompleted,
-    Value<DateTime?> completedAt = const Value.absent(),
+    String? status,
+    Value<DateTime?> cueCompletedAt = const Value.absent(),
+    Value<DateTime?> checkedInAt = const Value.absent(),
     Value<String?> recordId = const Value.absent(),
     DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+    bool? isCompleted,
+    Value<DateTime?> completedAt = const Value.absent(),
   }) => DailyPlanData(
     id: id ?? this.id,
     planDate: planDate ?? this.planDate,
@@ -1780,10 +2068,16 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
         ? scheduledTime.value
         : this.scheduledTime,
     priority: priority ?? this.priority,
-    isCompleted: isCompleted ?? this.isCompleted,
-    completedAt: completedAt.present ? completedAt.value : this.completedAt,
+    status: status ?? this.status,
+    cueCompletedAt: cueCompletedAt.present
+        ? cueCompletedAt.value
+        : this.cueCompletedAt,
+    checkedInAt: checkedInAt.present ? checkedInAt.value : this.checkedInAt,
     recordId: recordId.present ? recordId.value : this.recordId,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    isCompleted: isCompleted ?? this.isCompleted,
+    completedAt: completedAt.present ? completedAt.value : this.completedAt,
   );
   DailyPlanData copyWithCompanion(DailyPlansCompanion data) {
     return DailyPlanData(
@@ -1795,14 +2089,22 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
           ? data.scheduledTime.value
           : this.scheduledTime,
       priority: data.priority.present ? data.priority.value : this.priority,
+      status: data.status.present ? data.status.value : this.status,
+      cueCompletedAt: data.cueCompletedAt.present
+          ? data.cueCompletedAt.value
+          : this.cueCompletedAt,
+      checkedInAt: data.checkedInAt.present
+          ? data.checkedInAt.value
+          : this.checkedInAt,
+      recordId: data.recordId.present ? data.recordId.value : this.recordId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       isCompleted: data.isCompleted.present
           ? data.isCompleted.value
           : this.isCompleted,
       completedAt: data.completedAt.present
           ? data.completedAt.value
           : this.completedAt,
-      recordId: data.recordId.present ? data.recordId.value : this.recordId,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
 
@@ -1815,10 +2117,14 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
           ..write('cueTask: $cueTask, ')
           ..write('scheduledTime: $scheduledTime, ')
           ..write('priority: $priority, ')
-          ..write('isCompleted: $isCompleted, ')
-          ..write('completedAt: $completedAt, ')
+          ..write('status: $status, ')
+          ..write('cueCompletedAt: $cueCompletedAt, ')
+          ..write('checkedInAt: $checkedInAt, ')
           ..write('recordId: $recordId, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('completedAt: $completedAt')
           ..write(')'))
         .toString();
   }
@@ -1831,10 +2137,14 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
     cueTask,
     scheduledTime,
     priority,
-    isCompleted,
-    completedAt,
+    status,
+    cueCompletedAt,
+    checkedInAt,
     recordId,
     createdAt,
+    updatedAt,
+    isCompleted,
+    completedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -1846,10 +2156,14 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
           other.cueTask == this.cueTask &&
           other.scheduledTime == this.scheduledTime &&
           other.priority == this.priority &&
-          other.isCompleted == this.isCompleted &&
-          other.completedAt == this.completedAt &&
+          other.status == this.status &&
+          other.cueCompletedAt == this.cueCompletedAt &&
+          other.checkedInAt == this.checkedInAt &&
           other.recordId == this.recordId &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isCompleted == this.isCompleted &&
+          other.completedAt == this.completedAt);
 }
 
 class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
@@ -1859,10 +2173,14 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
   final Value<String> cueTask;
   final Value<DateTime?> scheduledTime;
   final Value<int> priority;
-  final Value<bool> isCompleted;
-  final Value<DateTime?> completedAt;
+  final Value<String> status;
+  final Value<DateTime?> cueCompletedAt;
+  final Value<DateTime?> checkedInAt;
   final Value<String?> recordId;
   final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<bool> isCompleted;
+  final Value<DateTime?> completedAt;
   final Value<int> rowid;
   const DailyPlansCompanion({
     this.id = const Value.absent(),
@@ -1871,10 +2189,14 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     this.cueTask = const Value.absent(),
     this.scheduledTime = const Value.absent(),
     this.priority = const Value.absent(),
-    this.isCompleted = const Value.absent(),
-    this.completedAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.cueCompletedAt = const Value.absent(),
+    this.checkedInAt = const Value.absent(),
     this.recordId = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.completedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DailyPlansCompanion.insert({
@@ -1884,10 +2206,14 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     required String cueTask,
     this.scheduledTime = const Value.absent(),
     this.priority = const Value.absent(),
-    this.isCompleted = const Value.absent(),
-    this.completedAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.cueCompletedAt = const Value.absent(),
+    this.checkedInAt = const Value.absent(),
     this.recordId = const Value.absent(),
     required DateTime createdAt,
+    this.updatedAt = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.completedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        planDate = Value(planDate),
@@ -1901,10 +2227,14 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     Expression<String>? cueTask,
     Expression<DateTime>? scheduledTime,
     Expression<int>? priority,
-    Expression<bool>? isCompleted,
-    Expression<DateTime>? completedAt,
+    Expression<String>? status,
+    Expression<DateTime>? cueCompletedAt,
+    Expression<DateTime>? checkedInAt,
     Expression<String>? recordId,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isCompleted,
+    Expression<DateTime>? completedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1914,10 +2244,14 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
       if (cueTask != null) 'cue_task': cueTask,
       if (scheduledTime != null) 'scheduled_time': scheduledTime,
       if (priority != null) 'priority': priority,
-      if (isCompleted != null) 'is_completed': isCompleted,
-      if (completedAt != null) 'completed_at': completedAt,
+      if (status != null) 'status': status,
+      if (cueCompletedAt != null) 'cue_completed_at': cueCompletedAt,
+      if (checkedInAt != null) 'checked_in_at': checkedInAt,
       if (recordId != null) 'record_id': recordId,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isCompleted != null) 'is_completed': isCompleted,
+      if (completedAt != null) 'completed_at': completedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1929,10 +2263,14 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     Value<String>? cueTask,
     Value<DateTime?>? scheduledTime,
     Value<int>? priority,
-    Value<bool>? isCompleted,
-    Value<DateTime?>? completedAt,
+    Value<String>? status,
+    Value<DateTime?>? cueCompletedAt,
+    Value<DateTime?>? checkedInAt,
     Value<String?>? recordId,
     Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<bool>? isCompleted,
+    Value<DateTime?>? completedAt,
     Value<int>? rowid,
   }) {
     return DailyPlansCompanion(
@@ -1942,10 +2280,14 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
       cueTask: cueTask ?? this.cueTask,
       scheduledTime: scheduledTime ?? this.scheduledTime,
       priority: priority ?? this.priority,
-      isCompleted: isCompleted ?? this.isCompleted,
-      completedAt: completedAt ?? this.completedAt,
+      status: status ?? this.status,
+      cueCompletedAt: cueCompletedAt ?? this.cueCompletedAt,
+      checkedInAt: checkedInAt ?? this.checkedInAt,
       recordId: recordId ?? this.recordId,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedAt: completedAt ?? this.completedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1971,17 +2313,29 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     if (priority.present) {
       map['priority'] = Variable<int>(priority.value);
     }
-    if (isCompleted.present) {
-      map['is_completed'] = Variable<bool>(isCompleted.value);
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
     }
-    if (completedAt.present) {
-      map['completed_at'] = Variable<DateTime>(completedAt.value);
+    if (cueCompletedAt.present) {
+      map['cue_completed_at'] = Variable<DateTime>(cueCompletedAt.value);
+    }
+    if (checkedInAt.present) {
+      map['checked_in_at'] = Variable<DateTime>(checkedInAt.value);
     }
     if (recordId.present) {
       map['record_id'] = Variable<String>(recordId.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isCompleted.present) {
+      map['is_completed'] = Variable<bool>(isCompleted.value);
+    }
+    if (completedAt.present) {
+      map['completed_at'] = Variable<DateTime>(completedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1998,10 +2352,14 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
           ..write('cueTask: $cueTask, ')
           ..write('scheduledTime: $scheduledTime, ')
           ..write('priority: $priority, ')
-          ..write('isCompleted: $isCompleted, ')
-          ..write('completedAt: $completedAt, ')
+          ..write('status: $status, ')
+          ..write('cueCompletedAt: $cueCompletedAt, ')
+          ..write('checkedInAt: $checkedInAt, ')
           ..write('recordId: $recordId, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('completedAt: $completedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3116,7 +3474,10 @@ typedef $$HabitRecordsTableCreateCompanionBuilder =
       Value<int?> quality,
       Value<String?> notes,
       Value<bool> isBackfilled,
+      Value<String> source,
+      Value<String?> planId,
       required DateTime createdAt,
+      Value<DateTime?> updatedAt,
       Value<int> rowid,
     });
 typedef $$HabitRecordsTableUpdateCompanionBuilder =
@@ -3127,7 +3488,10 @@ typedef $$HabitRecordsTableUpdateCompanionBuilder =
       Value<int?> quality,
       Value<String?> notes,
       Value<bool> isBackfilled,
+      Value<String> source,
+      Value<String?> planId,
       Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
       Value<int> rowid,
     });
 
@@ -3206,8 +3570,23 @@ class $$HabitRecordsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get planId => $composableBuilder(
+    column: $table.planId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3294,8 +3673,23 @@ class $$HabitRecordsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get planId => $composableBuilder(
+    column: $table.planId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3351,8 +3745,17 @@ class $$HabitRecordsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<String> get planId =>
+      $composableBuilder(column: $table.planId, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
   $$HabitsTableAnnotationComposer get habitId {
     final $$HabitsTableAnnotationComposer composer = $composerBuilder(
@@ -3437,7 +3840,10 @@ class $$HabitRecordsTableTableManager
                 Value<int?> quality = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<bool> isBackfilled = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> planId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HabitRecordsCompanion(
                 id: id,
@@ -3446,7 +3852,10 @@ class $$HabitRecordsTableTableManager
                 quality: quality,
                 notes: notes,
                 isBackfilled: isBackfilled,
+                source: source,
+                planId: planId,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3457,7 +3866,10 @@ class $$HabitRecordsTableTableManager
                 Value<int?> quality = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<bool> isBackfilled = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<String?> planId = const Value.absent(),
                 required DateTime createdAt,
+                Value<DateTime?> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => HabitRecordsCompanion.insert(
                 id: id,
@@ -3466,7 +3878,10 @@ class $$HabitRecordsTableTableManager
                 quality: quality,
                 notes: notes,
                 isBackfilled: isBackfilled,
+                source: source,
+                planId: planId,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3564,10 +3979,14 @@ typedef $$DailyPlansTableCreateCompanionBuilder =
       required String cueTask,
       Value<DateTime?> scheduledTime,
       Value<int> priority,
-      Value<bool> isCompleted,
-      Value<DateTime?> completedAt,
+      Value<String> status,
+      Value<DateTime?> cueCompletedAt,
+      Value<DateTime?> checkedInAt,
       Value<String?> recordId,
       required DateTime createdAt,
+      Value<DateTime?> updatedAt,
+      Value<bool> isCompleted,
+      Value<DateTime?> completedAt,
       Value<int> rowid,
     });
 typedef $$DailyPlansTableUpdateCompanionBuilder =
@@ -3578,10 +3997,14 @@ typedef $$DailyPlansTableUpdateCompanionBuilder =
       Value<String> cueTask,
       Value<DateTime?> scheduledTime,
       Value<int> priority,
-      Value<bool> isCompleted,
-      Value<DateTime?> completedAt,
+      Value<String> status,
+      Value<DateTime?> cueCompletedAt,
+      Value<DateTime?> checkedInAt,
       Value<String?> recordId,
       Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<bool> isCompleted,
+      Value<DateTime?> completedAt,
       Value<int> rowid,
     });
 
@@ -3661,6 +4084,31 @@ class $$DailyPlansTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get cueCompletedAt => $composableBuilder(
+    column: $table.cueCompletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get checkedInAt => $composableBuilder(
+    column: $table.checkedInAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<bool> get isCompleted => $composableBuilder(
     column: $table.isCompleted,
     builder: (column) => ColumnFilters(column),
@@ -3668,11 +4116,6 @@ class $$DailyPlansTableFilterComposer
 
   ColumnFilters<DateTime> get completedAt => $composableBuilder(
     column: $table.completedAt,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3757,6 +4200,31 @@ class $$DailyPlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get cueCompletedAt => $composableBuilder(
+    column: $table.cueCompletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get checkedInAt => $composableBuilder(
+    column: $table.checkedInAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isCompleted => $composableBuilder(
     column: $table.isCompleted,
     builder: (column) => ColumnOrderings(column),
@@ -3764,11 +4232,6 @@ class $$DailyPlansTableOrderingComposer
 
   ColumnOrderings<DateTime> get completedAt => $composableBuilder(
     column: $table.completedAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3845,6 +4308,25 @@ class $$DailyPlansTableAnnotationComposer
   GeneratedColumn<int> get priority =>
       $composableBuilder(column: $table.priority, builder: (column) => column);
 
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get cueCompletedAt => $composableBuilder(
+    column: $table.cueCompletedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get checkedInAt => $composableBuilder(
+    column: $table.checkedInAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
   GeneratedColumn<bool> get isCompleted => $composableBuilder(
     column: $table.isCompleted,
     builder: (column) => column,
@@ -3854,9 +4336,6 @@ class $$DailyPlansTableAnnotationComposer
     column: $table.completedAt,
     builder: (column) => column,
   );
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
 
   $$HabitsTableAnnotationComposer get habitId {
     final $$HabitsTableAnnotationComposer composer = $composerBuilder(
@@ -3939,10 +4418,14 @@ class $$DailyPlansTableTableManager
                 Value<String> cueTask = const Value.absent(),
                 Value<DateTime?> scheduledTime = const Value.absent(),
                 Value<int> priority = const Value.absent(),
-                Value<bool> isCompleted = const Value.absent(),
-                Value<DateTime?> completedAt = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> cueCompletedAt = const Value.absent(),
+                Value<DateTime?> checkedInAt = const Value.absent(),
                 Value<String?> recordId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DailyPlansCompanion(
                 id: id,
@@ -3951,10 +4434,14 @@ class $$DailyPlansTableTableManager
                 cueTask: cueTask,
                 scheduledTime: scheduledTime,
                 priority: priority,
-                isCompleted: isCompleted,
-                completedAt: completedAt,
+                status: status,
+                cueCompletedAt: cueCompletedAt,
+                checkedInAt: checkedInAt,
                 recordId: recordId,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                isCompleted: isCompleted,
+                completedAt: completedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3965,10 +4452,14 @@ class $$DailyPlansTableTableManager
                 required String cueTask,
                 Value<DateTime?> scheduledTime = const Value.absent(),
                 Value<int> priority = const Value.absent(),
-                Value<bool> isCompleted = const Value.absent(),
-                Value<DateTime?> completedAt = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> cueCompletedAt = const Value.absent(),
+                Value<DateTime?> checkedInAt = const Value.absent(),
                 Value<String?> recordId = const Value.absent(),
                 required DateTime createdAt,
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<DateTime?> completedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DailyPlansCompanion.insert(
                 id: id,
@@ -3977,10 +4468,14 @@ class $$DailyPlansTableTableManager
                 cueTask: cueTask,
                 scheduledTime: scheduledTime,
                 priority: priority,
-                isCompleted: isCompleted,
-                completedAt: completedAt,
+                status: status,
+                cueCompletedAt: cueCompletedAt,
+                checkedInAt: checkedInAt,
                 recordId: recordId,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                isCompleted: isCompleted,
+                completedAt: completedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

@@ -817,9 +817,144 @@ CREATE TABLE habit_dependencies (
    - 手动选择最新的文件作为主数据源
    - 另一设备导入时选择"智能合并"
 
-### Week 5: 通知和提醒功能（可选）
+### Week 5: 次日计划交互优化（核心体验提升）
 
-#### Task 2.18: 集成 flutter_local_notifications
+> **需求文档**: [`docs/requirements/daily_plan_interaction_requirements.md`](../docs/requirements/daily_plan_interaction_requirements.md)
+
+#### Task 2.22: 次日计划状态机重构 ✨ ✅
+
+**背景**: 当前暗示完成和习惯打卡边界不清晰,需要明确状态流转规则
+
+**核心改进**:
+- 引入状态机模型: `pending` → `cueCompleted` → `checkedIn` / `skipped`
+- 暗示完成 ≠ 习惯打卡,状态独立管理
+- 习惯列表和次日计划双向同步
+
+**子任务**:
+
+##### Phase 1: 数据层改造 (2 小时) ✅
+
+- [x] **实体层修改**
+  - [x] `DailyPlan` 新增字段: `status`, `recordId`, `cueCompletedAt`, `checkedInAt`
+  - [x] `HabitRecord` 新增字段: `source`, `planId`
+  - [x] 定义枚举: `PlanCompletionStatus`, `RecordSource`
+  - [x] 运行 Freezed 代码生成
+
+- [x] **数据库层修改**
+  - [x] 修改 `DailyPlansTable`: 新增 4 个字段
+  - [x] 修改 `HabitRecordsTable`: 新增 2 个字段
+  - [x] 编写迁移脚本 `migration_v2_plan_status.dart`
+  - [x] 更新数据库版本号(v1 → v2)
+  - [x] 测试迁移脚本(旧数据兼容性)
+
+##### Phase 2: 业务逻辑实现 (3 小时) ✅
+
+- [x] **Repository 接口扩展**
+  - [x] 新增方法: `markCueCompleted()`, `markCueIncomplete()`
+  - [x] 新增方法: `markPlanCheckedIn()`, `markPlanSkipped()`
+  - [x] 新增方法: `cancelCheckIn()`, `hasTodayRecord()`, `getTodayRecord()`
+  - [x] 新增方法: `syncPlanStatusAfterCheckIn()`
+
+- [x] **状态流转逻辑**
+  - [x] 实现 pending → cueCompleted 流程
+  - [x] 实现 cueCompleted → checkedIn 流程(关联 recordId)
+  - [x] 实现 pending → skipped 流程(习惯列表直接打卡)
+  - [x] 实现取消操作(checkedIn → cueCompleted)
+
+- [x] **双向同步逻辑**
+  - [x] 习惯列表打卡 → 计划自动标记为 skipped
+  - [x] 计划打卡 → 习惯列表显示"已打卡"
+  - [x] 取消打卡 → 双向状态恢复
+
+- [x] **防重复打卡**
+  - [x] 检查今日是否已打卡
+  - [x] 已打卡状态禁止再次打卡
+  - [x] 清晰的错误提示
+
+- [ ] **单元测试**
+  - [ ] 测试状态流转规则
+  - [ ] 测试同步逻辑
+  - [ ] 测试防重复打卡
+
+##### Phase 3: UI 层重构 (3 小时) ✅
+
+- [x] **DailyPlanScreen 交互优化**
+  - [x] **移除**: 二选一对话框("仅标记完成"/"完成并打卡")
+  - [x] **新增**: 点击卡片 → 直接标记暗示完成(pending → cueCompleted)
+  - [x] **新增**: 暗示完成后显示"打卡"按钮
+  - [x] **新增**: 点击"打卡"按钮 → 弹出打卡对话框
+  - [x] **新增**: 明日计划 Tab 只读(卡片置灰,不可操作)
+
+- [x] **PlanCard 组件重构**
+  - [x] 状态指示器重构:
+    - pending: 空心圆圈 ○
+    - cueCompleted: 绿色勾 ✓ + "打卡"按钮
+    - checkedIn: 绿色勾 ✓ + "已打卡"徽章 + 星级显示
+    - skipped: 删除线 + "已跳过"徽章
+  - [x] 条件渲染"打卡"按钮(仅 cueCompleted 状态)
+  - [x] 点击卡片标记/取消暗示完成
+  - [x] 明日计划状态: 置灰显示,点击无响应
+
+- [x] **HabitCard 组件优化**
+  - [x] 新增 Provider: `todayRecordProvider` (监听今日打卡记录)
+  - [x] 根据打卡状态动态显示按钮:
+    - 未打卡: "打卡"按钮(激活)
+    - 已打卡: "已打卡"徽章(禁用) + 星级显示
+  - [x] 打卡成功后自动刷新状态
+  - [x] 尝试重复打卡弹出提示: "今日已打卡"
+
+##### Phase 4: 测试与优化 (2 小时)
+
+- [ ] **Widget 测试**
+  - [ ] PlanCard 组件: 4 种状态渲染正确
+  - [ ] HabitCard 组件: 打卡状态显示正确
+
+- [ ] **集成测试**
+  - [ ] 场景 1: 按计划完整执行(pending → cueCompleted → checkedIn)
+  - [ ] 场景 2: 仅完成暗示,稍后补打卡
+  - [ ] 场景 3: 跳过计划,直接在习惯列表打卡(→ skipped)
+  - [ ] 场景 4: 尝试重复打卡(被阻止)
+  - [ ] 场景 5: 取消打卡(状态回退)
+  - [ ] 场景 6: 明日计划只读
+
+- [ ] **性能优化**
+  - [ ] Provider 刷新策略优化(使用 family 精确刷新)
+  - [ ] 状态切换动画流畅度
+  - [ ] 打卡对话框弹出速度
+
+- [ ] **UI 细节打磨**
+  - [ ] 状态切换过渡动画
+  - [ ] 按钮点击触觉反馈
+  - [ ] 成功/失败反馈提示
+
+##### Phase 5: 文档更新 (1 小时)
+
+- [ ] 更新 `docs/FAQ.md`
+  - [ ] Q1: 补充状态流转图
+  - [ ] 新增 Q: 如何补打卡?
+- [ ] 更新 `docs/habit/DAILY_PLAN_USER_GUIDE.md`
+  - [ ] 交互流程更新
+  - [ ] 状态说明
+- [ ] 更新 `PLAN.md`(本文件)
+
+**负责**: @flutter_architect
+**总预计时间**: 11 小时
+
+**验收标准**:
+- [ ] ✅ 状态流转正确(4 个场景测试通过)
+- [ ] ✅ 数据同步准确(习惯列表 ↔ 次日计划)
+- [ ] ✅ 防重复打卡生效
+- [ ] ✅ 明日计划只读
+- [ ] ✅ UI 状态清晰,交互流畅
+- [ ] ✅ 数据库迁移成功,旧数据兼容
+
+---
+
+### Week 6: 通知和提醒功能（可选,未来 Phase 3+）
+
+> 注: 次日计划核心交互优化完成后,通知功能作为增强体验的可选功能
+
+#### Task 2.23: 集成 flutter_local_notifications
 
 - [ ] 添加 `flutter_local_notifications` 依赖
 - [ ] 配置 iOS 通知权限（Info.plist）
@@ -829,7 +964,7 @@ CREATE TABLE habit_dependencies (
 - **负责**: @flutter_architect
 - **预计时间**: 2 小时
 
-#### Task 2.19: 实现计划提醒调度
+#### Task 2.24: 实现计划提醒调度
 
 - [ ] 创建通知调度服务
 - [ ] 实现计划创建时自动注册通知
@@ -839,7 +974,7 @@ CREATE TABLE habit_dependencies (
 - **负责**: @flutter_architect
 - **预计时间**: 3 小时
 
-#### Task 2.20: 提醒设置页面
+#### Task 2.25: 提醒设置页面
 
 - [ ] 实现全局提醒开关
 - [ ] 实现免打扰时段设置（如 22:00-8:00）
@@ -849,7 +984,7 @@ CREATE TABLE habit_dependencies (
 - **负责**: @flutter_architect
 - **预计时间**: 2 小时
 
-#### Task 2.21: 通知权限处理
+#### Task 2.26: 通知权限处理
 
 - [ ] 实现通知权限请求流程
 - [ ] 处理权限被拒绝的场景

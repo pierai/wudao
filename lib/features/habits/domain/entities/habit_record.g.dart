@@ -13,7 +13,14 @@ _HabitRecord _$HabitRecordFromJson(Map<String, dynamic> json) => _HabitRecord(
   quality: (json['quality'] as num?)?.toInt(),
   notes: json['notes'] as String?,
   isBackfilled: json['isBackfilled'] as bool,
+  source:
+      $enumDecodeNullable(_$RecordSourceEnumMap, json['source']) ??
+      RecordSource.fromList,
+  planId: json['planId'] as String?,
   createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$HabitRecordToJson(_HabitRecord instance) =>
@@ -24,5 +31,13 @@ Map<String, dynamic> _$HabitRecordToJson(_HabitRecord instance) =>
       'quality': ?instance.quality,
       'notes': ?instance.notes,
       'isBackfilled': instance.isBackfilled,
+      'source': _$RecordSourceEnumMap[instance.source]!,
+      'planId': ?instance.planId,
       'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': ?instance.updatedAt?.toIso8601String(),
     };
+
+const _$RecordSourceEnumMap = {
+  RecordSource.fromPlan: 'fromPlan',
+  RecordSource.fromList: 'fromList',
+};

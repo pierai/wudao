@@ -1,9 +1,22 @@
 # TODO LIST
 
-1. 本地数据的导入&导出
-2. 习惯列表的今日打卡（惯常行为）和完成暗示并打卡有什么区别？
+## BUG
+
+1. 编辑习惯时，数据没有回显
+2. 明日计划不允许打卡，但是可以点击checkbox完成暗示行为
+3. 习惯多了之后列表太长，不好管理
+4. 明日计划的提醒功能
+5. 新增或编辑习惯时，不需要校验输入的暗示、奖赏为空
+6. 对导出的习惯json数据进行在分析，看看如何对习惯更好的管理，现在习惯多了，感觉找不到重点
+
+## 导出功能
+
+1. 导出数据支持复制JSON到剪切板，用户可以直接粘贴到其他端的应用中
+
+## 数据准备
+
 3. 准备好习惯感悟MD笔记
-5. 使用 Github SpecKit 开发新项目：提供了思考的框架、实现路径、大模型间共享、存档
+2. 准备录入数据
 
 # wudao
 
@@ -24,11 +37,20 @@ samples, guidance on mobile development, and a full API reference.
 
 # Claude 使用
 
+## TODO
+
+1. 新项目使用 Github SpecKit 开发新项目：提供了思考的框架、实现路径、大模型间共享、存档
+2. 多Agent review 代码（设置教程：<https://www.bilibili.com/video/BV1HEunzPEoS/?spm_id_from=333.1387.search.video_card.click&vd_source=3b187a9d475dded9d7ef4b4b129abe64）>
+      a. codex 需要升级为Plus才能使用（codex目前看来似乎比claude 4.5个狗血）
+      b. gemini 有免费额度
+
 ## 指令
 
 /rewind 选中回滚
 
 /usage 查看用量
+
+/exit 退出当前会话
 
 tab 切换思考模式
 ultrathink 开启ultrathink模式
@@ -43,6 +65,10 @@ VSCode插件
 
 ARGUMENTS 传递参数
 @ 引用文件，在哪里使用命令，就引用哪个文件
+
+## hooks
+
+利用hooks实现claude code输出等待提示（等待用户确认）时，通过hooks发送飞书消息通知用户
 
 ## MCP配置
 

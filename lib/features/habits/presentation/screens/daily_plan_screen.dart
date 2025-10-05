@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/widgets/custom_segmented_control.dart';
 import '../../domain/entities/daily_plan.dart';
 import '../providers/habit_provider.dart';
+import '../widgets/check_in_dialog.dart';
 import '../widgets/plan_generator_dialog.dart';
 
 /// 次日计划页面
@@ -44,46 +45,81 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
     }
   }
 
+  /// 处理点击计划卡片(标记/取消暗示完成)
   Future<void> _handleCompletePlan(DailyPlan plan) async {
-    if (plan.isCompleted) {
-      // 已完成，取消完成
-      final repository = ref.read(habitRepositoryProvider);
-      await repository.uncompleteDailyPlan(plan.id);
-      _handleRefresh();
-    } else {
-      // 未完成，询问是否打卡
-      final shouldCheckIn = await showCupertinoDialog<bool>(
+    // 明日计划不可操作
+    if (!plan.isActionable) {
+      await showCupertinoDialog(
         context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: const Text('完成计划'),
-          content: Text(
-            '暗示"${plan.cueTask}"已完成\n是否执行惯常行为并打卡？',
-          ),
+          title: const Text('提示'),
+          content: const Text('明天才能执行此计划'),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('确定'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final repository = ref.read(habitRepositoryProvider);
+
+    // 根据当前状态决定行为
+    if (plan.isPending) {
+      // pending → cueCompleted (标记暗示完成)
+      await repository.markCueCompleted(plan.id);
+      _handleRefresh();
+    } else if (plan.isCueCompleted) {
+      // cueCompleted → pending (取消暗示完成)
+      await repository.markCueIncomplete(plan.id);
+      _handleRefresh();
+    } else if (plan.isCheckedIn) {
+      // checkedIn → cueCompleted (取消打卡)
+      final confirmed = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('取消打卡'),
+          content: const Text('确定要取消打卡吗？打卡记录将被删除。'),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('仅标记完成'),
+              child: const Text('取消'),
             ),
             CupertinoDialogAction(
-              isDefaultAction: true,
+              isDestructiveAction: true,
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('完成并打卡'),
+              child: const Text('确定'),
             ),
           ],
         ),
       );
 
-      if (shouldCheckIn == true && mounted) {
-        // TODO: 打开打卡对话框
-        // 暂时先标记完成
-        final repository = ref.read(habitRepositoryProvider);
-        await repository.completeDailyPlan(plan.id, null);
-        _handleRefresh();
-      } else if (shouldCheckIn == false && mounted) {
-        final repository = ref.read(habitRepositoryProvider);
-        await repository.completeDailyPlan(plan.id, null);
+      if (confirmed == true && plan.recordId != null && mounted) {
+        await repository.cancelCheckIn(plan.recordId!);
         _handleRefresh();
       }
+    }
+    // skipped 状态不可操作
+  }
+
+  /// 处理打卡按钮点击(仅在 cueCompleted 状态显示)
+  Future<void> _handleCheckIn(DailyPlan plan) async {
+    final repository = ref.read(habitRepositoryProvider);
+
+    // 获取习惯信息
+    final habit = await repository.getHabitById(plan.habitId);
+    if (habit == null || !mounted) return;
+
+    // 显示打卡对话框
+    final recordId = await showPlanCheckInDialog(context, habit, plan);
+
+    // 如果打卡成功,标记计划为 checkedIn
+    if (recordId != null && mounted) {
+      await repository.markPlanCheckedIn(plan.id, recordId);
+      _handleRefresh();
     }
   }
 
@@ -176,9 +212,11 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
                   // 按优先级和状态排序
                   final sortedPlans = [...plans];
                   sortedPlans.sort((a, b) {
-                    // 未完成的排前面
-                    if (a.isCompleted != b.isCompleted) {
-                      return a.isCompleted ? 1 : -1;
+                    // 已完成的(checkedIn/skipped)排后面,pending/cueCompleted 排前面
+                    final aCompleted = a.isCheckedIn || a.isSkipped;
+                    final bCompleted = b.isCheckedIn || b.isSkipped;
+                    if (aCompleted != bCompleted) {
+                      return aCompleted ? 1 : -1;
                     }
                     // 优先级高的排前面
                     return b.priority.compareTo(a.priority);
@@ -270,30 +308,8 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
             ),
             child: Row(
               children: [
-                // 完成状态圆圈
-                Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: plan.isCompleted
-                        ? CupertinoColors.activeGreen
-                        : CupertinoColors.systemGrey5,
-                    border: Border.all(
-                      color: plan.isCompleted
-                          ? CupertinoColors.activeGreen
-                          : CupertinoColors.systemGrey,
-                      width: 2,
-                    ),
-                  ),
-                  child: plan.isCompleted
-                      ? const Icon(
-                          CupertinoIcons.check_mark,
-                          size: 14,
-                          color: CupertinoColors.white,
-                        )
-                      : null,
-                ),
+                // 状态指示器
+                _buildStatusIndicator(plan),
                 const SizedBox(width: 12),
 
                 // 计划内容
@@ -306,10 +322,10 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          decoration: plan.isCompleted
+                          decoration: plan.isSkipped
                               ? TextDecoration.lineThrough
                               : null,
-                          color: plan.isCompleted
+                          color: plan.isSkipped || !plan.isActionable
                               ? CupertinoColors.systemGrey
                               : null,
                         ),
@@ -364,6 +380,11 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
                     ],
                   ),
                 ),
+
+                // 操作按钮/徽章
+                _buildActionButton(plan),
+
+                const SizedBox(width: 8),
 
                 // 优先级标识
                 if (plan.priority >= 8)
@@ -490,5 +511,96 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
     final repository = ref.read(habitRepositoryProvider);
     final habit = await repository.getHabitById(habitId);
     return habit?.name ?? '未知习惯';
+  }
+
+  /// 根据计划状态构建状态指示器
+  Widget _buildStatusIndicator(DailyPlan plan) {
+    if (plan.isSkipped) {
+      return const Icon(
+        CupertinoIcons.exclamationmark_triangle,
+        size: 24,
+        color: CupertinoColors.systemOrange,
+      );
+    }
+
+    final bool isCompleted = plan.isCueCompleted || plan.isCheckedIn;
+
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isCompleted
+            ? CupertinoColors.activeGreen
+            : CupertinoColors.systemGrey5,
+        border: Border.all(
+          color: isCompleted
+              ? CupertinoColors.activeGreen
+              : CupertinoColors.systemGrey,
+          width: 2,
+        ),
+      ),
+      child: isCompleted
+          ? const Icon(
+              CupertinoIcons.check_mark,
+              size: 14,
+              color: CupertinoColors.white,
+            )
+          : null,
+    );
+  }
+
+  /// 根据计划状态构建操作按钮/徽章
+  Widget _buildActionButton(DailyPlan plan) {
+    if (plan.isCueCompleted && plan.isActionable) {
+      // 暗示已完成,显示"打卡"按钮
+      return CupertinoButton(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        minSize: 0,
+        color: CupertinoColors.activeBlue,
+        borderRadius: BorderRadius.circular(6),
+        onPressed: () => _handleCheckIn(plan),
+        child: const Text(
+          '打卡',
+          style: TextStyle(fontSize: 14, color: CupertinoColors.white),
+        ),
+      );
+    } else if (plan.isCheckedIn) {
+      // 已打卡,显示"已打卡"徽章
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: CupertinoColors.activeGreen.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Text(
+          '已打卡',
+          style: TextStyle(
+            fontSize: 12,
+            color: CupertinoColors.activeGreen,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    } else if (plan.isSkipped) {
+      // 已跳过,显示"已跳过"徽章
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: CupertinoColors.systemOrange.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Text(
+          '已跳过',
+          style: TextStyle(
+            fontSize: 12,
+            color: CupertinoColors.systemOrange,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }
