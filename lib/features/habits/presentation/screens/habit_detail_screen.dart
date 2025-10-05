@@ -225,7 +225,7 @@ class HabitDetailScreen extends ConsumerWidget {
           icon: CupertinoIcons.lightbulb,
           iconColor: CupertinoColors.systemYellow,
           title: '暗示（触发条件）',
-          content: habit.cue,
+          content: habit.cue ?? '',
         ),
         const SizedBox(height: 12),
 
@@ -254,7 +254,7 @@ class HabitDetailScreen extends ConsumerWidget {
           icon: CupertinoIcons.star_fill,
           iconColor: CupertinoColors.systemOrange,
           title: '奖赏（获得的满足）',
-          content: habit.reward,
+          content: habit.reward ?? '',
         ),
 
         // 分类和备注

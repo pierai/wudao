@@ -242,7 +242,7 @@ class _CheckInDialogState extends ConsumerState<CheckInDialog>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    widget.habit.reward,
+                    widget.habit.reward ?? '',
                     style: const TextStyle(
                       fontSize: 14,
                       color: CupertinoColors.systemGrey,
@@ -549,7 +549,7 @@ class _PlanCheckInDialogState extends ConsumerState<PlanCheckInDialog>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    widget.habit.reward,
+                    widget.habit.reward ?? '',
                     style: const TextStyle(
                       fontSize: 14,
                       color: CupertinoColors.systemGrey,

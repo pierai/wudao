@@ -15,8 +15,8 @@ sealed class Habit with _$Habit {
     /// 习惯名称
     required String name,
 
-    /// 暗示：触发习惯的环境或情境信号
-    required String cue,
+    /// 暗示：触发习惯的环境或情境信号（可选）
+    String? cue,
 
     /// 惯常行为：习惯性执行的动作
     required String routine,
@@ -24,8 +24,8 @@ sealed class Habit with _$Habit {
     /// 原惯常行为（仅用于习惯替代类型）
     String? oldRoutine,
 
-    /// 奖赏：行为带来的满足感或收益
-    required String reward,
+    /// 奖赏：行为带来的满足感或收益（可选）
+    String? reward,
 
     /// 习惯类型
     required HabitType type,

@@ -55,10 +55,10 @@ extension HabitEntityToData on Habit {
     return HabitsCompanion.insert(
       id: id,
       name: name,
-      cue: cue,
+      cue: cue != null ? Value(cue) : const Value(null),
       routine: routine,
       oldRoutine: oldRoutine != null ? Value(oldRoutine) : const Value(null),
-      reward: reward,
+      reward: reward != null ? Value(reward) : const Value(null),
       type: typeString,
       category: category != null ? Value(category) : const Value(null),
       notes: notes != null ? Value(notes) : const Value(null),

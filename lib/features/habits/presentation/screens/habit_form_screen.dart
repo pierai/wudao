@@ -54,8 +54,22 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
   }
 
   Future<void> _loadHabitData() async {
-    // TODO: 实现从 repository 加载习惯数据
-    // 当前为占位实现
+    final repository = ref.read(habitRepositoryProvider);
+    final habit = await repository.getHabitById(widget.habitId!);
+
+    if (habit != null && mounted) {
+      setState(() {
+        _nameController.text = habit.name;
+        _cueController.text = habit.cue ?? '';
+        _routineController.text = habit.routine;
+        _oldRoutineController.text = habit.oldRoutine ?? '';
+        _rewardController.text = habit.reward ?? '';
+        _categoryController.text = habit.category ?? '';
+        _notesController.text = habit.notes ?? '';
+        _selectedType = habit.type;
+        _isKeystone = habit.isKeystone;
+      });
+    }
   }
 
   @override
@@ -85,11 +99,8 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
         _nameError = null;
       }
 
-      // 验证暗示
-      if (_cueController.text.trim().isEmpty) {
-        _cueError = '请输入触发暗示';
-        isValid = false;
-      } else if (_cueController.text.trim().length > 500) {
+      // 验证暗示（可选）
+      if (_cueController.text.trim().length > 500) {
         _cueError = '暗示不能超过 500 个字符';
         isValid = false;
       } else {
@@ -122,11 +133,8 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
         _oldRoutineError = null;
       }
 
-      // 验证奖赏
-      if (_rewardController.text.trim().isEmpty) {
-        _rewardError = '请输入奖赏';
-        isValid = false;
-      } else if (_rewardController.text.trim().length > 500) {
+      // 验证奖赏（可选）
+      if (_rewardController.text.trim().length > 500) {
         _rewardError = '奖赏不能超过 500 个字符';
         isValid = false;
       } else {
@@ -153,12 +161,16 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
       final habit = Habit(
         id: widget.habitId ?? 'habit_${now.millisecondsSinceEpoch}',
         name: _nameController.text.trim(),
-        cue: _cueController.text.trim(),
+        cue: _cueController.text.trim().isNotEmpty
+            ? _cueController.text.trim()
+            : null,
         routine: _routineController.text.trim(),
         oldRoutine: _selectedType == HabitType.replacement
             ? _oldRoutineController.text.trim()
             : null,
-        reward: _rewardController.text.trim(),
+        reward: _rewardController.text.trim().isNotEmpty
+            ? _rewardController.text.trim()
+            : null,
         type: _selectedType,
         category: _categoryController.text.trim().isNotEmpty
             ? _categoryController.text.trim()
@@ -279,7 +291,7 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
 
               // 暗示（Cue）
               _buildTextField(
-                label: '暗示（触发条件）',
+                label: '暗示（触发条件）（可选）',
                 controller: _cueController,
                 placeholder: '例如：晚饭后坐在书桌前',
                 errorText: _cueError,
@@ -323,7 +335,7 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
 
               // 奖赏（Reward）
               _buildTextField(
-                label: '奖赏（获得的满足）',
+                label: '奖赏（获得的满足）（可选）',
                 controller: _rewardController,
                 placeholder: '例如：获得新知识，内心充实',
                 errorText: _rewardError,

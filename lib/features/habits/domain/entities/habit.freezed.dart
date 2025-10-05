@@ -17,11 +17,11 @@ mixin _$Habit {
 
 /// 唯一标识符
  String get id;/// 习惯名称
- String get name;/// 暗示：触发习惯的环境或情境信号
- String get cue;/// 惯常行为：习惯性执行的动作
+ String get name;/// 暗示：触发习惯的环境或情境信号（可选）
+ String? get cue;/// 惯常行为：习惯性执行的动作
  String get routine;/// 原惯常行为（仅用于习惯替代类型）
- String? get oldRoutine;/// 奖赏：行为带来的满足感或收益
- String get reward;/// 习惯类型
+ String? get oldRoutine;/// 奖赏：行为带来的满足感或收益（可选）
+ String? get reward;/// 习惯类型
  HabitType get type;/// 分类（可选）
  String? get category;/// 备注说明
  String? get notes;/// 是否活跃
@@ -63,7 +63,7 @@ abstract mixin class $HabitCopyWith<$Res>  {
   factory $HabitCopyWith(Habit value, $Res Function(Habit) _then) = _$HabitCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String cue, String routine, String? oldRoutine, String reward, HabitType type, String? category, String? notes, bool isActive, bool isKeystone, DateTime createdAt, DateTime updatedAt, DateTime? deletedAt
+ String id, String name, String? cue, String routine, String? oldRoutine, String? reward, HabitType type, String? category, String? notes, bool isActive, bool isKeystone, DateTime createdAt, DateTime updatedAt, DateTime? deletedAt
 });
 
 
@@ -80,15 +80,15 @@ class _$HabitCopyWithImpl<$Res>
 
 /// Create a copy of Habit
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? cue = null,Object? routine = null,Object? oldRoutine = freezed,Object? reward = null,Object? type = null,Object? category = freezed,Object? notes = freezed,Object? isActive = null,Object? isKeystone = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? cue = freezed,Object? routine = null,Object? oldRoutine = freezed,Object? reward = freezed,Object? type = null,Object? category = freezed,Object? notes = freezed,Object? isActive = null,Object? isKeystone = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,cue: null == cue ? _self.cue : cue // ignore: cast_nullable_to_non_nullable
-as String,routine: null == routine ? _self.routine : routine // ignore: cast_nullable_to_non_nullable
+as String,cue: freezed == cue ? _self.cue : cue // ignore: cast_nullable_to_non_nullable
+as String?,routine: null == routine ? _self.routine : routine // ignore: cast_nullable_to_non_nullable
 as String,oldRoutine: freezed == oldRoutine ? _self.oldRoutine : oldRoutine // ignore: cast_nullable_to_non_nullable
-as String?,reward: null == reward ? _self.reward : reward // ignore: cast_nullable_to_non_nullable
-as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String?,reward: freezed == reward ? _self.reward : reward // ignore: cast_nullable_to_non_nullable
+as String?,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as HabitType,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
@@ -178,7 +178,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String cue,  String routine,  String? oldRoutine,  String reward,  HabitType type,  String? category,  String? notes,  bool isActive,  bool isKeystone,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String? cue,  String routine,  String? oldRoutine,  String? reward,  HabitType type,  String? category,  String? notes,  bool isActive,  bool isKeystone,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Habit() when $default != null:
 return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_that.reward,_that.type,_that.category,_that.notes,_that.isActive,_that.isKeystone,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
@@ -199,7 +199,7 @@ return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String cue,  String routine,  String? oldRoutine,  String reward,  HabitType type,  String? category,  String? notes,  bool isActive,  bool isKeystone,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String? cue,  String routine,  String? oldRoutine,  String? reward,  HabitType type,  String? category,  String? notes,  bool isActive,  bool isKeystone,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Habit():
 return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_that.reward,_that.type,_that.category,_that.notes,_that.isActive,_that.isKeystone,_that.createdAt,_that.updatedAt,_that.deletedAt);}
@@ -216,7 +216,7 @@ return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String cue,  String routine,  String? oldRoutine,  String reward,  HabitType type,  String? category,  String? notes,  bool isActive,  bool isKeystone,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String? cue,  String routine,  String? oldRoutine,  String? reward,  HabitType type,  String? category,  String? notes,  bool isActive,  bool isKeystone,  DateTime createdAt,  DateTime updatedAt,  DateTime? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Habit() when $default != null:
 return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_that.reward,_that.type,_that.category,_that.notes,_that.isActive,_that.isKeystone,_that.createdAt,_that.updatedAt,_that.deletedAt);case _:
@@ -231,21 +231,21 @@ return $default(_that.id,_that.name,_that.cue,_that.routine,_that.oldRoutine,_th
 @JsonSerializable()
 
 class _Habit extends Habit {
-  const _Habit({required this.id, required this.name, required this.cue, required this.routine, this.oldRoutine, required this.reward, required this.type, this.category, this.notes, required this.isActive, this.isKeystone = false, required this.createdAt, required this.updatedAt, this.deletedAt}): super._();
+  const _Habit({required this.id, required this.name, this.cue, required this.routine, this.oldRoutine, this.reward, required this.type, this.category, this.notes, required this.isActive, this.isKeystone = false, required this.createdAt, required this.updatedAt, this.deletedAt}): super._();
   factory _Habit.fromJson(Map<String, dynamic> json) => _$HabitFromJson(json);
 
 /// 唯一标识符
 @override final  String id;
 /// 习惯名称
 @override final  String name;
-/// 暗示：触发习惯的环境或情境信号
-@override final  String cue;
+/// 暗示：触发习惯的环境或情境信号（可选）
+@override final  String? cue;
 /// 惯常行为：习惯性执行的动作
 @override final  String routine;
 /// 原惯常行为（仅用于习惯替代类型）
 @override final  String? oldRoutine;
-/// 奖赏：行为带来的满足感或收益
-@override final  String reward;
+/// 奖赏：行为带来的满足感或收益（可选）
+@override final  String? reward;
 /// 习惯类型
 @override final  HabitType type;
 /// 分类（可选）
@@ -297,7 +297,7 @@ abstract mixin class _$HabitCopyWith<$Res> implements $HabitCopyWith<$Res> {
   factory _$HabitCopyWith(_Habit value, $Res Function(_Habit) _then) = __$HabitCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String cue, String routine, String? oldRoutine, String reward, HabitType type, String? category, String? notes, bool isActive, bool isKeystone, DateTime createdAt, DateTime updatedAt, DateTime? deletedAt
+ String id, String name, String? cue, String routine, String? oldRoutine, String? reward, HabitType type, String? category, String? notes, bool isActive, bool isKeystone, DateTime createdAt, DateTime updatedAt, DateTime? deletedAt
 });
 
 
@@ -314,15 +314,15 @@ class __$HabitCopyWithImpl<$Res>
 
 /// Create a copy of Habit
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? cue = null,Object? routine = null,Object? oldRoutine = freezed,Object? reward = null,Object? type = null,Object? category = freezed,Object? notes = freezed,Object? isActive = null,Object? isKeystone = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? cue = freezed,Object? routine = null,Object? oldRoutine = freezed,Object? reward = freezed,Object? type = null,Object? category = freezed,Object? notes = freezed,Object? isActive = null,Object? isKeystone = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,}) {
   return _then(_Habit(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,cue: null == cue ? _self.cue : cue // ignore: cast_nullable_to_non_nullable
-as String,routine: null == routine ? _self.routine : routine // ignore: cast_nullable_to_non_nullable
+as String,cue: freezed == cue ? _self.cue : cue // ignore: cast_nullable_to_non_nullable
+as String?,routine: null == routine ? _self.routine : routine // ignore: cast_nullable_to_non_nullable
 as String,oldRoutine: freezed == oldRoutine ? _self.oldRoutine : oldRoutine // ignore: cast_nullable_to_non_nullable
-as String?,reward: null == reward ? _self.reward : reward // ignore: cast_nullable_to_non_nullable
-as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as String?,reward: freezed == reward ? _self.reward : reward // ignore: cast_nullable_to_non_nullable
+as String?,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as HabitType,category: freezed == category ? _self.category : category // ignore: cast_nullable_to_non_nullable
 as String?,notes: freezed == notes ? _self.notes : notes // ignore: cast_nullable_to_non_nullable
 as String?,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable

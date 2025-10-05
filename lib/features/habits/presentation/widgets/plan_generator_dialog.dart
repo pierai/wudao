@@ -206,7 +206,7 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    habit.cue,
+                    habit.cue ?? '',
                     style: const TextStyle(
                       fontSize: 14,
                       color: CupertinoColors.systemGrey,
@@ -402,7 +402,7 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
           id: 'plan_${DateTime.now().millisecondsSinceEpoch}_$habitId',
           habitId: habitId,
           planDate: tomorrowDate,
-          cueTask: habit.cue, // 将暗示作为任务
+          cueTask: habit.cue ?? '', // 将暗示作为任务
           scheduledTime: _suggestedTimes[habitId],
           priority: _priorities[habitId] ?? 5,
           status: PlanCompletionStatus.pending, // 初始状态为待执行

@@ -295,7 +295,7 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
           ),
         ),
         child: GestureDetector(
-          onTap: () => _handleCompletePlan(plan),
+          onTap: plan.isActionable ? () => _handleCompletePlan(plan) : null,
           child: Container(
             padding: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
@@ -524,29 +524,33 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
     }
 
     final bool isCompleted = plan.isCueCompleted || plan.isCheckedIn;
+    final bool isActionable = plan.isActionable; // 明日计划不可操作
 
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isCompleted
-            ? CupertinoColors.activeGreen
-            : CupertinoColors.systemGrey5,
-        border: Border.all(
+    return Opacity(
+      opacity: isActionable ? 1.0 : 0.5, // 明日计划降低透明度
+      child: Container(
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
           color: isCompleted
               ? CupertinoColors.activeGreen
-              : CupertinoColors.systemGrey,
-          width: 2,
+              : CupertinoColors.systemGrey5,
+          border: Border.all(
+            color: isCompleted
+                ? CupertinoColors.activeGreen
+                : CupertinoColors.systemGrey,
+            width: 2,
+          ),
         ),
+        child: isCompleted
+            ? const Icon(
+                CupertinoIcons.check_mark,
+                size: 14,
+                color: CupertinoColors.white,
+              )
+            : null,
       ),
-      child: isCompleted
-          ? const Icon(
-              CupertinoIcons.check_mark,
-              size: 14,
-              color: CupertinoColors.white,
-            )
-          : null,
     );
   }
 

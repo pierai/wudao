@@ -35,13 +35,10 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
   late final GeneratedColumn<String> cue = GeneratedColumn<String>(
     'cue',
     aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 500,
-    ),
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _routineMeta = const VerificationMeta(
     'routine',
@@ -75,13 +72,10 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
   late final GeneratedColumn<String> reward = GeneratedColumn<String>(
     'reward',
     aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 500,
-    ),
+    true,
+    additionalChecks: GeneratedColumn.checkTextLength(maxTextLength: 500),
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
@@ -223,8 +217,6 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         _cueMeta,
         cue.isAcceptableOrUnknown(data['cue']!, _cueMeta),
       );
-    } else if (isInserting) {
-      context.missing(_cueMeta);
     }
     if (data.containsKey('routine')) {
       context.handle(
@@ -245,8 +237,6 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         _rewardMeta,
         reward.isAcceptableOrUnknown(data['reward']!, _rewardMeta),
       );
-    } else if (isInserting) {
-      context.missing(_rewardMeta);
     }
     if (data.containsKey('type')) {
       context.handle(
@@ -322,7 +312,7 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
       cue: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}cue'],
-      )!,
+      ),
       routine: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}routine'],
@@ -334,7 +324,7 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
       reward: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}reward'],
-      )!,
+      ),
       type: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}type'],
@@ -383,9 +373,9 @@ class HabitData extends DataClass implements Insertable<HabitData> {
   /// 习惯名称
   final String name;
 
-  /// 暗示：触发习惯的环境或情境信号
+  /// 暗示：触发习惯的环境或情境信号（可选）
   /// 示例："早上起床后，看到书包放在椅子上"
-  final String cue;
+  final String? cue;
 
   /// 惯常行为：习惯性执行的动作
   /// 示例："拿起书包去图书馆"
@@ -395,9 +385,9 @@ class HabitData extends DataClass implements Insertable<HabitData> {
   /// 示例："喝奶茶" -> 替代为 -> "喝酸奶"
   final String? oldRoutine;
 
-  /// 奖赏：行为带来的满足感或收益
+  /// 奖赏：行为带来的满足感或收益（可选）
   /// 示例："自律的实现让我精神满足"
-  final String reward;
+  final String? reward;
 
   /// 习惯类型：POSITIVE（正向习惯）或 REPLACEMENT（习惯替代）
   final String type;
@@ -427,10 +417,10 @@ class HabitData extends DataClass implements Insertable<HabitData> {
   const HabitData({
     required this.id,
     required this.name,
-    required this.cue,
+    this.cue,
     required this.routine,
     this.oldRoutine,
-    required this.reward,
+    this.reward,
     required this.type,
     this.category,
     this.notes,
@@ -445,12 +435,16 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['name'] = Variable<String>(name);
-    map['cue'] = Variable<String>(cue);
+    if (!nullToAbsent || cue != null) {
+      map['cue'] = Variable<String>(cue);
+    }
     map['routine'] = Variable<String>(routine);
     if (!nullToAbsent || oldRoutine != null) {
       map['old_routine'] = Variable<String>(oldRoutine);
     }
-    map['reward'] = Variable<String>(reward);
+    if (!nullToAbsent || reward != null) {
+      map['reward'] = Variable<String>(reward);
+    }
     map['type'] = Variable<String>(type);
     if (!nullToAbsent || category != null) {
       map['category'] = Variable<String>(category);
@@ -472,12 +466,14 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     return HabitsCompanion(
       id: Value(id),
       name: Value(name),
-      cue: Value(cue),
+      cue: cue == null && nullToAbsent ? const Value.absent() : Value(cue),
       routine: Value(routine),
       oldRoutine: oldRoutine == null && nullToAbsent
           ? const Value.absent()
           : Value(oldRoutine),
-      reward: Value(reward),
+      reward: reward == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reward),
       type: Value(type),
       category: category == null && nullToAbsent
           ? const Value.absent()
@@ -503,10 +499,10 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     return HabitData(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      cue: serializer.fromJson<String>(json['cue']),
+      cue: serializer.fromJson<String?>(json['cue']),
       routine: serializer.fromJson<String>(json['routine']),
       oldRoutine: serializer.fromJson<String?>(json['oldRoutine']),
-      reward: serializer.fromJson<String>(json['reward']),
+      reward: serializer.fromJson<String?>(json['reward']),
       type: serializer.fromJson<String>(json['type']),
       category: serializer.fromJson<String?>(json['category']),
       notes: serializer.fromJson<String?>(json['notes']),
@@ -523,10 +519,10 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'name': serializer.toJson<String>(name),
-      'cue': serializer.toJson<String>(cue),
+      'cue': serializer.toJson<String?>(cue),
       'routine': serializer.toJson<String>(routine),
       'oldRoutine': serializer.toJson<String?>(oldRoutine),
-      'reward': serializer.toJson<String>(reward),
+      'reward': serializer.toJson<String?>(reward),
       'type': serializer.toJson<String>(type),
       'category': serializer.toJson<String?>(category),
       'notes': serializer.toJson<String?>(notes),
@@ -541,10 +537,10 @@ class HabitData extends DataClass implements Insertable<HabitData> {
   HabitData copyWith({
     String? id,
     String? name,
-    String? cue,
+    Value<String?> cue = const Value.absent(),
     String? routine,
     Value<String?> oldRoutine = const Value.absent(),
-    String? reward,
+    Value<String?> reward = const Value.absent(),
     String? type,
     Value<String?> category = const Value.absent(),
     Value<String?> notes = const Value.absent(),
@@ -556,10 +552,10 @@ class HabitData extends DataClass implements Insertable<HabitData> {
   }) => HabitData(
     id: id ?? this.id,
     name: name ?? this.name,
-    cue: cue ?? this.cue,
+    cue: cue.present ? cue.value : this.cue,
     routine: routine ?? this.routine,
     oldRoutine: oldRoutine.present ? oldRoutine.value : this.oldRoutine,
-    reward: reward ?? this.reward,
+    reward: reward.present ? reward.value : this.reward,
     type: type ?? this.type,
     category: category.present ? category.value : this.category,
     notes: notes.present ? notes.value : this.notes,
@@ -653,10 +649,10 @@ class HabitData extends DataClass implements Insertable<HabitData> {
 class HabitsCompanion extends UpdateCompanion<HabitData> {
   final Value<String> id;
   final Value<String> name;
-  final Value<String> cue;
+  final Value<String?> cue;
   final Value<String> routine;
   final Value<String?> oldRoutine;
-  final Value<String> reward;
+  final Value<String?> reward;
   final Value<String> type;
   final Value<String?> category;
   final Value<String?> notes;
@@ -686,10 +682,10 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
   HabitsCompanion.insert({
     required String id,
     required String name,
-    required String cue,
+    this.cue = const Value.absent(),
     required String routine,
     this.oldRoutine = const Value.absent(),
-    required String reward,
+    this.reward = const Value.absent(),
     required String type,
     this.category = const Value.absent(),
     this.notes = const Value.absent(),
@@ -701,9 +697,7 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
-       cue = Value(cue),
        routine = Value(routine),
-       reward = Value(reward),
        type = Value(type),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
@@ -746,10 +740,10 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
   HabitsCompanion copyWith({
     Value<String>? id,
     Value<String>? name,
-    Value<String>? cue,
+    Value<String?>? cue,
     Value<String>? routine,
     Value<String?>? oldRoutine,
-    Value<String>? reward,
+    Value<String?>? reward,
     Value<String>? type,
     Value<String?>? category,
     Value<String?>? notes,
@@ -2901,10 +2895,10 @@ typedef $$HabitsTableCreateCompanionBuilder =
     HabitsCompanion Function({
       required String id,
       required String name,
-      required String cue,
+      Value<String?> cue,
       required String routine,
       Value<String?> oldRoutine,
-      required String reward,
+      Value<String?> reward,
       required String type,
       Value<String?> category,
       Value<String?> notes,
@@ -2919,10 +2913,10 @@ typedef $$HabitsTableUpdateCompanionBuilder =
     HabitsCompanion Function({
       Value<String> id,
       Value<String> name,
-      Value<String> cue,
+      Value<String?> cue,
       Value<String> routine,
       Value<String?> oldRoutine,
-      Value<String> reward,
+      Value<String?> reward,
       Value<String> type,
       Value<String?> category,
       Value<String?> notes,
@@ -3321,10 +3315,10 @@ class $$HabitsTableTableManager
               ({
                 Value<String> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<String> cue = const Value.absent(),
+                Value<String?> cue = const Value.absent(),
                 Value<String> routine = const Value.absent(),
                 Value<String?> oldRoutine = const Value.absent(),
-                Value<String> reward = const Value.absent(),
+                Value<String?> reward = const Value.absent(),
                 Value<String> type = const Value.absent(),
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
@@ -3355,10 +3349,10 @@ class $$HabitsTableTableManager
               ({
                 required String id,
                 required String name,
-                required String cue,
+                Value<String?> cue = const Value.absent(),
                 required String routine,
                 Value<String?> oldRoutine = const Value.absent(),
-                required String reward,
+                Value<String?> reward = const Value.absent(),
                 required String type,
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),

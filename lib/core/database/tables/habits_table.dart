@@ -11,9 +11,9 @@ class Habits extends Table {
   /// 习惯名称
   TextColumn get name => text().withLength(min: 1, max: 100)();
 
-  /// 暗示：触发习惯的环境或情境信号
+  /// 暗示：触发习惯的环境或情境信号（可选）
   /// 示例："早上起床后，看到书包放在椅子上"
-  TextColumn get cue => text().withLength(min: 1, max: 500)();
+  TextColumn get cue => text().withLength(max: 500).nullable()();
 
   /// 惯常行为：习惯性执行的动作
   /// 示例："拿起书包去图书馆"
@@ -23,9 +23,9 @@ class Habits extends Table {
   /// 示例："喝奶茶" -> 替代为 -> "喝酸奶"
   TextColumn get oldRoutine => text().withLength(max: 500).nullable()();
 
-  /// 奖赏：行为带来的满足感或收益
+  /// 奖赏：行为带来的满足感或收益（可选）
   /// 示例："自律的实现让我精神满足"
-  TextColumn get reward => text().withLength(min: 1, max: 500)();
+  TextColumn get reward => text().withLength(max: 500).nullable()();
 
   /// 习惯类型：POSITIVE（正向习惯）或 REPLACEMENT（习惯替代）
   TextColumn get type => text()();

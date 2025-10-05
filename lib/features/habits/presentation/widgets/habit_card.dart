@@ -214,22 +214,24 @@ class HabitCard extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 12),
-                // 暗示预览
-                Row(
-                  children: [
-                    const Icon(CupertinoIcons.lightbulb, size: 16, color: CupertinoColors.systemGrey),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        habit.cue,
-                        style: const TextStyle(fontSize: 14, color: CupertinoColors.systemGrey),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                // 暗示预览（如果有）
+                if (habit.cue != null && habit.cue!.isNotEmpty) ...[
+                  Row(
+                    children: [
+                      const Icon(CupertinoIcons.lightbulb, size: 16, color: CupertinoColors.systemGrey),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          habit.cue!,
+                          style: const TextStyle(fontSize: 14, color: CupertinoColors.systemGrey),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 // 统计信息
                 statsAsync.when(
                   data: (stats) {
