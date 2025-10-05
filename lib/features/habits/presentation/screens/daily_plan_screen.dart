@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/widgets/custom_segmented_control.dart';
 import '../../domain/entities/daily_plan.dart';
 import '../providers/habit_provider.dart';
 import '../widgets/plan_generator_dialog.dart';
@@ -19,14 +20,25 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
   int _selectedSegment = 0; // 0: 今日计划, 1: 明日计划
 
   Future<void> _handleRefresh() async {
-    ref.invalidate(todayPlansProvider);
+    // 根据选中的日期刷新对应的计划列表
+    final date = _selectedSegment == 0
+        ? DateTime.now()
+        : DateTime.now().add(const Duration(days: 1));
+    ref.invalidate(plansByDateProvider(date));
   }
 
-  void _showPlanGenerator() {
-    showCupertinoModalPopup(
+  void _showPlanGenerator() async {
+    final result = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (context) => const PlanGeneratorDialog(),
     );
+
+    // 如果成功生成计划，自动切换到明日计划标签
+    if (result == true && mounted) {
+      setState(() {
+        _selectedSegment = 1;
+      });
+    }
   }
 
   Future<void> _handleCompletePlan(DailyPlan plan) async {
@@ -101,7 +113,11 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final plansAsync = ref.watch(todayPlansProvider);
+    // 根据选中的日期获取对应的计划列表
+    final date = _selectedSegment == 0
+        ? DateTime.now()
+        : DateTime.now().add(const Duration(days: 1));
+    final plansAsync = ref.watch(plansByDateProvider(date));
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
@@ -119,13 +135,16 @@ class _DailyPlanScreenState extends ConsumerState<DailyPlanScreen> {
             // 日期选择器
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: CupertinoSegmentedControl<int>(
+              child: CustomSegmentedControl<int>(
                 groupValue: _selectedSegment,
                 onValueChanged: (value) {
-                  setState(() {
-                    _selectedSegment = value;
-                  });
+                  if (value != null) {
+                    setState(() {
+                      _selectedSegment = value;
+                    });
+                  }
                 },
+                borderRadius: 12, // 增大圆角
                 children: const {
                   0: Padding(
                     padding: EdgeInsets.symmetric(vertical: 12),

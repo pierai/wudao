@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../shared/widgets/custom_segmented_control.dart';
 import '../providers/habit_provider.dart';
 import '../widgets/habit_card.dart';
 import 'daily_plan_screen.dart';
@@ -94,11 +95,14 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
             if (_searchQuery.isEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: CupertinoSegmentedControl<KeystoneFilterType>(
+                child: CustomSegmentedControl<KeystoneFilterType>(
                   groupValue: filterType,
                   onValueChanged: (value) {
-                    ref.read(keystoneFilterProvider.notifier).state = value;
+                    if (value != null) {
+                      ref.read(keystoneFilterProvider.notifier).state = value;
+                    }
                   },
+                  borderRadius: 12, // 增大圆角
                   children: const {
                     KeystoneFilterType.all: Padding(
                       padding: EdgeInsets.symmetric(vertical: 8),

@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:liquid_glass_bottom_bar/liquid_glass_bottom_bar.dart';
 
+import '../../../../shared/widgets/custom_glass_bottom_bar.dart';
 import '../../../goals/presentation/screens/goals_screen.dart';
 import '../../../habits/presentation/screens/habits_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
@@ -53,17 +53,20 @@ class HomeScreen extends ConsumerWidget {
               ),
               child: Material(
                 color: Colors.transparent,
-                child: LiquidGlassBottomBar(
+                child: CustomGlassBottomBar(
                   margin: const EdgeInsets.all(16),
                   currentIndex: selectedIndex,
                   onTap: (index) {
                     ref.read(selectedIndexProvider.notifier).setIndex(index);
                   },
+                  borderRadius: 32, // 更大的圆角
+                  backgroundAlpha: 25, // 更透明，不那么灰
+                  activeColor: const Color(0xFF007AFF), // iOS系统蓝
                   items: const [
-                    LiquidGlassBottomBarItem(icon: CupertinoIcons.flag, label: '目标'),
-                    LiquidGlassBottomBarItem(icon: CupertinoIcons.chart_bar, label: '习惯'),
-                    LiquidGlassBottomBarItem(icon: CupertinoIcons.lightbulb, label: '灵感'),
-                    LiquidGlassBottomBarItem(icon: CupertinoIcons.person, label: '我的'),
+                    CustomGlassBottomBarItem(icon: CupertinoIcons.flag, label: '目标'),
+                    CustomGlassBottomBarItem(icon: CupertinoIcons.chart_bar, label: '习惯'),
+                    CustomGlassBottomBarItem(icon: CupertinoIcons.lightbulb, label: '灵感'),
+                    CustomGlassBottomBarItem(icon: CupertinoIcons.person, label: '我的'),
                   ],
                 ),
               ),

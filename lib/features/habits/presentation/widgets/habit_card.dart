@@ -21,7 +21,13 @@ class HabitCard extends ConsumerWidget {
 
     if (!hasRecord && context.mounted) {
       // 显示打卡对话框
-      await showCheckInDialog(context, habit);
+      final result = await showCheckInDialog(context, habit);
+
+      // 如果打卡成功，刷新今日打卡状态和统计数据
+      if (result == true) {
+        ref.invalidate(hasTodayRecordProvider(habit.id));
+        ref.invalidate(habitStatsProvider(habit.id));
+      }
     }
   }
 

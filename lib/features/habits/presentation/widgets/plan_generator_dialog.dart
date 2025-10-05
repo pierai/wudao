@@ -311,42 +311,68 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
     showCupertinoModalPopup(
       context: context,
       builder: (context) => Container(
-        height: 250,
+        height: 280,
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
         color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: Column(
-          children: [
-            Container(
-              height: 44,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CupertinoButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('取消'),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              // 顶部操作栏
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: CupertinoColors.separator.resolveFrom(context),
+                      width: 0.5,
+                    ),
                   ),
-                  CupertinoButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: const Text('确定'),
-                  ),
-                ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('取消'),
+                    ),
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        '确定',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.time,
-                initialDateTime: initialTime,
-                use24hFormat: true,
-                onDateTimeChanged: (DateTime newTime) {
-                  setState(() {
-                    _suggestedTimes[habitId] = newTime;
-                  });
-                },
+              // 时间选择器
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.time,
+                  initialDateTime: initialTime,
+                  use24hFormat: true,
+                  onDateTimeChanged: (DateTime newTime) {
+                    setState(() {
+                      _suggestedTimes[habitId] = newTime;
+                    });
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -390,7 +416,8 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
       await repository.createDailyPlans(plans);
 
       if (mounted) {
-        Navigator.of(context).pop();
+        // 关闭对话框并返回成功标识
+        Navigator.of(context).pop(true);
         showCupertinoDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
