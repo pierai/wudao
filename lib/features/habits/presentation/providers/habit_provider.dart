@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // TODO: Migrate to NotifierProvider in future updates
 import 'package:flutter_riverpod/legacy.dart' show StateProvider;
 
-import '../../../../core/database/app_database.dart';
+import '../../../../core/providers/database_provider.dart';
 import '../../../../core/providers/notification_providers.dart';
 import '../../domain/entities/habit.dart';
 import '../../domain/entities/habit_record.dart';
@@ -12,13 +12,6 @@ import '../../domain/entities/daily_plan.dart';
 import '../../domain/entities/habit_frontmatter.dart';
 import '../../domain/repositories/habit_repository.dart';
 import '../../data/repositories/habit_repository_impl.dart';
-
-// ========== 数据库 Provider ==========
-
-/// 数据库单例 Provider
-final databaseProvider = Provider<AppDatabase>((ref) {
-  return AppDatabase();
-});
 
 // ========== Repository Providers ==========
 

@@ -5,10 +5,12 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'tables/goals_table.dart';
 import 'tables/habits_table.dart';
 import 'tables/habit_records_table.dart';
 import 'tables/daily_plans_table.dart';
 import 'tables/habit_frontmatters_table.dart';
+import 'daos/goal_dao.dart';
 import 'daos/habit_dao.dart';
 import 'daos/habit_record_dao.dart';
 import 'daos/daily_plan_dao.dart';
@@ -19,15 +21,17 @@ part 'app_database.g.dart';
 /// 悟道应用数据库
 ///
 /// 使用 Drift 实现类型安全的 SQLite 数据库
-/// 当前版本包含习惯追踪模块的所有表
+/// 包含人生目标管理和习惯追踪模块
 @DriftDatabase(
   tables: [
+    Goals,
     Habits,
     HabitRecords,
     DailyPlans,
     HabitFrontmatters,
   ],
   daos: [
+    GoalDao,
     HabitDao,
     HabitRecordDao,
     DailyPlanDao,
@@ -47,7 +51,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase._internal() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -60,6 +64,9 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 3) {
             await _migrateToV3(m);
+          }
+          if (from < 4) {
+            await _migrateToV4(m);
           }
         },
       );
@@ -96,6 +103,12 @@ class AppDatabase extends _$AppDatabase {
     // daily_plans 表新增提醒字段
     await m.addColumn(dailyPlans, dailyPlans.reminderEnabled);
     await m.addColumn(dailyPlans, dailyPlans.reminderMinutesBefore);
+  }
+
+  /// 迁移到版本 4: 添加人生目标管理功能
+  Future<void> _migrateToV4(Migrator m) async {
+    // 创建 goals 表
+    await m.createTable(goals);
   }
 
   /// 打开数据库连接
