@@ -372,6 +372,26 @@ A: 需要同时解决两个问题：
 
 3. 修改后执行 `flutter clean` 并重启 VS Code Dart Analysis Server
 
+**Q: macOS 平台通知初始化错误？**
+A: `flutter_local_notifications` 需要为 macOS 单独配置 `DarwinInitializationSettings`：
+
+```dart
+const DarwinInitializationSettings initializationSettingsDarwin = DarwinInitializationSettings(...);
+const InitializationSettings(...
+  iOS: initializationSettingsDarwin,
+  macOS: initializationSettingsDarwin,  // 必须添加
+);
+```
+
+**Q: macOS 文件选择器无响应？**
+A: 需要在 entitlements 中添加文件访问权限：
+- `macos/Runner/DebugProfile.entitlements` 和 `macos/Runner/Release.entitlements` 中添加：
+  ```xml
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+  ```
+- 修改后执行 `flutter clean`
+
 ## 相关文档
 
 - 详细技术架构: `technical_architecture.md`
@@ -391,5 +411,5 @@ A: 需要同时解决两个问题：
 
 ---
 
-**最后更新**: 2025-10-01
-**版本**: v0.1.0-alpha
+**最后更新**: 2025-10-07
+**版本**: v0.2.0-alpha

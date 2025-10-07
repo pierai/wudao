@@ -178,6 +178,17 @@ fvm flutter build macos --debug
 
 ## 常见问题
 
+### 提示编译报错，实际代码正常
+
+  1. 重启 Dart Analysis Server
+    - 按 Cmd+Shift+P
+    - 输入 "Dart: Restart Analysis Server"
+
+  2. 如果还不行，尝试重新加载窗口
+    - 按 Cmd+Shift+P
+    - 输入 "Developer: Reload Window"
+    - 回车执行
+
 ### 问题 1: pod install 下载超时
 
 ```bash
@@ -231,6 +242,8 @@ SocketException: Failed to create server socket (OS Error: Operation not permitt
 <true/>
 <key>com.apple.security.network.client</key>
 <true/>
+<key>com.apple.security.files.user-selected.read-write</key>
+<true/>
 ```
 
 `macos/Runner/Release.entitlements`：
@@ -238,7 +251,15 @@ SocketException: Failed to create server socket (OS Error: Operation not permitt
 ```xml
 <key>com.apple.security.network.client</key>
 <true/>
+<key>com.apple.security.files.user-selected.read-write</key>
+<true/>
 ```
+
+**权限说明**：
+
+- `com.apple.security.network.server`：允许应用监听端口（调试用）
+- `com.apple.security.network.client`：允许应用发起网络请求
+- `com.apple.security.files.user-selected.read-write`：允许访问用户选择的文件（数据导入导出功能）
 
 修改后执行：
 
@@ -250,6 +271,7 @@ flutter clean
 **注意**：
 
 - 命令行 `flutter run` 不受影响，因为使用了不同的权限配置
+- 修改 entitlements 后必须执行 `flutter clean`，否则新权限不会生效
 - VS Code 中的 `.vscode/settings.json` 需要配置正确的 Flutter SDK 路径：
 
   ```json
@@ -262,6 +284,45 @@ flutter clean
   // ⚠️ 备选：绝对路径（不推荐，不跨设备）
   // "dart.flutterSdkPath": "/Users/pierai/Development/projects/flutter/wudao/.fvm/versions/3.35.5"
   ```
+
+### 问题 5: macOS 平台通知初始化错误
+
+**错误信息**：
+
+```
+Unhandled Exception: Invalid argument(s): macOS settings must be set when targeting macOS platform.
+#0 FlutterLocalNotificationsPlugin.initialize
+```
+
+**原因**：`flutter_local_notifications` 插件在 macOS 平台需要单独的初始化配置。
+
+**解决方案**：在通知服务初始化时，为 macOS 平台添加 `DarwinInitializationSettings`：
+
+```dart
+const DarwinInitializationSettings initializationSettingsDarwin =
+    DarwinInitializationSettings(
+  requestAlertPermission: true,
+  requestBadgePermission: true,
+  requestSoundPermission: true,
+);
+
+const InitializationSettings initializationSettings =
+    InitializationSettings(
+  iOS: initializationSettingsDarwin,
+  macOS: initializationSettingsDarwin,  // 必须添加
+  android: initializationSettingsAndroid,
+);
+```
+
+**注意**：iOS 和 macOS 可以共用同一个 `DarwinInitializationSettings` 实例。
+
+### 问题 6: macOS 数据导入文件选择器无响应
+
+**症状**：点击"选择文件"按钮后，文件选择对话框不显示。
+
+**原因**：macOS App Sandbox 缺少用户文件访问权限。
+
+**解决方案**：参见问题 4 中的 `com.apple.security.files.user-selected.read-write` 权限配置。
 
 ## 预缓存资源
 

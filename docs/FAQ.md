@@ -363,6 +363,149 @@ macOS App Sandbox 缺少网络权限，导致 Flutter 的 VM Service 无法监�
 
 ---
 
+### Q9: macOS 通知初始化错误？
+
+**错误信息**：
+```
+Unhandled Exception: Invalid argument(s): macOS settings must be set when targeting macOS platform.
+#0 FlutterLocalNotificationsPlugin.initialize
+```
+
+**原因**：
+`flutter_local_notifications` 插件需要为 macOS 平台单独配置初始化设置。
+
+**解决方案**：
+
+在通知服务初始化代码中，为 macOS 添加 `DarwinInitializationSettings`：
+
+```dart
+const DarwinInitializationSettings initializationSettingsDarwin =
+    DarwinInitializationSettings(
+  requestAlertPermission: true,
+  requestBadgePermission: true,
+  requestSoundPermission: true,
+);
+
+const InitializationSettings initializationSettings =
+    InitializationSettings(
+  iOS: initializationSettingsDarwin,
+  macOS: initializationSettingsDarwin,  // ✅ 必须添加
+  android: initializationSettingsAndroid,
+);
+```
+
+**注意**：iOS 和 macOS 可以共用同一个 `DarwinInitializationSettings` 实例。
+
+详见：[README.md - 问题5](../README.md#问题-5-macos-平台通知初始化错误)
+
+---
+
+### Q10: macOS 文件选择器无响应？
+
+**症状**：
+点击"导入数据"中的"选择文件"按钮后，文件选择对话框不显示。
+
+**原因**：
+macOS App Sandbox 缺少用户文件访问权限。
+
+**解决方案**：
+
+在 entitlements 文件中添加文件访问权限：
+
+1. `macos/Runner/DebugProfile.entitlements`：
+```xml
+<key>com.apple.security.files.user-selected.read-write</key>
+<true/>
+```
+
+2. `macos/Runner/Release.entitlements`：
+```xml
+<key>com.apple.security.files.user-selected.read-write</key>
+<true/>
+```
+
+3. 修改后执行：
+```bash
+flutter clean
+# 然后重新运行应用
+```
+
+**权限说明**：
+- `com.apple.security.files.user-selected.read-write`：允许访问用户通过文件选择器选择的文件
+- 这是一个安全的权限，仅限于用户主动选择的文件，不会允许应用访问任意文件
+
+详见：[README.md - 问题6](../README.md#问题-6-macos-数据导入文件选择器无响应)
+
+---
+
+### Q11: 如何清除应用的所有数据？
+
+**使用场景**：
+- 开发测试时需要重置数据
+- 想要重新开始记录
+- 遇到数据问题需要清空
+
+**操作步骤**：
+
+1. 打开"我的"页面
+2. 找到"开发者选项"分组
+3. 点击"清除所有数据"
+4. 阅读警告提示（⚠️ 此操作不可恢复）
+5. 确认清除
+6. 应用自动退出（需要重启）
+
+**⚠️ 重要提示**：
+- 此操作会删除所有习惯、打卡记录、计划和感悟数据
+- 此操作不可恢复
+- 建议在清除前先导出数据进行备份
+
+**技术细节**：
+- 数据库文件路径：`应用文档目录/wudao.db`
+- 清除操作会关闭数据库连接，然后删除数据库文件
+- iOS/macOS 平台会自动退出应用，需要用户手动重启
+
+---
+
+### Q12: 数据导入时的"完全覆盖"策略是什么？
+
+**完全覆盖策略**是 5 种导入策略中最激进的一种，适用于特殊场景。
+
+#### 5 种导入策略对比：
+
+| 策略 | 图标 | 描述 | 使用场景 |
+|-----|------|------|---------|
+| 完全覆盖 | 🗑️ | 删除当前所有数据，完全使用导入文件的数据（⚠️ 不可恢复） | 从备份恢复、设备重置 |
+| 保留新数据 | 📥 | 导入文件的数据将覆盖当前设备的数据 | 从主力设备同步到次要设备 |
+| 保留旧数据 | 💾 | 保留当前设备的数据，跳过导入文件中的冲突项 | 误操作导入时保护现有数据 |
+| 智能合并 | 🧠 | 根据更新时间自动选择最新的数据（推荐） | 日常设备间同步 |
+| 手动选择 | 👆 | 逐项对比冲突数据，手动选择保留哪个 | 重要数据需要仔细确认 |
+
+#### 完全覆盖策略详细说明：
+
+**执行流程**：
+1. 自动备份当前数据（防止误操作）
+2. 清空所有表（habits, records, plans, frontmatters）
+3. 导入文件中的所有数据（无冲突检测）
+4. 显示导入结果
+
+**⚠️ 危险提示**：
+- UI 上会显示红色警告样式
+- "不可恢复"提示
+- 二次确认对话框
+
+**适用场景**：
+- ✅ 从完整备份恢复数据
+- ✅ 新设备首次导入数据
+- ✅ 彻底清除旧数据，使用新数据
+- ❌ 不适合日常设备间同步（会丢失当前设备数据）
+
+**安全机制**：
+- 导入前自动创建备份文件（`backup_before_import_YYYYMMDD.json`）
+- 如果导入失败，可以从备份恢复
+- 使用数据库事务，失败自动回滚
+
+---
+
 ## 📚 更多文档
 
 - [完整需求文档](requirements.md)
@@ -373,6 +516,18 @@ macOS App Sandbox 缺少网络权限，导致 Flutter 的 VM Service 无法监�
 
 ---
 
-**文档版本**: v1.0
-**最后更新**: 2025-10-05
+**文档版本**: v1.1
+**最后更新**: 2025-10-07
 **维护者**: 项目团队
+
+## 📝 更新日志
+
+### v1.1 (2025-10-07)
+- ✨ 新增 Q9: macOS 通知初始化错误
+- ✨ 新增 Q10: macOS 文件选择器无响应
+- ✨ 新增 Q11: 如何清除应用的所有数据
+- ✨ 新增 Q12: 数据导入时的"完全覆盖"策略
+
+### v1.0 (2025-10-05)
+- 🎉 首次发布
+- 包含习惯追踪、数据管理、技术问题相关的 FAQ

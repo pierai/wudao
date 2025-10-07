@@ -954,44 +954,47 @@ CREATE TABLE habit_dependencies (
 
 > 注: 次日计划核心交互优化完成后,通知功能作为增强体验的可选功能
 
-#### Task 2.23: 集成 flutter_local_notifications
+#### Task 2.23: 集成 flutter_local_notifications ✅
 
-- [ ] 添加 `flutter_local_notifications` 依赖
-- [ ] 配置 iOS 通知权限（Info.plist）
-- [ ] 配置 Android 通知渠道
-- [ ] 初始化通知服务
-- [ ] 测试本地通知发送
+- [x] 添加 `flutter_local_notifications` 依赖
+- [x] 配置 iOS 通知权限（Info.plist）
+- [x] 配置 macOS 通知权限（entitlements）
+- [x] 配置 Android 通知渠道
+- [x] 初始化通知服务（支持 iOS/macOS/Android）
+- [x] 测试本地通知发送
+- [x] **修复**: macOS 平台通知初始化错误（DarwinInitializationSettings 共享）
 - **负责**: @flutter_architect
-- **预计时间**: 2 小时
+- **实际时间**: 2.5 小时
 
-#### Task 2.24: 实现计划提醒调度
+#### Task 2.24: 实现计划提醒调度 ✅
 
-- [ ] 创建通知调度服务
-- [ ] 实现计划创建时自动注册通知
-- [ ] 实现计划更新时重新调度通知
-- [ ] 实现计划完成/删除时取消通知
-- [ ] 处理时区和时间计算逻辑
+- [x] 创建通知调度服务 (`lib/core/services/notification_service.dart`)
+- [x] 实现计划创建时自动注册通知
+- [x] 实现计划更新时重新调度通知
+- [x] 实现计划完成/删除时取消通知
+- [x] 处理时区和时间计算逻辑
+- [x] 跨平台权限检查（iOS/macOS/Android）
 - **负责**: @flutter_architect
-- **预计时间**: 3 小时
+- **实际时间**: 3 小时
 
-#### Task 2.25: 提醒设置页面
+#### Task 2.25: 提醒设置页面 ✅
 
-- [ ] 实现全局提醒开关
-- [ ] 实现免打扰时段设置（如 22:00-8:00）
-- [ ] 实现提前提醒时间设置（准时/5分钟/10分钟/15分钟）
-- [ ] 实现单个计划禁用提醒
-- [ ] 保存设置到本地存储
+- [x] 实现全局提醒开关
+- [x] 实现免打扰时段设置（如 22:00-8:00）
+- [x] 实现提前提醒时间设置（准时/5分钟/10分钟/15分钟）
+- [x] 实现单个计划禁用提醒
+- [x] 保存设置到本地存储
 - **负责**: @flutter_architect
-- **预计时间**: 2 小时
+- **实际时间**: 2 小时
 
-#### Task 2.26: 通知权限处理
+#### Task 2.26: 通知权限处理 ✅
 
-- [ ] 实现通知权限请求流程
-- [ ] 处理权限被拒绝的场景
-- [ ] 添加引导用户开启权限的提示
-- [ ] 实现通知点击后跳转到计划详情页
+- [x] 实现通知权限请求流程
+- [x] 处理权限被拒绝的场景
+- [x] 添加引导用户开启权限的提示
+- [x] 实现通知点击后跳转到计划详情页
 - **负责**: @flutter_architect
-- **预计时间**: 1 小时
+- **实际时间**: 1 小时
 
 ### Phase 2 验收标准 ✓
 
@@ -1129,9 +1132,76 @@ CREATE TABLE habit_dependencies (
 
 ---
 
-## 本次更新总结 (2025-10-05)
+### Week 7: macOS 平台优化与数据管理 ✅
 
-### Phase 2 Week 1-4 已完成 ✅
+#### Task 2.27: macOS 平台兼容性修复 ✅
+
+- [x] **通知服务 macOS 支持**
+  - [x] 修复 macOS 平台通知初始化崩溃
+  - [x] 统一 iOS/macOS 使用 DarwinInitializationSettings
+  - [x] 跨平台权限请求和检查
+  - **文件**: `lib/core/services/notification_service.dart`
+
+- [x] **文件选择器权限配置**
+  - [x] 添加 `com.apple.security.files.user-selected.read-write` 权限
+  - [x] 更新 DebugProfile.entitlements 和 Release.entitlements
+  - [x] 修复导入数据文件选择无响应问题
+  - **文件**:
+    - `macos/Runner/DebugProfile.entitlements`
+    - `macos/Runner/Release.entitlements`
+
+- **负责**: @flutter_architect
+- **实际时间**: 1.5 小时
+
+#### Task 2.28: 应用内数据管理功能 ✅
+
+- [x] **数据清除功能**
+  - [x] 添加"开发者选项"分组到个人中心
+  - [x] 实现"清除所有数据"功能
+  - [x] 数据库连接关闭 → 删除 wudao.db → 自动退出应用
+  - [x] 危险操作二次确认对话框
+  - **文件**: `lib/features/profile/presentation/screens/profile_screen.dart`
+
+- **负责**: @flutter_architect
+- **实际时间**: 1 小时
+
+#### Task 2.29: 数据导入策略增强 ✅
+
+- [x] **新增"完全覆盖"策略**
+  - [x] 添加 `MergeStrategy.replaceAll` 枚举值
+  - [x] 实现数据清空逻辑（`_clearAllData()`）
+  - [x] 实现直接导入逻辑（`_importAllDataDirect()`）
+  - [x] 修复 switch 枚举穷尽检查错误
+  - **文件**:
+    - `lib/features/habits/domain/entities/merge_strategy.dart`
+    - `lib/features/habits/data/services/data_import_service.dart`
+
+- [x] **UI 安全提示优化**
+  - [x] 为危险策略添加红色警告样式
+  - [x] 为所有策略添加 emoji 图标（🗑️📥💾🧠👆）
+  - [x] 新增 `isDangerous` 属性标记危险操作
+  - **文件**: `lib/features/habits/presentation/screens/import_screen.dart`
+
+- **负责**: @flutter_architect
+- **实际时间**: 2 小时
+
+**本周修复的 Bug**:
+- 🐛 macOS 通知初始化崩溃（DarwinInitializationSettings 未配置）
+- 🐛 macOS 文件选择器无响应（缺少沙盒权限）
+- 🐛 MergeStrategy switch 枚举穷尽检查错误
+
+**本周提交的 Commit**:
+1. `fix: 修复 macOS 平台通知初始化错误`
+2. `fix: 修复 macOS 数据导入文件选择器无响应问题`
+3. `feat: 添加应用内清除所有数据功能`
+4. `feat: 添加数据导入"完全覆盖"策略`
+5. `fix: 修复 MergeStrategy switch 语句枚举穷尽检查错误`
+
+---
+
+## 本次更新总结 (2025-10-07)
+
+### Phase 2 Week 1-7 已完成 ✅
 
 **Week 1-2 完成的功能**:
 
@@ -1176,9 +1246,9 @@ CREATE TABLE habit_dependencies (
 
 ---
 
-**最后更新**: 2025-10-05
-**当前冲刺**: Phase 2, Week 4（路由配置已完成）
-**Phase 2 完成度**: ~98%（核心功能全部完成，仅待测试与文档）
+**最后更新**: 2025-10-07
+**当前冲刺**: Phase 2, Week 7（macOS 平台优化与数据管理已完成）
+**Phase 2 完成度**: ~99%（所有核心功能已完成，仅待自动化测试）
 
 ## 📚 用户文档
 

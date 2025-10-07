@@ -23,13 +23,23 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
   final Map<String, int> _priorities = {};
   bool _isSaving = false;
 
+  // 新增：计划日期，默认为明天
+  late DateTime _planDate;
+
+  @override
+  void initState() {
+    super.initState();
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    _planDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
+  }
+
   @override
   Widget build(BuildContext context) {
     final habitsAsync = ref.watch(activeHabitsProvider);
 
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('从习惯生成计划'),
+        middle: const Text('生成习惯计划'),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.of(context).pop(),
@@ -82,21 +92,20 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
             return ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
+                // 日期选择器
+                _buildDateSelector(),
+                const SizedBox(height: 24),
+
                 const Text(
                   '选择要规划的习惯：',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 12),
                 ...habits.map((habit) => _buildHabitItem(habit)),
               ],
             );
           },
-          loading: () => const Center(
-            child: CupertinoActivityIndicator(),
-          ),
+          loading: () => const Center(child: CupertinoActivityIndicator()),
           error: (error, stack) => Center(
             child: Text(
               '加载失败: $error',
@@ -221,10 +230,7 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
             // 选中后显示时间和优先级设置
             if (isSelected) ...[
               const SizedBox(height: 12),
-              Container(
-                height: 0.5,
-                color: CupertinoColors.separator,
-              ),
+              Container(height: 0.5, color: CupertinoColors.separator),
               const SizedBox(height: 12),
 
               // 建议时间
@@ -284,15 +290,24 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
                     },
                     children: const {
                       3: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         child: Text('低', style: TextStyle(fontSize: 12)),
                       ),
                       5: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         child: Text('中', style: TextStyle(fontSize: 12)),
                       ),
                       8: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
                         child: Text('高', style: TextStyle(fontSize: 12)),
                       ),
                     },
@@ -301,6 +316,142 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+
+  /// 构建日期选择器
+  Widget _buildDateSelector() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final isToday = _planDate == today;
+    final isTomorrow = _planDate == today.add(const Duration(days: 1));
+
+    String dateLabel;
+    if (isToday) {
+      dateLabel = '今天 ${_formatDate(_planDate)}';
+    } else if (isTomorrow) {
+      dateLabel = '明天 ${_formatDate(_planDate)}';
+    } else {
+      dateLabel = _formatDate(_planDate);
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: CupertinoColors.systemGrey6.resolveFrom(context),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          const Icon(
+            CupertinoIcons.calendar,
+            size: 20,
+            color: CupertinoColors.systemBlue,
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            '计划日期：',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+          const Spacer(),
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: _pickPlanDate,
+            child: Row(
+              children: [
+                Text(
+                  dateLabel,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(CupertinoIcons.chevron_right, size: 16),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 选择计划日期
+  void _pickPlanDate() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => Container(
+        height: 280,
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        color: CupertinoColors.systemBackground.resolveFrom(context),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              // 顶部操作栏
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: CupertinoColors.separator.resolveFrom(context),
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('取消'),
+                    ),
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        '确定',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // 日期选择器
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: _planDate,
+                  minimumDate: DateTime.now(), // 最早只能选今天
+                  maximumDate: DateTime.now().add(
+                    const Duration(days: 365),
+                  ), // 最多一年后
+                  onDateTimeChanged: (DateTime newDate) {
+                    setState(() {
+                      _planDate = DateTime(
+                        newDate.year,
+                        newDate.month,
+                        newDate.day,
+                      );
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -388,8 +539,6 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
 
     try {
       final repository = ref.read(habitRepositoryProvider);
-      final tomorrow = DateTime.now().add(const Duration(days: 1));
-      final tomorrowDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day);
 
       // 获取选中的习惯详情
       final plans = <DailyPlan>[];
@@ -401,7 +550,7 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
         final plan = DailyPlan(
           id: 'plan_${DateTime.now().millisecondsSinceEpoch}_$habitId',
           habitId: habitId,
-          planDate: tomorrowDate,
+          planDate: _planDate, // 使用用户选择的日期
           cueTask: habit.cue ?? '', // 将暗示作为任务
           scheduledTime: _suggestedTimes[habitId],
           priority: _priorities[habitId] ?? 5,
@@ -465,5 +614,9 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
 
   String _formatTime(DateTime dateTime) {
     return '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.month}月${date.day}日';
   }
 }
