@@ -305,6 +305,11 @@ class DataImportService {
     List<ConflictInfo> conflicts,
   ) {
     switch (strategy) {
+      case MergeStrategy.replaceAll:
+        // 完全覆盖策略不应该走到这里，因为在 _importDataWithStrategy 中已提前处理
+        // 如果意外走到这里，保留新数据
+        return ConflictAction.keepNew;
+
       case MergeStrategy.keepNew:
         return ConflictAction.keepNew;
 
