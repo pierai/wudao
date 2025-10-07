@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart' show StateProvider;
 
 import '../../../../core/database/app_database.dart';
+import '../../../../core/providers/notification_providers.dart';
 import '../../domain/entities/habit.dart';
 import '../../domain/entities/habit_record.dart';
 import '../../domain/entities/habit_stats.dart';
@@ -24,12 +25,14 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 /// 习惯仓库 Provider
 final habitRepositoryProvider = Provider<HabitRepository>((ref) {
   final database = ref.watch(databaseProvider);
+  final reminderScheduler = ref.watch(reminderSchedulerServiceProvider);
 
   return HabitRepositoryImpl(
     habitDao: database.habitDao,
     recordDao: database.habitRecordDao,
     planDao: database.dailyPlanDao,
     frontmatterDao: database.frontmatterDao,
+    reminderScheduler: reminderScheduler,
   );
 });
 

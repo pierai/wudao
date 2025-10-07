@@ -46,6 +46,13 @@ sealed class DailyPlan with _$DailyPlan {
     /// 更新时间
     DateTime? updatedAt,
 
+    // ==================== 提醒功能字段 ====================
+    /// 是否启用提醒
+    @Default(true) bool reminderEnabled,
+
+    /// 提前提醒分钟数（0=准时, 5=提前5分钟, 10=提前10分钟, 15=提前15分钟）
+    @Default(0) int reminderMinutesBefore,
+
     // ==================== 废弃字段(向后兼容) ====================
     /// @deprecated 使用 status 替代
     @Deprecated('Use status instead') @Default(false) bool isCompleted,

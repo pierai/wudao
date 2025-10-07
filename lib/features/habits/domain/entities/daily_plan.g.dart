@@ -29,6 +29,8 @@ _DailyPlan _$DailyPlanFromJson(Map<String, dynamic> json) => _DailyPlan(
   updatedAt: json['updatedAt'] == null
       ? null
       : DateTime.parse(json['updatedAt'] as String),
+  reminderEnabled: json['reminderEnabled'] as bool? ?? true,
+  reminderMinutesBefore: (json['reminderMinutesBefore'] as num?)?.toInt() ?? 0,
   isCompleted: json['isCompleted'] as bool? ?? false,
   completedAt: json['completedAt'] == null
       ? null
@@ -49,6 +51,8 @@ Map<String, dynamic> _$DailyPlanToJson(_DailyPlan instance) =>
       'recordId': ?instance.recordId,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': ?instance.updatedAt?.toIso8601String(),
+      'reminderEnabled': instance.reminderEnabled,
+      'reminderMinutesBefore': instance.reminderMinutesBefore,
       'isCompleted': instance.isCompleted,
       'completedAt': ?instance.completedAt?.toIso8601String(),
     };

@@ -3,6 +3,7 @@ import '../../../../core/database/daos/habit_dao.dart';
 import '../../../../core/database/daos/habit_record_dao.dart';
 import '../../../../core/database/daos/daily_plan_dao.dart';
 import '../../../../core/database/daos/frontmatter_dao.dart';
+import '../../../../core/services/reminder_scheduler_service.dart';
 import '../../domain/entities/habit.dart';
 import '../../domain/entities/habit_record.dart';
 import '../../domain/entities/habit_stats.dart';
@@ -25,16 +26,19 @@ class HabitRepositoryImpl implements HabitRepository {
   final HabitRecordDao _recordDao;
   final DailyPlanDao _planDao;
   final FrontmatterDao _frontmatterDao;
+  final ReminderSchedulerService? _reminderScheduler;
 
   HabitRepositoryImpl({
     required HabitDao habitDao,
     required HabitRecordDao recordDao,
     required DailyPlanDao planDao,
     required FrontmatterDao frontmatterDao,
+    ReminderSchedulerService? reminderScheduler,
   })  : _habitDao = habitDao,
         _recordDao = recordDao,
         _planDao = planDao,
-        _frontmatterDao = frontmatterDao;
+        _frontmatterDao = frontmatterDao,
+        _reminderScheduler = reminderScheduler;
 
   // ========== 习惯管理 ==========
 
@@ -377,16 +381,45 @@ class HabitRepositoryImpl implements HabitRepository {
   @override
   Future<void> createDailyPlan(DailyPlan plan) async {
     await _planDao.insertPlan(plan.toData());
+
+    // 安排提醒通知
+    if (plan.reminderEnabled && plan.scheduledTime != null) {
+      await _reminderScheduler?.schedulePlanReminder(
+        plan,
+        minutesBefore: plan.reminderMinutesBefore,
+      );
+    }
   }
 
   @override
   Future<void> createDailyPlans(List<DailyPlan> plans) async {
     await _planDao.insertPlans(plans.map((p) => p.toData()).toList());
+
+    // 批量安排提醒通知
+    for (final plan in plans) {
+      if (plan.reminderEnabled && plan.scheduledTime != null) {
+        await _reminderScheduler?.schedulePlanReminder(
+          plan,
+          minutesBefore: plan.reminderMinutesBefore,
+        );
+      }
+    }
   }
 
   @override
   Future<void> updateDailyPlan(DailyPlan plan) async {
     await _planDao.updatePlan(plan.toData());
+
+    // 更新提醒通知
+    if (plan.reminderEnabled && plan.scheduledTime != null) {
+      await _reminderScheduler?.updatePlanReminder(
+        plan,
+        minutesBefore: plan.reminderMinutesBefore,
+      );
+    } else {
+      // 如果禁用了提醒，取消现有通知
+      await _reminderScheduler?.cancelPlanReminder(plan.id);
+    }
   }
 
   // ========== 次日计划状态管理 (Phase 2 新增) ==========
@@ -528,6 +561,10 @@ class HabitRepositoryImpl implements HabitRepository {
 
   @override
   Future<void> deleteDailyPlan(String planId) async {
+    // 先取消通知
+    await _reminderScheduler?.cancelPlanReminder(planId);
+
+    // 再删除计划
     await _planDao.deletePlan(planId);
   }
 

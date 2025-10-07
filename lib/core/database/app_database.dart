@@ -47,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase._internal() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -57,6 +57,9 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (Migrator m, int from, int to) async {
           if (from < 2) {
             await _migrateToV2(m);
+          }
+          if (from < 3) {
+            await _migrateToV3(m);
           }
         },
       );
@@ -86,6 +89,13 @@ class AppDatabase extends _$AppDatabase {
       'UPDATE daily_plans SET checked_in_at = completed_at WHERE completed_at IS NOT NULL',
       updates: {dailyPlans},
     );
+  }
+
+  /// 迁移到版本 3: 添加通知提醒功能
+  Future<void> _migrateToV3(Migrator m) async {
+    // daily_plans 表新增提醒字段
+    await m.addColumn(dailyPlans, dailyPlans.reminderEnabled);
+    await m.addColumn(dailyPlans, dailyPlans.reminderMinutesBefore);
   }
 
   /// 打开数据库连接

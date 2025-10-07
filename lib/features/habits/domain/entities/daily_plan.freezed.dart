@@ -27,7 +27,10 @@ mixin _$DailyPlan {
  DateTime? get checkedInAt;/// 关联的打卡记录 ID
  String? get recordId;/// 创建时间
  DateTime get createdAt;/// 更新时间
- DateTime? get updatedAt;// ==================== 废弃字段(向后兼容) ====================
+ DateTime? get updatedAt;// ==================== 提醒功能字段 ====================
+/// 是否启用提醒
+ bool get reminderEnabled;/// 提前提醒分钟数（0=准时, 5=提前5分钟, 10=提前10分钟, 15=提前15分钟）
+ int get reminderMinutesBefore;// ==================== 废弃字段(向后兼容) ====================
 /// @deprecated 使用 status 替代
 @Deprecated('Use status instead') bool get isCompleted;/// @deprecated 使用 checkedInAt 替代
 @Deprecated('Use checkedInAt instead') DateTime? get completedAt;
@@ -43,16 +46,16 @@ $DailyPlanCopyWith<DailyPlan> get copyWith => _$DailyPlanCopyWithImpl<DailyPlan>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DailyPlan&&(identical(other.id, id) || other.id == id)&&(identical(other.planDate, planDate) || other.planDate == planDate)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.cueTask, cueTask) || other.cueTask == cueTask)&&(identical(other.scheduledTime, scheduledTime) || other.scheduledTime == scheduledTime)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.status, status) || other.status == status)&&(identical(other.cueCompletedAt, cueCompletedAt) || other.cueCompletedAt == cueCompletedAt)&&(identical(other.checkedInAt, checkedInAt) || other.checkedInAt == checkedInAt)&&(identical(other.recordId, recordId) || other.recordId == recordId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.isCompleted, isCompleted) || other.isCompleted == isCompleted)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DailyPlan&&(identical(other.id, id) || other.id == id)&&(identical(other.planDate, planDate) || other.planDate == planDate)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.cueTask, cueTask) || other.cueTask == cueTask)&&(identical(other.scheduledTime, scheduledTime) || other.scheduledTime == scheduledTime)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.status, status) || other.status == status)&&(identical(other.cueCompletedAt, cueCompletedAt) || other.cueCompletedAt == cueCompletedAt)&&(identical(other.checkedInAt, checkedInAt) || other.checkedInAt == checkedInAt)&&(identical(other.recordId, recordId) || other.recordId == recordId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.reminderEnabled, reminderEnabled) || other.reminderEnabled == reminderEnabled)&&(identical(other.reminderMinutesBefore, reminderMinutesBefore) || other.reminderMinutesBefore == reminderMinutesBefore)&&(identical(other.isCompleted, isCompleted) || other.isCompleted == isCompleted)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,planDate,habitId,cueTask,scheduledTime,priority,status,cueCompletedAt,checkedInAt,recordId,createdAt,updatedAt,isCompleted,completedAt);
+int get hashCode => Object.hash(runtimeType,id,planDate,habitId,cueTask,scheduledTime,priority,status,cueCompletedAt,checkedInAt,recordId,createdAt,updatedAt,reminderEnabled,reminderMinutesBefore,isCompleted,completedAt);
 
 @override
 String toString() {
-  return 'DailyPlan(id: $id, planDate: $planDate, habitId: $habitId, cueTask: $cueTask, scheduledTime: $scheduledTime, priority: $priority, status: $status, cueCompletedAt: $cueCompletedAt, checkedInAt: $checkedInAt, recordId: $recordId, createdAt: $createdAt, updatedAt: $updatedAt, isCompleted: $isCompleted, completedAt: $completedAt)';
+  return 'DailyPlan(id: $id, planDate: $planDate, habitId: $habitId, cueTask: $cueTask, scheduledTime: $scheduledTime, priority: $priority, status: $status, cueCompletedAt: $cueCompletedAt, checkedInAt: $checkedInAt, recordId: $recordId, createdAt: $createdAt, updatedAt: $updatedAt, reminderEnabled: $reminderEnabled, reminderMinutesBefore: $reminderMinutesBefore, isCompleted: $isCompleted, completedAt: $completedAt)';
 }
 
 
@@ -63,7 +66,7 @@ abstract mixin class $DailyPlanCopyWith<$Res>  {
   factory $DailyPlanCopyWith(DailyPlan value, $Res Function(DailyPlan) _then) = _$DailyPlanCopyWithImpl;
 @useResult
 $Res call({
- String id, DateTime planDate, String habitId, String cueTask, DateTime? scheduledTime, int priority, PlanCompletionStatus status, DateTime? cueCompletedAt, DateTime? checkedInAt, String? recordId, DateTime createdAt, DateTime? updatedAt,@Deprecated('Use status instead') bool isCompleted,@Deprecated('Use checkedInAt instead') DateTime? completedAt
+ String id, DateTime planDate, String habitId, String cueTask, DateTime? scheduledTime, int priority, PlanCompletionStatus status, DateTime? cueCompletedAt, DateTime? checkedInAt, String? recordId, DateTime createdAt, DateTime? updatedAt, bool reminderEnabled, int reminderMinutesBefore,@Deprecated('Use status instead') bool isCompleted,@Deprecated('Use checkedInAt instead') DateTime? completedAt
 });
 
 
@@ -80,7 +83,7 @@ class _$DailyPlanCopyWithImpl<$Res>
 
 /// Create a copy of DailyPlan
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? planDate = null,Object? habitId = null,Object? cueTask = null,Object? scheduledTime = freezed,Object? priority = null,Object? status = null,Object? cueCompletedAt = freezed,Object? checkedInAt = freezed,Object? recordId = freezed,Object? createdAt = null,Object? updatedAt = freezed,Object? isCompleted = null,Object? completedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? planDate = null,Object? habitId = null,Object? cueTask = null,Object? scheduledTime = freezed,Object? priority = null,Object? status = null,Object? cueCompletedAt = freezed,Object? checkedInAt = freezed,Object? recordId = freezed,Object? createdAt = null,Object? updatedAt = freezed,Object? reminderEnabled = null,Object? reminderMinutesBefore = null,Object? isCompleted = null,Object? completedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,planDate: null == planDate ? _self.planDate : planDate // ignore: cast_nullable_to_non_nullable
@@ -94,7 +97,9 @@ as DateTime?,checkedInAt: freezed == checkedInAt ? _self.checkedInAt : checkedIn
 as DateTime?,recordId: freezed == recordId ? _self.recordId : recordId // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,isCompleted: null == isCompleted ? _self.isCompleted : isCompleted // ignore: cast_nullable_to_non_nullable
+as DateTime?,reminderEnabled: null == reminderEnabled ? _self.reminderEnabled : reminderEnabled // ignore: cast_nullable_to_non_nullable
+as bool,reminderMinutesBefore: null == reminderMinutesBefore ? _self.reminderMinutesBefore : reminderMinutesBefore // ignore: cast_nullable_to_non_nullable
+as int,isCompleted: null == isCompleted ? _self.isCompleted : isCompleted // ignore: cast_nullable_to_non_nullable
 as bool,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
@@ -178,10 +183,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DateTime planDate,  String habitId,  String cueTask,  DateTime? scheduledTime,  int priority,  PlanCompletionStatus status,  DateTime? cueCompletedAt,  DateTime? checkedInAt,  String? recordId,  DateTime createdAt,  DateTime? updatedAt, @Deprecated('Use status instead')  bool isCompleted, @Deprecated('Use checkedInAt instead')  DateTime? completedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DateTime planDate,  String habitId,  String cueTask,  DateTime? scheduledTime,  int priority,  PlanCompletionStatus status,  DateTime? cueCompletedAt,  DateTime? checkedInAt,  String? recordId,  DateTime createdAt,  DateTime? updatedAt,  bool reminderEnabled,  int reminderMinutesBefore, @Deprecated('Use status instead')  bool isCompleted, @Deprecated('Use checkedInAt instead')  DateTime? completedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DailyPlan() when $default != null:
-return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.scheduledTime,_that.priority,_that.status,_that.cueCompletedAt,_that.checkedInAt,_that.recordId,_that.createdAt,_that.updatedAt,_that.isCompleted,_that.completedAt);case _:
+return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.scheduledTime,_that.priority,_that.status,_that.cueCompletedAt,_that.checkedInAt,_that.recordId,_that.createdAt,_that.updatedAt,_that.reminderEnabled,_that.reminderMinutesBefore,_that.isCompleted,_that.completedAt);case _:
   return orElse();
 
 }
@@ -199,10 +204,10 @@ return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.schedu
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DateTime planDate,  String habitId,  String cueTask,  DateTime? scheduledTime,  int priority,  PlanCompletionStatus status,  DateTime? cueCompletedAt,  DateTime? checkedInAt,  String? recordId,  DateTime createdAt,  DateTime? updatedAt, @Deprecated('Use status instead')  bool isCompleted, @Deprecated('Use checkedInAt instead')  DateTime? completedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DateTime planDate,  String habitId,  String cueTask,  DateTime? scheduledTime,  int priority,  PlanCompletionStatus status,  DateTime? cueCompletedAt,  DateTime? checkedInAt,  String? recordId,  DateTime createdAt,  DateTime? updatedAt,  bool reminderEnabled,  int reminderMinutesBefore, @Deprecated('Use status instead')  bool isCompleted, @Deprecated('Use checkedInAt instead')  DateTime? completedAt)  $default,) {final _that = this;
 switch (_that) {
 case _DailyPlan():
-return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.scheduledTime,_that.priority,_that.status,_that.cueCompletedAt,_that.checkedInAt,_that.recordId,_that.createdAt,_that.updatedAt,_that.isCompleted,_that.completedAt);}
+return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.scheduledTime,_that.priority,_that.status,_that.cueCompletedAt,_that.checkedInAt,_that.recordId,_that.createdAt,_that.updatedAt,_that.reminderEnabled,_that.reminderMinutesBefore,_that.isCompleted,_that.completedAt);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -216,10 +221,10 @@ return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.schedu
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DateTime planDate,  String habitId,  String cueTask,  DateTime? scheduledTime,  int priority,  PlanCompletionStatus status,  DateTime? cueCompletedAt,  DateTime? checkedInAt,  String? recordId,  DateTime createdAt,  DateTime? updatedAt, @Deprecated('Use status instead')  bool isCompleted, @Deprecated('Use checkedInAt instead')  DateTime? completedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DateTime planDate,  String habitId,  String cueTask,  DateTime? scheduledTime,  int priority,  PlanCompletionStatus status,  DateTime? cueCompletedAt,  DateTime? checkedInAt,  String? recordId,  DateTime createdAt,  DateTime? updatedAt,  bool reminderEnabled,  int reminderMinutesBefore, @Deprecated('Use status instead')  bool isCompleted, @Deprecated('Use checkedInAt instead')  DateTime? completedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _DailyPlan() when $default != null:
-return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.scheduledTime,_that.priority,_that.status,_that.cueCompletedAt,_that.checkedInAt,_that.recordId,_that.createdAt,_that.updatedAt,_that.isCompleted,_that.completedAt);case _:
+return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.scheduledTime,_that.priority,_that.status,_that.cueCompletedAt,_that.checkedInAt,_that.recordId,_that.createdAt,_that.updatedAt,_that.reminderEnabled,_that.reminderMinutesBefore,_that.isCompleted,_that.completedAt);case _:
   return null;
 
 }
@@ -231,7 +236,7 @@ return $default(_that.id,_that.planDate,_that.habitId,_that.cueTask,_that.schedu
 @JsonSerializable()
 
 class _DailyPlan extends DailyPlan {
-  const _DailyPlan({required this.id, required this.planDate, required this.habitId, required this.cueTask, this.scheduledTime, required this.priority, this.status = PlanCompletionStatus.pending, this.cueCompletedAt, this.checkedInAt, this.recordId, required this.createdAt, this.updatedAt, @Deprecated('Use status instead') this.isCompleted = false, @Deprecated('Use checkedInAt instead') this.completedAt}): super._();
+  const _DailyPlan({required this.id, required this.planDate, required this.habitId, required this.cueTask, this.scheduledTime, required this.priority, this.status = PlanCompletionStatus.pending, this.cueCompletedAt, this.checkedInAt, this.recordId, required this.createdAt, this.updatedAt, this.reminderEnabled = true, this.reminderMinutesBefore = 0, @Deprecated('Use status instead') this.isCompleted = false, @Deprecated('Use checkedInAt instead') this.completedAt}): super._();
   factory _DailyPlan.fromJson(Map<String, dynamic> json) => _$DailyPlanFromJson(json);
 
 /// 唯一标识符
@@ -258,6 +263,11 @@ class _DailyPlan extends DailyPlan {
 @override final  DateTime createdAt;
 /// 更新时间
 @override final  DateTime? updatedAt;
+// ==================== 提醒功能字段 ====================
+/// 是否启用提醒
+@override@JsonKey() final  bool reminderEnabled;
+/// 提前提醒分钟数（0=准时, 5=提前5分钟, 10=提前10分钟, 15=提前15分钟）
+@override@JsonKey() final  int reminderMinutesBefore;
 // ==================== 废弃字段(向后兼容) ====================
 /// @deprecated 使用 status 替代
 @override@JsonKey()@Deprecated('Use status instead') final  bool isCompleted;
@@ -277,16 +287,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DailyPlan&&(identical(other.id, id) || other.id == id)&&(identical(other.planDate, planDate) || other.planDate == planDate)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.cueTask, cueTask) || other.cueTask == cueTask)&&(identical(other.scheduledTime, scheduledTime) || other.scheduledTime == scheduledTime)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.status, status) || other.status == status)&&(identical(other.cueCompletedAt, cueCompletedAt) || other.cueCompletedAt == cueCompletedAt)&&(identical(other.checkedInAt, checkedInAt) || other.checkedInAt == checkedInAt)&&(identical(other.recordId, recordId) || other.recordId == recordId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.isCompleted, isCompleted) || other.isCompleted == isCompleted)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DailyPlan&&(identical(other.id, id) || other.id == id)&&(identical(other.planDate, planDate) || other.planDate == planDate)&&(identical(other.habitId, habitId) || other.habitId == habitId)&&(identical(other.cueTask, cueTask) || other.cueTask == cueTask)&&(identical(other.scheduledTime, scheduledTime) || other.scheduledTime == scheduledTime)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.status, status) || other.status == status)&&(identical(other.cueCompletedAt, cueCompletedAt) || other.cueCompletedAt == cueCompletedAt)&&(identical(other.checkedInAt, checkedInAt) || other.checkedInAt == checkedInAt)&&(identical(other.recordId, recordId) || other.recordId == recordId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.reminderEnabled, reminderEnabled) || other.reminderEnabled == reminderEnabled)&&(identical(other.reminderMinutesBefore, reminderMinutesBefore) || other.reminderMinutesBefore == reminderMinutesBefore)&&(identical(other.isCompleted, isCompleted) || other.isCompleted == isCompleted)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,planDate,habitId,cueTask,scheduledTime,priority,status,cueCompletedAt,checkedInAt,recordId,createdAt,updatedAt,isCompleted,completedAt);
+int get hashCode => Object.hash(runtimeType,id,planDate,habitId,cueTask,scheduledTime,priority,status,cueCompletedAt,checkedInAt,recordId,createdAt,updatedAt,reminderEnabled,reminderMinutesBefore,isCompleted,completedAt);
 
 @override
 String toString() {
-  return 'DailyPlan(id: $id, planDate: $planDate, habitId: $habitId, cueTask: $cueTask, scheduledTime: $scheduledTime, priority: $priority, status: $status, cueCompletedAt: $cueCompletedAt, checkedInAt: $checkedInAt, recordId: $recordId, createdAt: $createdAt, updatedAt: $updatedAt, isCompleted: $isCompleted, completedAt: $completedAt)';
+  return 'DailyPlan(id: $id, planDate: $planDate, habitId: $habitId, cueTask: $cueTask, scheduledTime: $scheduledTime, priority: $priority, status: $status, cueCompletedAt: $cueCompletedAt, checkedInAt: $checkedInAt, recordId: $recordId, createdAt: $createdAt, updatedAt: $updatedAt, reminderEnabled: $reminderEnabled, reminderMinutesBefore: $reminderMinutesBefore, isCompleted: $isCompleted, completedAt: $completedAt)';
 }
 
 
@@ -297,7 +307,7 @@ abstract mixin class _$DailyPlanCopyWith<$Res> implements $DailyPlanCopyWith<$Re
   factory _$DailyPlanCopyWith(_DailyPlan value, $Res Function(_DailyPlan) _then) = __$DailyPlanCopyWithImpl;
 @override @useResult
 $Res call({
- String id, DateTime planDate, String habitId, String cueTask, DateTime? scheduledTime, int priority, PlanCompletionStatus status, DateTime? cueCompletedAt, DateTime? checkedInAt, String? recordId, DateTime createdAt, DateTime? updatedAt,@Deprecated('Use status instead') bool isCompleted,@Deprecated('Use checkedInAt instead') DateTime? completedAt
+ String id, DateTime planDate, String habitId, String cueTask, DateTime? scheduledTime, int priority, PlanCompletionStatus status, DateTime? cueCompletedAt, DateTime? checkedInAt, String? recordId, DateTime createdAt, DateTime? updatedAt, bool reminderEnabled, int reminderMinutesBefore,@Deprecated('Use status instead') bool isCompleted,@Deprecated('Use checkedInAt instead') DateTime? completedAt
 });
 
 
@@ -314,7 +324,7 @@ class __$DailyPlanCopyWithImpl<$Res>
 
 /// Create a copy of DailyPlan
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? planDate = null,Object? habitId = null,Object? cueTask = null,Object? scheduledTime = freezed,Object? priority = null,Object? status = null,Object? cueCompletedAt = freezed,Object? checkedInAt = freezed,Object? recordId = freezed,Object? createdAt = null,Object? updatedAt = freezed,Object? isCompleted = null,Object? completedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? planDate = null,Object? habitId = null,Object? cueTask = null,Object? scheduledTime = freezed,Object? priority = null,Object? status = null,Object? cueCompletedAt = freezed,Object? checkedInAt = freezed,Object? recordId = freezed,Object? createdAt = null,Object? updatedAt = freezed,Object? reminderEnabled = null,Object? reminderMinutesBefore = null,Object? isCompleted = null,Object? completedAt = freezed,}) {
   return _then(_DailyPlan(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,planDate: null == planDate ? _self.planDate : planDate // ignore: cast_nullable_to_non_nullable
@@ -328,7 +338,9 @@ as DateTime?,checkedInAt: freezed == checkedInAt ? _self.checkedInAt : checkedIn
 as DateTime?,recordId: freezed == recordId ? _self.recordId : recordId // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,isCompleted: null == isCompleted ? _self.isCompleted : isCompleted // ignore: cast_nullable_to_non_nullable
+as DateTime?,reminderEnabled: null == reminderEnabled ? _self.reminderEnabled : reminderEnabled // ignore: cast_nullable_to_non_nullable
+as bool,reminderMinutesBefore: null == reminderMinutesBefore ? _self.reminderMinutesBefore : reminderMinutesBefore // ignore: cast_nullable_to_non_nullable
+as int,isCompleted: null == isCompleted ? _self.isCompleted : isCompleted // ignore: cast_nullable_to_non_nullable
 as bool,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));

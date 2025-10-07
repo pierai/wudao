@@ -24,6 +24,8 @@ extension DailyPlanDataToEntity on DailyPlanData {
       recordId: recordId,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      reminderEnabled: reminderEnabled,
+      reminderMinutesBefore: reminderMinutesBefore,
     );
   }
 }
@@ -44,6 +46,8 @@ extension DailyPlanEntityToData on DailyPlan {
       recordId: recordId,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      reminderEnabled: reminderEnabled,
+      reminderMinutesBefore: reminderMinutesBefore,
       // 废弃字段 - 从新字段计算
       isCompleted: status.isCheckedIn || status.isSkipped,
       completedAt: checkedInAt,
@@ -65,6 +69,8 @@ extension DailyPlanEntityToData on DailyPlan {
       recordId: recordId != null ? Value(recordId) : const Value(null),
       createdAt: createdAt,
       updatedAt: updatedAt != null ? Value(updatedAt) : const Value(null),
+      reminderEnabled: Value(reminderEnabled),
+      reminderMinutesBefore: Value(reminderMinutesBefore),
       // 废弃字段 - 从新字段计算
       isCompleted: Value(status.isCheckedIn || status.isSkipped),
       completedAt: checkedInAt != null ? Value(checkedInAt) : const Value(null),

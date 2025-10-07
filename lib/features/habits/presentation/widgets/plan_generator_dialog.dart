@@ -411,6 +411,9 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
           recordId: null,
           createdAt: DateTime.now(),
           updatedAt: null,
+          // 提醒功能：当设置了时间时自动启用提醒
+          reminderEnabled: _suggestedTimes[habitId] != null,
+          reminderMinutesBefore: 0, // 默认准时提醒
         );
 
         plans.add(plan);

@@ -51,6 +51,13 @@ class DailyPlans extends Table {
   /// 更新时间
   DateTimeColumn get updatedAt => dateTime().nullable()();
 
+  // ==================== 提醒功能字段 ====================
+  /// 是否启用提醒（默认启用）
+  BoolColumn get reminderEnabled => boolean().withDefault(const Constant(true))();
+
+  /// 提前提醒分钟数（0=准时, 5=提前5分钟, 10=提前10分钟, 15=提前15分钟，默认0）
+  IntColumn get reminderMinutesBefore => integer().withDefault(const Constant(0))();
+
   // ==================== 废弃字段(向后兼容) ====================
   /// @deprecated 使用 status 替代
   BoolColumn get isCompleted => boolean().withDefault(const Constant(false))();

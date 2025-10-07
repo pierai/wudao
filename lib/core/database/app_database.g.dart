@@ -1635,6 +1635,32 @@ class $DailyPlansTable extends DailyPlans
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _reminderEnabledMeta = const VerificationMeta(
+    'reminderEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> reminderEnabled = GeneratedColumn<bool>(
+    'reminder_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("reminder_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _reminderMinutesBeforeMeta =
+      const VerificationMeta('reminderMinutesBefore');
+  @override
+  late final GeneratedColumn<int> reminderMinutesBefore = GeneratedColumn<int>(
+    'reminder_minutes_before',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _isCompletedMeta = const VerificationMeta(
     'isCompleted',
   );
@@ -1675,6 +1701,8 @@ class $DailyPlansTable extends DailyPlans
     recordId,
     createdAt,
     updatedAt,
+    reminderEnabled,
+    reminderMinutesBefore,
     isCompleted,
     completedAt,
   ];
@@ -1778,6 +1806,24 @@ class $DailyPlansTable extends DailyPlans
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('reminder_enabled')) {
+      context.handle(
+        _reminderEnabledMeta,
+        reminderEnabled.isAcceptableOrUnknown(
+          data['reminder_enabled']!,
+          _reminderEnabledMeta,
+        ),
+      );
+    }
+    if (data.containsKey('reminder_minutes_before')) {
+      context.handle(
+        _reminderMinutesBeforeMeta,
+        reminderMinutesBefore.isAcceptableOrUnknown(
+          data['reminder_minutes_before']!,
+          _reminderMinutesBeforeMeta,
+        ),
+      );
+    }
     if (data.containsKey('is_completed')) {
       context.handle(
         _isCompletedMeta,
@@ -1853,6 +1899,14 @@ class $DailyPlansTable extends DailyPlans
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       ),
+      reminderEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}reminder_enabled'],
+      )!,
+      reminderMinutesBefore: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reminder_minutes_before'],
+      )!,
       isCompleted: attachedDatabase.typeMapping.read(
         DriftSqlType.bool,
         data['${effectivePrefix}is_completed'],
@@ -1911,6 +1965,12 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
   /// 更新时间
   final DateTime? updatedAt;
 
+  /// 是否启用提醒（默认启用）
+  final bool reminderEnabled;
+
+  /// 提前提醒分钟数（0=准时, 5=提前5分钟, 10=提前10分钟, 15=提前15分钟，默认0）
+  final int reminderMinutesBefore;
+
   /// @deprecated 使用 status 替代
   final bool isCompleted;
 
@@ -1929,6 +1989,8 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
     this.recordId,
     required this.createdAt,
     this.updatedAt,
+    required this.reminderEnabled,
+    required this.reminderMinutesBefore,
     required this.isCompleted,
     this.completedAt,
   });
@@ -1957,6 +2019,8 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
+    map['reminder_enabled'] = Variable<bool>(reminderEnabled);
+    map['reminder_minutes_before'] = Variable<int>(reminderMinutesBefore);
     map['is_completed'] = Variable<bool>(isCompleted);
     if (!nullToAbsent || completedAt != null) {
       map['completed_at'] = Variable<DateTime>(completedAt);
@@ -1988,6 +2052,8 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
+      reminderEnabled: Value(reminderEnabled),
+      reminderMinutesBefore: Value(reminderMinutesBefore),
       isCompleted: Value(isCompleted),
       completedAt: completedAt == null && nullToAbsent
           ? const Value.absent()
@@ -2013,6 +2079,10 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
       recordId: serializer.fromJson<String?>(json['recordId']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      reminderEnabled: serializer.fromJson<bool>(json['reminderEnabled']),
+      reminderMinutesBefore: serializer.fromJson<int>(
+        json['reminderMinutesBefore'],
+      ),
       isCompleted: serializer.fromJson<bool>(json['isCompleted']),
       completedAt: serializer.fromJson<DateTime?>(json['completedAt']),
     );
@@ -2033,6 +2103,8 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
       'recordId': serializer.toJson<String?>(recordId),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'reminderEnabled': serializer.toJson<bool>(reminderEnabled),
+      'reminderMinutesBefore': serializer.toJson<int>(reminderMinutesBefore),
       'isCompleted': serializer.toJson<bool>(isCompleted),
       'completedAt': serializer.toJson<DateTime?>(completedAt),
     };
@@ -2051,6 +2123,8 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
     Value<String?> recordId = const Value.absent(),
     DateTime? createdAt,
     Value<DateTime?> updatedAt = const Value.absent(),
+    bool? reminderEnabled,
+    int? reminderMinutesBefore,
     bool? isCompleted,
     Value<DateTime?> completedAt = const Value.absent(),
   }) => DailyPlanData(
@@ -2070,6 +2144,8 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
     recordId: recordId.present ? recordId.value : this.recordId,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    reminderEnabled: reminderEnabled ?? this.reminderEnabled,
+    reminderMinutesBefore: reminderMinutesBefore ?? this.reminderMinutesBefore,
     isCompleted: isCompleted ?? this.isCompleted,
     completedAt: completedAt.present ? completedAt.value : this.completedAt,
   );
@@ -2093,6 +2169,12 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
       recordId: data.recordId.present ? data.recordId.value : this.recordId,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      reminderEnabled: data.reminderEnabled.present
+          ? data.reminderEnabled.value
+          : this.reminderEnabled,
+      reminderMinutesBefore: data.reminderMinutesBefore.present
+          ? data.reminderMinutesBefore.value
+          : this.reminderMinutesBefore,
       isCompleted: data.isCompleted.present
           ? data.isCompleted.value
           : this.isCompleted,
@@ -2117,6 +2199,8 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
           ..write('recordId: $recordId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('reminderEnabled: $reminderEnabled, ')
+          ..write('reminderMinutesBefore: $reminderMinutesBefore, ')
           ..write('isCompleted: $isCompleted, ')
           ..write('completedAt: $completedAt')
           ..write(')'))
@@ -2137,6 +2221,8 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
     recordId,
     createdAt,
     updatedAt,
+    reminderEnabled,
+    reminderMinutesBefore,
     isCompleted,
     completedAt,
   );
@@ -2156,6 +2242,8 @@ class DailyPlanData extends DataClass implements Insertable<DailyPlanData> {
           other.recordId == this.recordId &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
+          other.reminderEnabled == this.reminderEnabled &&
+          other.reminderMinutesBefore == this.reminderMinutesBefore &&
           other.isCompleted == this.isCompleted &&
           other.completedAt == this.completedAt);
 }
@@ -2173,6 +2261,8 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
   final Value<String?> recordId;
   final Value<DateTime> createdAt;
   final Value<DateTime?> updatedAt;
+  final Value<bool> reminderEnabled;
+  final Value<int> reminderMinutesBefore;
   final Value<bool> isCompleted;
   final Value<DateTime?> completedAt;
   final Value<int> rowid;
@@ -2189,6 +2279,8 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     this.recordId = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.reminderEnabled = const Value.absent(),
+    this.reminderMinutesBefore = const Value.absent(),
     this.isCompleted = const Value.absent(),
     this.completedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2206,6 +2298,8 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     this.recordId = const Value.absent(),
     required DateTime createdAt,
     this.updatedAt = const Value.absent(),
+    this.reminderEnabled = const Value.absent(),
+    this.reminderMinutesBefore = const Value.absent(),
     this.isCompleted = const Value.absent(),
     this.completedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2227,6 +2321,8 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     Expression<String>? recordId,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<bool>? reminderEnabled,
+    Expression<int>? reminderMinutesBefore,
     Expression<bool>? isCompleted,
     Expression<DateTime>? completedAt,
     Expression<int>? rowid,
@@ -2244,6 +2340,9 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
       if (recordId != null) 'record_id': recordId,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (reminderEnabled != null) 'reminder_enabled': reminderEnabled,
+      if (reminderMinutesBefore != null)
+        'reminder_minutes_before': reminderMinutesBefore,
       if (isCompleted != null) 'is_completed': isCompleted,
       if (completedAt != null) 'completed_at': completedAt,
       if (rowid != null) 'rowid': rowid,
@@ -2263,6 +2362,8 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     Value<String?>? recordId,
     Value<DateTime>? createdAt,
     Value<DateTime?>? updatedAt,
+    Value<bool>? reminderEnabled,
+    Value<int>? reminderMinutesBefore,
     Value<bool>? isCompleted,
     Value<DateTime?>? completedAt,
     Value<int>? rowid,
@@ -2280,6 +2381,9 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
       recordId: recordId ?? this.recordId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      reminderEnabled: reminderEnabled ?? this.reminderEnabled,
+      reminderMinutesBefore:
+          reminderMinutesBefore ?? this.reminderMinutesBefore,
       isCompleted: isCompleted ?? this.isCompleted,
       completedAt: completedAt ?? this.completedAt,
       rowid: rowid ?? this.rowid,
@@ -2325,6 +2429,14 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (reminderEnabled.present) {
+      map['reminder_enabled'] = Variable<bool>(reminderEnabled.value);
+    }
+    if (reminderMinutesBefore.present) {
+      map['reminder_minutes_before'] = Variable<int>(
+        reminderMinutesBefore.value,
+      );
+    }
     if (isCompleted.present) {
       map['is_completed'] = Variable<bool>(isCompleted.value);
     }
@@ -2352,6 +2464,8 @@ class DailyPlansCompanion extends UpdateCompanion<DailyPlanData> {
           ..write('recordId: $recordId, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('reminderEnabled: $reminderEnabled, ')
+          ..write('reminderMinutesBefore: $reminderMinutesBefore, ')
           ..write('isCompleted: $isCompleted, ')
           ..write('completedAt: $completedAt, ')
           ..write('rowid: $rowid')
@@ -3979,6 +4093,8 @@ typedef $$DailyPlansTableCreateCompanionBuilder =
       Value<String?> recordId,
       required DateTime createdAt,
       Value<DateTime?> updatedAt,
+      Value<bool> reminderEnabled,
+      Value<int> reminderMinutesBefore,
       Value<bool> isCompleted,
       Value<DateTime?> completedAt,
       Value<int> rowid,
@@ -3997,6 +4113,8 @@ typedef $$DailyPlansTableUpdateCompanionBuilder =
       Value<String?> recordId,
       Value<DateTime> createdAt,
       Value<DateTime?> updatedAt,
+      Value<bool> reminderEnabled,
+      Value<int> reminderMinutesBefore,
       Value<bool> isCompleted,
       Value<DateTime?> completedAt,
       Value<int> rowid,
@@ -4100,6 +4218,16 @@ class $$DailyPlansTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get reminderEnabled => $composableBuilder(
+    column: $table.reminderEnabled,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reminderMinutesBefore => $composableBuilder(
+    column: $table.reminderMinutesBefore,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4219,6 +4347,16 @@ class $$DailyPlansTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get reminderEnabled => $composableBuilder(
+    column: $table.reminderEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get reminderMinutesBefore => $composableBuilder(
+    column: $table.reminderMinutesBefore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<bool> get isCompleted => $composableBuilder(
     column: $table.isCompleted,
     builder: (column) => ColumnOrderings(column),
@@ -4321,6 +4459,16 @@ class $$DailyPlansTableAnnotationComposer
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
+  GeneratedColumn<bool> get reminderEnabled => $composableBuilder(
+    column: $table.reminderEnabled,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reminderMinutesBefore => $composableBuilder(
+    column: $table.reminderMinutesBefore,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<bool> get isCompleted => $composableBuilder(
     column: $table.isCompleted,
     builder: (column) => column,
@@ -4418,6 +4566,8 @@ class $$DailyPlansTableTableManager
                 Value<String?> recordId = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> reminderEnabled = const Value.absent(),
+                Value<int> reminderMinutesBefore = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -4434,6 +4584,8 @@ class $$DailyPlansTableTableManager
                 recordId: recordId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                reminderEnabled: reminderEnabled,
+                reminderMinutesBefore: reminderMinutesBefore,
                 isCompleted: isCompleted,
                 completedAt: completedAt,
                 rowid: rowid,
@@ -4452,6 +4604,8 @@ class $$DailyPlansTableTableManager
                 Value<String?> recordId = const Value.absent(),
                 required DateTime createdAt,
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<bool> reminderEnabled = const Value.absent(),
+                Value<int> reminderMinutesBefore = const Value.absent(),
                 Value<bool> isCompleted = const Value.absent(),
                 Value<DateTime?> completedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -4468,6 +4622,8 @@ class $$DailyPlansTableTableManager
                 recordId: recordId,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                reminderEnabled: reminderEnabled,
+                reminderMinutesBefore: reminderMinutesBefore,
                 isCompleted: isCompleted,
                 completedAt: completedAt,
                 rowid: rowid,
