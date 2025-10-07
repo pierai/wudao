@@ -412,6 +412,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
 
   Widget _buildStrategyOption(MergeStrategy strategy) {
     final isSelected = _selectedStrategy == strategy;
+    final isDangerous = strategy.isDangerous;
 
     return GestureDetector(
       onTap: () {
@@ -424,12 +425,16 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? CupertinoColors.systemBlue.withOpacity(0.1)
+              ? (isDangerous
+                  ? CupertinoColors.systemRed.withOpacity(0.1)
+                  : CupertinoColors.systemBlue.withOpacity(0.1))
               : CupertinoColors.systemGrey6,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected
-                ? CupertinoColors.systemBlue
+                ? (isDangerous
+                    ? CupertinoColors.systemRed
+                    : CupertinoColors.systemBlue)
                 : CupertinoColors.systemGrey5,
             width: 2,
           ),
@@ -441,7 +446,9 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
                   ? CupertinoIcons.checkmark_circle_fill
                   : CupertinoIcons.circle,
               color: isSelected
-                  ? CupertinoColors.systemBlue
+                  ? (isDangerous
+                      ? CupertinoColors.systemRed
+                      : CupertinoColors.systemBlue)
                   : CupertinoColors.systemGrey,
             ),
             const SizedBox(width: 12),
@@ -449,22 +456,37 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    strategy.displayName,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected
-                          ? CupertinoColors.systemBlue
-                          : CupertinoColors.label,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        strategy.icon,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          strategy.displayName,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: isSelected
+                                ? (isDangerous
+                                    ? CupertinoColors.systemRed
+                                    : CupertinoColors.systemBlue)
+                                : CupertinoColors.label,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     strategy.description,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: CupertinoColors.systemGrey,
+                      color: isDangerous
+                          ? CupertinoColors.systemRed
+                          : CupertinoColors.systemGrey,
                     ),
                   ),
                 ],

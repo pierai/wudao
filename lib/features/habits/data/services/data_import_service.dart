@@ -167,10 +167,17 @@ class DataImportService {
     int failedCount = 0;
     final errors = <String>[];
 
-    // 创建冲突 ID 映射
-    final conflictIds = conflicts.map((c) => c.conflictId).toSet();
-
     try {
+      // 完全覆盖策略：先清空所有数据
+      if (strategy == MergeStrategy.replaceAll) {
+        await _clearAllData();
+        // 清空后，所有数据都视为无冲突，直接导入
+        return await _importAllDataDirect(exportData);
+      }
+
+      // 创建冲突 ID 映射
+      final conflictIds = conflicts.map((c) => c.conflictId).toSet();
+
       // 1. 导入习惯
       for (final habitJson in exportData.habits) {
         try {
@@ -352,6 +359,84 @@ class DataImportService {
   /// 判断打卡记录是否不同
   bool _isRecordDifferent(HabitRecord current, HabitRecord imported) {
     return current.quality != imported.quality || current.notes != imported.notes;
+  }
+
+  /// 清空所有数据（用于完全覆盖策略）
+  Future<void> _clearAllData() async {
+    // 删除所有表的数据（保留表结构）
+    await _database.delete(_database.habitFrontmatters).go();
+    await _database.delete(_database.dailyPlans).go();
+    await _database.delete(_database.habitRecords).go();
+    await _database.delete(_database.habits).go();
+    // 注意：goals 表暂时不清空，因为导入数据不包含目标
+  }
+
+  /// 直接导入所有数据（无冲突检测，用于完全覆盖策略）
+  Future<ImportResult> _importAllDataDirect(ExportData exportData) async {
+    int successCount = 0;
+    int failedCount = 0;
+    final errors = <String>[];
+
+    try {
+      // 1. 导入习惯
+      for (final habitJson in exportData.habits) {
+        try {
+          final habit = Habit.fromJson(habitJson);
+          await _habitRepository.createHabit(habit);
+          successCount++;
+        } catch (e) {
+          errors.add('导入习惯失败（${habitJson['name']}）：$e');
+          failedCount++;
+        }
+      }
+
+      // 2. 导入打卡记录
+      for (final recordJson in exportData.records) {
+        try {
+          final record = HabitRecord.fromJson(recordJson);
+          await _habitRepository.recordExecution(record);
+          successCount++;
+        } catch (e) {
+          errors.add('导入打卡记录失败：$e');
+          failedCount++;
+        }
+      }
+
+      // 3. 导入次日计划
+      for (final planJson in exportData.plans) {
+        try {
+          final plan = DailyPlan.fromJson(planJson);
+          await _habitRepository.createDailyPlan(plan);
+          successCount++;
+        } catch (e) {
+          errors.add('导入次日计划失败：$e');
+          failedCount++;
+        }
+      }
+
+      // 4. 导入 Frontmatter
+      for (final frontmatterJson in exportData.frontmatters) {
+        try {
+          final frontmatter = HabitFrontmatter.fromJson(frontmatterJson);
+          await _habitRepository.createFrontmatter(frontmatter);
+          successCount++;
+        } catch (e) {
+          errors.add('导入 Frontmatter 失败：$e');
+          failedCount++;
+        }
+      }
+
+      return ImportResult(
+        successCount: successCount,
+        failedCount: failedCount,
+        errors: errors,
+      );
+    } catch (e) {
+      return ImportResult(
+        failedCount: failedCount + 1,
+        errors: [...errors, '导入过程发生错误：$e'],
+      );
+    }
   }
 }
 
