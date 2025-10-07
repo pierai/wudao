@@ -54,7 +54,8 @@ samples, guidance on mobile development, and a full API reference.
 
 tab 切换思考模式
 ultrathink 开启ultrathink模式
-搜索发送的历史消息 Ctrl +R
+搜索发送的历史消息 Ctrl + R
+查看 todos：Ctrl + T
 VSCode插件
 
 ## 自定义命令

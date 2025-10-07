@@ -33,8 +33,8 @@ class NotificationService {
     // 设置本地时区为中国上海
     tz.setLocalLocation(tz.getLocation('Asia/Shanghai'));
 
-    // iOS 初始化设置
-    const DarwinInitializationSettings initializationSettingsIOS =
+    // iOS/macOS 初始化设置
+    const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -47,7 +47,8 @@ class NotificationService {
 
     const InitializationSettings initializationSettings =
         InitializationSettings(
-      iOS: initializationSettingsIOS,
+      iOS: initializationSettingsDarwin,
+      macOS: initializationSettingsDarwin,
       android: initializationSettingsAndroid,
     );
 
@@ -68,7 +69,7 @@ class NotificationService {
   /// 返回是否授予权限
   Future<bool> requestPermissions() async {
     // iOS 请求权限
-    final result = await _notifications
+    final iosResult = await _notifications
         .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>()
         ?.requestPermissions(
@@ -77,18 +78,34 @@ class NotificationService {
           sound: true,
         );
 
-    return result ?? false;
+    // macOS 请求权限
+    final macosResult = await _notifications
+        .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+
+    return iosResult ?? macosResult ?? false;
   }
 
   /// 检查通知权限状态
   Future<bool> checkPermissions() async {
     // iOS 检查权限
-    final result = await _notifications
+    final iosResult = await _notifications
         .resolvePlatformSpecificImplementation<
             IOSFlutterLocalNotificationsPlugin>()
         ?.checkPermissions();
 
-    return result?.isEnabled ?? false;
+    // macOS 检查权限
+    final macosResult = await _notifications
+        .resolvePlatformSpecificImplementation<
+            MacOSFlutterLocalNotificationsPlugin>()
+        ?.checkPermissions();
+
+    return iosResult?.isEnabled ?? macosResult?.isEnabled ?? false;
   }
 
   /// 调度计划提醒通知
