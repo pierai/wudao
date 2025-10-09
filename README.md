@@ -42,6 +42,10 @@ samples, guidance on mobile development, and a full API reference.
 
 # Claude 使用
 
+## 更新
+
+npm install -g @anthropic-ai/claude-code
+
 ## TODO
 
 1. 新项目使用 Github SpecKit 开发新项目：提供了思考的框架、实现路径、大模型间共享、存档
@@ -50,6 +54,9 @@ samples, guidance on mobile development, and a full API reference.
       b. gemini 有免费额度
 
 ## 指令
+
+claude --dangerously-skip-permissions
+       --allowed-tools
 
 /rewind 选中回滚
 
@@ -60,7 +67,7 @@ samples, guidance on mobile development, and a full API reference.
 tab 切换思考模式
 ultrathink 开启ultrathink模式
 搜索发送的历史消息 Ctrl + R
-查看 todos：Ctrl + T
+查看 TODO LIST：Ctrl + T
 VSCode插件
 
 ## 自定义命令
@@ -77,9 +84,6 @@ ARGUMENTS 传递参数
 利用hooks实现claude code输出等待提示（等待用户确认）时，通过hooks发送飞书消息通知用户
 
 ## MCP配置
-
-claude --dangerously-skip-permissions
-      --allowed-tools
 
 claude mcp add-json github '{"command":"npx","args":["-y","@modelcontex
       tprotocol/server-github"],"env":{"GITHUB_PERSONAL_ACCESS_TOKEN":""}}'
