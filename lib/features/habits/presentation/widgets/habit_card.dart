@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,7 +8,7 @@ import '../../domain/entities/habit.dart';
 import '../providers/habit_provider.dart';
 import 'check_in_dialog.dart';
 
-/// 习惯卡片组件
+/// 习惯卡片组件（支持响应式布局）
 class HabitCard extends ConsumerWidget {
   final Habit habit;
   final bool showAssociatedHabits;
@@ -16,6 +18,95 @@ class HabitCard extends ConsumerWidget {
     required this.habit,
     this.showAssociatedHabits = false,
   });
+
+  /// 判断是否为紧凑模式（iPhone）
+  bool _isCompactMode(BuildContext context) {
+    // iOS且屏幕宽度小于等于iPhone Pro Max宽度
+    return Platform.isIOS && MediaQuery.of(context).size.width <= 428;
+  }
+
+  // ========== 响应式布局参数 ==========
+
+  /// 卡片外层横向 padding
+  double _outerHorizontalPadding(BuildContext context) {
+    return _isCompactMode(context) ? 12.0 : 16.0;
+  }
+
+  /// 卡片外层纵向 padding
+  double _outerVerticalPadding(BuildContext context) {
+    return _isCompactMode(context) ? 6.0 : 8.0;
+  }
+
+  /// 卡片内层 padding
+  double _innerPadding(BuildContext context) {
+    return _isCompactMode(context) ? 12.0 : 16.0;
+  }
+
+  /// 标题字体大小
+  double _titleFontSize(BuildContext context) {
+    return _isCompactMode(context) ? 16.0 : 18.0;
+  }
+
+  /// 标题下方间隔
+  double _titleBottomSpacing(BuildContext context) {
+    return _isCompactMode(context) ? 3.0 : 4.0;
+  }
+
+  /// 类型标签字体大小
+  double _typeBadgeFontSize(BuildContext context) {
+    return _isCompactMode(context) ? 11.0 : 12.0;
+  }
+
+  /// 类型标签 padding
+  EdgeInsets _typeBadgePadding(BuildContext context) {
+    return _isCompactMode(context)
+        ? const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5)
+        : const EdgeInsets.symmetric(horizontal: 8, vertical: 2);
+  }
+
+  /// 暗示区块字体大小
+  double _cueFontSize(BuildContext context) {
+    return _isCompactMode(context) ? 13.0 : 14.0;
+  }
+
+  /// 暗示区块图标大小
+  double _cueIconSize(BuildContext context) {
+    return _isCompactMode(context) ? 14.0 : 16.0;
+  }
+
+  /// 区块间隔
+  double _sectionSpacing(BuildContext context) {
+    return _isCompactMode(context) ? 8.0 : 12.0;
+  }
+
+  /// 统计信息字体大小
+  double _statsFontSize(BuildContext context) {
+    return _isCompactMode(context) ? 13.0 : 14.0;
+  }
+
+  /// 统计信息 padding
+  EdgeInsets _statsPadding(BuildContext context) {
+    return _isCompactMode(context)
+        ? const EdgeInsets.symmetric(horizontal: 10, vertical: 5)
+        : const EdgeInsets.symmetric(horizontal: 12, vertical: 6);
+  }
+
+  /// 快速打卡按钮尺寸
+  double _checkInButtonSize(BuildContext context) {
+    return _isCompactMode(context) ? 40.0 : 44.0;
+  }
+
+  /// 快速打卡按钮图标尺寸
+  double _checkInButtonIconSize(BuildContext context) {
+    return _isCompactMode(context) ? 20.0 : 24.0;
+  }
+
+  /// 是否显示暗示预览（iPhone 上可隐藏以节省空间）
+  bool _showCuePreview(BuildContext context) {
+    // iPhone 上如果暗示内容较长，可以考虑隐藏
+    // 这里先保留显示，用户可以根据需要调整
+    return true; // _isCompactMode(context) ? false : true;
+  }
 
   Future<void> _handleCheckIn(BuildContext context, WidgetRef ref) async {
     final repository = ref.read(habitRepositoryProvider);
@@ -81,7 +172,10 @@ class HabitCard extends ConsumerWidget {
     final hasTodayRecordAsync = ref.watch(hasTodayRecordProvider(habit.id));
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: EdgeInsets.symmetric(
+        horizontal: _outerHorizontalPadding(context),
+        vertical: _outerVerticalPadding(context),
+      ),
       child: Dismissible(
         key: Key(habit.id),
         direction: DismissDirection.endToStart,
@@ -125,7 +219,7 @@ class HabitCard extends ConsumerWidget {
         child: GestureDetector(
           onTap: () => _handleViewDetail(context),
           child: Container(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(_innerPadding(context)),
             decoration: BoxDecoration(
               color: CupertinoColors.systemBackground,
               borderRadius: BorderRadius.circular(12.0),
@@ -145,21 +239,18 @@ class HabitCard extends ConsumerWidget {
                         children: [
                           Text(
                             habit.name,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: TextStyle(
+                              fontSize: _titleFontSize(context),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: _titleBottomSpacing(context)),
                           // 习惯类型标签和核心习惯徽章
                           Row(
                             children: [
                               // 习惯类型标签
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
+                                padding: _typeBadgePadding(context),
                                 decoration: BoxDecoration(
                                   color: habit.isPositive
                                       ? CupertinoColors.activeGreen.withOpacity(
@@ -173,7 +264,7 @@ class HabitCard extends ConsumerWidget {
                                 child: Text(
                                   habit.typeDisplayText,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: _typeBadgeFontSize(context),
                                     color: habit.isPositive
                                         ? CupertinoColors.activeGreen
                                         : CupertinoColors.activeBlue,
@@ -184,27 +275,26 @@ class HabitCard extends ConsumerWidget {
                               if (habit.isCore) ...[
                                 const SizedBox(width: 6),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 2,
-                                  ),
+                                  padding: _typeBadgePadding(context),
                                   decoration: BoxDecoration(
                                     color: CupertinoColors.systemOrange
                                         .withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
-                                  child: const Row(
+                                  child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Text(
                                         '💎',
-                                        style: TextStyle(fontSize: 10),
+                                        style: TextStyle(
+                                          fontSize: _typeBadgeFontSize(context) - 1,
+                                        ),
                                       ),
-                                      SizedBox(width: 2),
+                                      const SizedBox(width: 2),
                                       Text(
                                         '核心习惯',
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: _typeBadgeFontSize(context),
                                           color: CupertinoColors.systemOrange,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -229,8 +319,8 @@ class HabitCard extends ConsumerWidget {
                                 ? null
                                 : () => _handleCheckIn(context, ref),
                             child: Container(
-                              width: 44,
-                              height: 44,
+                              width: _checkInButtonSize(context),
+                              height: _checkInButtonSize(context),
                               decoration: BoxDecoration(
                                 color: hasTodayRecord
                                     ? CupertinoColors.activeGreen
@@ -244,7 +334,7 @@ class HabitCard extends ConsumerWidget {
                                 color: hasTodayRecord
                                     ? CupertinoColors.white
                                     : CupertinoColors.systemGrey,
-                                size: 24,
+                                size: _checkInButtonIconSize(context),
                               ),
                             ),
                           );
@@ -258,22 +348,24 @@ class HabitCard extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: _sectionSpacing(context)),
                 // 暗示预览（如果有）
-                if (habit.cue != null && habit.cue!.isNotEmpty) ...[
+                if (_showCuePreview(context) &&
+                    habit.cue != null &&
+                    habit.cue!.isNotEmpty) ...[
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         CupertinoIcons.lightbulb,
-                        size: 16,
+                        size: _cueIconSize(context),
                         color: CupertinoColors.systemGrey,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           habit.cue!,
-                          style: const TextStyle(
-                            fontSize: 14,
+                          style: TextStyle(
+                            fontSize: _cueFontSize(context),
                             color: CupertinoColors.systemGrey,
                           ),
                           maxLines: 1,
@@ -282,7 +374,7 @@ class HabitCard extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: _sectionSpacing(context)),
                 ],
                 // 统计信息
                 statsAsync.when(
@@ -291,10 +383,7 @@ class HabitCard extends ConsumerWidget {
                       children: [
                         // 连续天数
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
+                          padding: _statsPadding(context),
                           decoration: BoxDecoration(
                             color: CupertinoColors.systemGrey6,
                             borderRadius: BorderRadius.circular(8),
@@ -303,13 +392,15 @@ class HabitCard extends ConsumerWidget {
                             children: [
                               Text(
                                 stats.currentStreakBadge,
-                                style: const TextStyle(fontSize: 14),
+                                style: TextStyle(
+                                  fontSize: _statsFontSize(context),
+                                ),
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${stats.currentStreak} 天',
-                                style: const TextStyle(
-                                  fontSize: 14,
+                                style: TextStyle(
+                                  fontSize: _statsFontSize(context),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -319,18 +410,15 @@ class HabitCard extends ConsumerWidget {
                         const SizedBox(width: 8),
                         // 完成率
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
+                          padding: _statsPadding(context),
                           decoration: BoxDecoration(
                             color: CupertinoColors.systemGrey6,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
                             '完成率 ${stats.completionRatePercentage}',
-                            style: const TextStyle(
-                              fontSize: 14,
+                            style: TextStyle(
+                              fontSize: _statsFontSize(context),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -361,7 +449,7 @@ class HabitCard extends ConsumerWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 12),
+        SizedBox(height: _sectionSpacing(context)),
         // 展开/收起按钮
         GestureDetector(
           onTap: () {
