@@ -250,20 +250,22 @@ class HabitCard extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SizedBox(width: _badgeSpacing(context)),
-                          // 习惯类型标签
-                          Container(
-                            padding: _typeBadgePadding(context),
-                            decoration: BoxDecoration(color: _getTypeBadgeColor(habit), borderRadius: BorderRadius.circular(4)),
-                            child: Text(
-                              habit.typeDisplayText,
-                              style: TextStyle(
-                                fontSize: _typeBadgeFontSize(context),
-                                fontWeight: FontWeight.w600,
-                                color: _getTypeTextColor(habit),
+                          // 习惯类型标签（核心习惯不显示，用背景色表示）
+                          if (!habit.isCore) ...[
+                            SizedBox(width: _badgeSpacing(context)),
+                            Container(
+                              padding: _typeBadgePadding(context),
+                              decoration: BoxDecoration(color: _getTypeBadgeColor(habit), borderRadius: BorderRadius.circular(4)),
+                              child: Text(
+                                habit.typeDisplayText,
+                                style: TextStyle(
+                                  fontSize: _typeBadgeFontSize(context),
+                                  fontWeight: FontWeight.w600,
+                                  color: _getTypeTextColor(habit),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                           // 分类标签
                           if (habit.category != null) ...[
                             SizedBox(width: _badgeSpacing(context)),
