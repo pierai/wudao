@@ -9,20 +9,20 @@ import '../widgets/habit_card.dart';
 
 /// 习惯Tab类型
 enum HabitTabType {
-  core, // 💎核心习惯
+  core, // 💪核心习惯
   replacement, // 🔄习惯替代
-  positive, // ✅正向习惯
+  positive, // ⬆️正向习惯
 }
 
 extension HabitTabTypeX on HabitTabType {
   String get displayName {
     switch (this) {
       case HabitTabType.positive:
-        return '✅ 正向习惯';
+        return '⬆️ 正向习惯';
       case HabitTabType.core:
-        return '💎 核心习惯';
+        return '💪 核心习惯';
       case HabitTabType.replacement:
-        return '🔄 习惯替代';
+        return '↔️ 习惯替代';
     }
   }
 
@@ -271,22 +271,15 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                     sliver: SliverToBoxAdapter(
                       child: Text(
                         '📂 核心习惯',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: CupertinoColors.systemGrey.darkColor,
-                        ),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: CupertinoColors.systemGrey.darkColor),
                       ),
                     ),
                   ),
                   SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final habit = coreHabits[index];
-                        return _buildCoreHabitCard(habit);
-                      },
-                      childCount: coreHabits.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final habit = coreHabits[index];
+                      return _buildCoreHabitCard(habit);
+                    }, childCount: coreHabits.length),
                   ),
                 ],
 
@@ -294,12 +287,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                 if (coreHabits.isNotEmpty && unassociatedHabits.isNotEmpty)
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    sliver: SliverToBoxAdapter(
-                      child: Container(
-                        height: 1,
-                        color: CupertinoColors.separator,
-                      ),
-                    ),
+                    sliver: SliverToBoxAdapter(child: Container(height: 1, color: CupertinoColors.separator)),
                   ),
 
                 // 未关联习惯区
@@ -311,38 +299,21 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                         children: [
                           Text(
                             '未关联的习惯',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: CupertinoColors.systemGrey.darkColor,
-                            ),
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: CupertinoColors.systemGrey.darkColor),
                           ),
                           const SizedBox(width: 8),
-                          Icon(
-                            CupertinoIcons.hand_draw,
-                            size: 14,
-                            color: CupertinoColors.systemGrey.darkColor,
-                          ),
+                          Icon(CupertinoIcons.hand_draw, size: 14, color: CupertinoColors.systemGrey.darkColor),
                           const SizedBox(width: 4),
-                          Text(
-                            '长按拖到核心习惯',
-                            style: TextStyle(
-                              fontSize: 11,
-                              color: CupertinoColors.systemGrey,
-                            ),
-                          ),
+                          Text('长按拖到核心习惯', style: TextStyle(fontSize: 11, color: CupertinoColors.systemGrey)),
                         ],
                       ),
                     ),
                   ),
                   SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final habit = unassociatedHabits[index];
-                        return _buildDraggableHabitCard(habit);
-                      },
-                      childCount: unassociatedHabits.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final habit = unassociatedHabits[index];
+                      return _buildDraggableHabitCard(habit);
+                    }, childCount: unassociatedHabits.length),
                   ),
                 ],
               ],
@@ -371,13 +342,10 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
           slivers: [
             CupertinoSliverRefreshControl(onRefresh: _handleRefresh),
             SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final habit = filteredHabits[index];
-                  return _buildHabitCardWithAssociationBadge(habit);
-                },
-                childCount: filteredHabits.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final habit = filteredHabits[index];
+                return _buildHabitCardWithAssociationBadge(habit);
+              }, childCount: filteredHabits.length),
             ),
           ],
         );
@@ -408,10 +376,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
         // 返回卡片，如果已关联则显示标记
         return Stack(
           children: [
-            HabitCard(
-              habit: habit,
-              showAssociatedHabits: false,
-            ),
+            HabitCard(habit: habit, showAssociatedHabits: false),
             if (isAssociated)
               Positioned(
                 top: 12,
@@ -425,19 +390,11 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
-                      Icon(
-                        CupertinoIcons.link,
-                        size: 10,
-                        color: CupertinoColors.white,
-                      ),
+                      Icon(CupertinoIcons.link, size: 10, color: CupertinoColors.white),
                       SizedBox(width: 2),
                       Text(
                         '已关联',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: CupertinoColors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: TextStyle(fontSize: 10, color: CupertinoColors.white, fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
@@ -467,18 +424,10 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
 
         return Container(
           decoration: BoxDecoration(
-            border: isHovering
-                ? Border.all(
-                    color: CupertinoColors.activeBlue,
-                    width: 2,
-                  )
-                : null,
+            border: isHovering ? Border.all(color: CupertinoColors.activeBlue, width: 2) : null,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: HabitCard(
-            habit: coreHabit,
-            showAssociatedHabits: true,
-          ),
+          child: HabitCard(habit: coreHabit, showAssociatedHabits: true),
         );
       },
     );
@@ -495,24 +444,12 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
           opacity: 0.8,
           child: SizedBox(
             width: MediaQuery.of(context).size.width - 32,
-            child: HabitCard(
-              habit: habit,
-              showAssociatedHabits: false,
-            ),
+            child: HabitCard(habit: habit, showAssociatedHabits: false),
           ),
         ),
       ),
-      childWhenDragging: Opacity(
-        opacity: 0.3,
-        child: HabitCard(
-          habit: habit,
-          showAssociatedHabits: false,
-        ),
-      ),
-      child: HabitCard(
-        habit: habit,
-        showAssociatedHabits: false,
-      ),
+      childWhenDragging: Opacity(opacity: 0.3, child: HabitCard(habit: habit, showAssociatedHabits: false)),
+      child: HabitCard(habit: habit, showAssociatedHabits: false),
     );
   }
 
@@ -520,10 +457,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
   Future<void> _createAssociation(String coreHabitId, String associatedHabitId) async {
     try {
       final repository = ref.read(habitRepositoryProvider);
-      await repository.addHabitAssociation(
-        keystoneHabitId: coreHabitId,
-        associatedHabitId: associatedHabitId,
-      );
+      await repository.addHabitAssociation(keystoneHabitId: coreHabitId, associatedHabitId: associatedHabitId);
 
       if (mounted) {
         // 显示成功提示
@@ -532,13 +466,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
           builder: (context) => CupertinoAlertDialog(
             title: const Text('关联成功'),
             content: const Text('习惯已关联到核心习惯'),
-            actions: [
-              CupertinoDialogAction(
-                isDefaultAction: true,
-                onPressed: () => Navigator.pop(context),
-                child: const Text('确定'),
-              ),
-            ],
+            actions: [CupertinoDialogAction(isDefaultAction: true, onPressed: () => Navigator.pop(context), child: const Text('确定'))],
           ),
         );
       }
@@ -550,12 +478,7 @@ class _HabitsScreenState extends ConsumerState<HabitsScreen> {
           builder: (context) => CupertinoAlertDialog(
             title: const Text('关联失败'),
             content: Text(e.toString()),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('确定'),
-              ),
-            ],
+            actions: [CupertinoDialogAction(onPressed: () => Navigator.pop(context), child: const Text('确定'))],
           ),
         );
       }
