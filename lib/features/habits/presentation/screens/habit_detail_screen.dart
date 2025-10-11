@@ -123,7 +123,7 @@ class HabitDetailScreen extends ConsumerWidget {
                 // 习惯类型和分类标签
                 Row(
                   children: [
-                    // 类型标签（带图标）
+                    // 类型标签（文字）
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -133,23 +133,13 @@ class HabitDetailScreen extends ConsumerWidget {
                         color: _getTypeBadgeColor(habit),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _getTypeIcon(habit),
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            habit.typeDisplayText,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: _getTypeTextColor(habit),
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        habit.typeDisplayText,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: _getTypeTextColor(habit),
+                        ),
                       ),
                     ),
                     // 分类标签
@@ -164,23 +154,13 @@ class HabitDetailScreen extends ConsumerWidget {
                           color: CupertinoColors.systemGrey5,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              habit.category!.icon,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              habit.category!.displayName,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: CupertinoColors.systemGrey,
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          habit.category!.displayName,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: CupertinoColors.systemGrey,
+                          ),
                         ),
                       ),
                     ],
@@ -483,18 +463,6 @@ class HabitDetailScreen extends ConsumerWidget {
   }
 
   // ========== 标签辅助方法 ==========
-
-  /// 获取类型标签图标
-  String _getTypeIcon(Habit habit) {
-    switch (habit.type) {
-      case HabitType.positive:
-        return '✅';
-      case HabitType.core:
-        return '💎';
-      case HabitType.replacement:
-        return '🔄';
-    }
-  }
 
   /// 获取类型标签背景色
   Color _getTypeBadgeColor(Habit habit) {

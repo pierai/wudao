@@ -111,18 +111,6 @@ class HabitCard extends ConsumerWidget {
 
   // ========== 标签辅助方法 ==========
 
-  /// 获取类型标签图标
-  String _getTypeIcon(Habit habit) {
-    switch (habit.type) {
-      case HabitType.positive:
-        return '✅';
-      case HabitType.core:
-        return '💎';
-      case HabitType.replacement:
-        return '🔄';
-    }
-  }
-
   /// 获取类型标签背景色
   Color _getTypeBadgeColor(Habit habit) {
     switch (habit.type) {
@@ -132,6 +120,18 @@ class HabitCard extends ConsumerWidget {
         return CupertinoColors.systemOrange.withOpacity(0.15);
       case HabitType.replacement:
         return CupertinoColors.activeBlue.withOpacity(0.15);
+    }
+  }
+
+  /// 获取类型标签文字颜色
+  Color _getTypeTextColor(Habit habit) {
+    switch (habit.type) {
+      case HabitType.positive:
+        return CupertinoColors.activeGreen;
+      case HabitType.core:
+        return CupertinoColors.systemOrange;
+      case HabitType.replacement:
+        return CupertinoColors.activeBlue;
     }
   }
 
@@ -283,9 +283,11 @@ class HabitCard extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              _getTypeIcon(habit),
+                              habit.typeDisplayText,
                               style: TextStyle(
                                 fontSize: _typeBadgeFontSize(context),
+                                fontWeight: FontWeight.w600,
+                                color: _getTypeTextColor(habit),
                               ),
                             ),
                           ),
@@ -299,9 +301,11 @@ class HabitCard extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                habit.category!.icon,
+                                habit.category!.displayName,
                                 style: TextStyle(
                                   fontSize: _typeBadgeFontSize(context),
+                                  fontWeight: FontWeight.w600,
+                                  color: CupertinoColors.systemGrey,
                                 ),
                               ),
                             ),
