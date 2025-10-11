@@ -73,6 +73,86 @@
 - 应对网络不稳定
 - 降低服务器负载
 
+### ADR-005: 习惯类型三分类系统
+
+**背景**:
+- 初版使用 `type` (positive/replacement) + `isKeystone` 布尔值标识核心习惯
+- UI臃肿：5个Tab（生活、学习、健康、工作、运动）+ 核心/普通筛选
+- 关联功能操作复杂，正向习惯和核心习惯分开展示不便于建立关联
+
+**决策**:
+采用三种互斥的习惯类型系统：
+- **💎 核心习惯 (core)**: 能够引发连锁反应，带动其他习惯形成的关键习惯
+- **🔄 习惯替代 (replacement)**: 通过替换惯常行为来改变不良习惯，保持相同暗示和奖赏
+- **✅ 正向习惯 (positive)**: 要建立的新习惯，包含完整的暗示-惯常行为-奖赏回路
+
+**实现**:
+1. 移除 `isKeystone` 字段，使用 `type = 'CORE'` 直接标识
+2. Tab改为按类型分类（核心/替代/正向），而非按分类（生活/工作/运动）
+3. 核心习惯Tab实现分区布局：核心习惯区 + 未关联习惯区
+4. 实现拖拽关联功能：长按未关联习惯拖到核心习惯上建立关联
+5. 分类简化为3个枚举：life/work/sport
+
+**优势**:
+- ✅ UI简洁：3个Tab替代原来的5个分类Tab
+- ✅ 类型语义清晰：一个习惯只有一种类型，避免概念混淆
+- ✅ 操作直观：拖拽关联符合iOS用户习惯，类似文件管理
+- ✅ 数据库优化：减少一个字段，查询更简单
+- ✅ 向后兼容：数据库迁移自动转换旧数据
+
+**数据库迁移** (Schema v6):
+```sql
+-- 移除 isKeystone 列，将 isKeystone=true 的习惯转为 type='CORE'
+UPDATE habits SET type = 'CORE' WHERE isKeystone = 1 AND type != 'REPLACEMENT';
+ALTER TABLE habits DROP COLUMN isKeystone;
+```
+
+### ADR-006: 习惯关联采用拖拽交互
+
+**背景**:
+用户需要将正向习惯和习惯替代关联到核心习惯，但两者在不同Tab中展示，建立关联不便。
+
+**决策**:
+在核心习惯Tab中实现拖拽关联功能（方案A）：
+- 核心习惯区：展示所有核心习惯及其关联的习惯（可展开）
+- 未关联习惯区：显示未被关联的正向/替代习惯
+- 拖拽交互：长按未关联习惯，拖到核心习惯上建立关联
+
+**替代方案**:
+- ❌ 方案B：新增"全部习惯"Tab专门管理关联（增加复杂度）
+- ❌ 方案C：进入"编辑模式"后从抽屉拖拽（步骤繁琐）
+- ❌ 方案D：跨Tab拖拽（实现复杂，用户难以发现）
+
+**实现细节**:
+```dart
+// 核心习惯卡片使用DragTarget接收拖拽
+DragTarget<Habit>(
+  onWillAcceptWithDetails: (details) => details.data.type != HabitType.core,
+  onAcceptWithDetails: (details) => _createAssociation(...),
+  builder: (context, candidateData, rejectedData) {
+    final isHovering = candidateData.isNotEmpty;
+    return Container(
+      decoration: isHovering ? Border.all(color: activeBlue, width: 2) : null,
+      child: HabitCard(...),
+    );
+  },
+)
+
+// 未关联习惯使用LongPressDraggable支持拖拽
+LongPressDraggable<Habit>(
+  data: habit,
+  feedback: Material(...), // 拖拽时的视觉反馈
+  childWhenDragging: Opacity(opacity: 0.3, ...), // 原位置幽灵效果
+  child: HabitCard(...),
+)
+```
+
+**用户体验**:
+- ✅ 拖拽中：卡片80%不透明度 + 阴影 + 原位置30%幽灵效果
+- ✅ 悬停时：核心习惯卡片蓝色边框高亮
+- ✅ 成功后：Cupertino风格提示，习惯从未关联区消失
+- ✅ 已关联标记：正向/替代Tab显示蓝色"🔗已关联"徽章
+
 ## 项目结构
 
 ```
@@ -130,7 +210,7 @@ lib/
 
 ## 当前开发阶段
 
-### Phase 1: 人生目标管理 MVP（进行中）
+### Phase 1: 人生目标管理 MVP（待完成）
 
 **核心功能**:
 
@@ -146,6 +226,86 @@ lib/
 - CupertinoListSection 展示目标层级
 - AsyncNotifierProvider 管理目标状态
 - 离线优先：本地 Drift 存储 + 云端同步
+
+### Phase 2: 习惯追踪模块（已完成核心功能）
+
+**已完成功能** ✅:
+
+1. **习惯类型系统**
+   - 三种互斥类型：核心习惯、习惯替代、正向习惯
+   - 数据库Schema v6，支持从旧版本自动迁移
+   - 3个分类：生活(life)、工作(work)、运动(sport)
+
+2. **习惯管理**
+   - 习惯CRUD操作（创建/编辑/删除/归档）
+   - 习惯搜索和筛选
+   - 习惯循环：暗示(Cue) → 惯常行为(Routine) → 奖赏(Reward)
+   - 习惯替代需要填写原惯常行为(Old Routine)
+
+3. **习惯关联系统**
+   - 拖拽关联：长按未关联习惯拖到核心习惯上
+   - 关联查询：查看核心习惯的所有伴随习惯
+   - 未关联习惯列表：实时监听未被关联的习惯
+   - 已关联标记：在正向/替代Tab显示蓝色徽章
+
+4. **打卡记录**
+   - 每日打卡（支持质量评分1-5星）
+   - 打卡历史查询和月度日历展示
+   - 连续天数统计（当前连续、最佳连续）
+   - 完成率计算和可视化
+
+5. **明日计划**
+   - 创建次日计划并设置计划时间
+   - 计划状态管理：pending → cueCompleted → checkedIn
+   - 支持跳过计划(skipped)
+   - 计划完成率统计
+
+6. **Frontmatter灵感记录**
+   - Markdown格式记录灵感和感悟
+   - 支持标签分类和搜索
+   - 与习惯关联（可引用习惯）
+
+**UI实现重点**:
+
+- **核心习惯Tab**:
+  - 📂 核心习惯区（可展开显示关联习惯）
+  - 未关联习惯区（支持长按拖拽）
+  - 拖拽悬停时蓝色边框高亮
+
+- **正向习惯/习惯替代Tab**:
+  - 显示对应类型的所有习惯
+  - 已关联习惯显示"🔗已关联"徽章
+
+- **习惯表单**:
+  - 3选项类型选择器（核心/替代/正向）
+  - 紧凑的分类按钮布局
+  - 智能字段显示（习惯替代时显示原惯常行为）
+
+**数据库设计**:
+
+```
+habits (习惯表)
+├─ id, name, cue, routine, old_routine, reward
+├─ type: POSITIVE | CORE | REPLACEMENT
+├─ category: life | work | sport
+└─ is_active, created_at, updated_at, deleted_at
+
+habit_associations (关联表)
+├─ keystone_habit_id (核心习惯ID)
+├─ associated_habit_id (关联习惯ID)
+└─ created_at
+
+habit_records (打卡记录表)
+habit_plans (明日计划表)
+frontmatters (灵感记录表)
+```
+
+**待完成功能** ⏳:
+
+- 习惯提醒通知
+- 习惯统计报表和趋势图
+- 习惯模板库
+- 批量操作（批量关联、批量归档）
 
 ## 代码规范
 
@@ -414,5 +574,43 @@ A: 需要在 entitlements 中添加文件访问权限：
 
 ---
 
-**最后更新**: 2025-10-07
-**版本**: v0.2.0-alpha
+**最后更新**: 2025-10-11
+**版本**: v0.3.0-alpha
+
+## 更新日志
+
+### v0.3.0-alpha (2025-10-11)
+
+**重大更新**:
+- ✨ 实现习惯拖拽关联功能（方案A）
+- 🔄 重构习惯类型系统（type三分类替代type+isKeystone）
+- 🎨 优化UI布局（3个Tab替代5个分类Tab）
+- 📦 数据库迁移到Schema v6
+- 📚 更新种子数据和文档
+
+**功能增强**:
+- 核心习惯Tab分区布局（核心习惯区 + 未关联习惯区）
+- 长按拖拽交互，iOS原生体验
+- 已关联习惯显示蓝色徽章
+- 分类选择器UI优化（紧凑按钮布局）
+
+**技术改进**:
+- 新增 `watchUnassociatedHabits` DAO查询
+- 新增 `unassociatedHabitsProvider` 和 `isHabitAssociatedProvider`
+- DragTarget + LongPressDraggable 实现拖拽
+- 完善习惯关联的数据层和UI层
+
+**文档更新**:
+- 新增 ADR-005: 习惯类型三分类系统
+- 新增 ADR-006: 习惯关联采用拖拽交互
+- 更新开发阶段说明和数据库设计文档
+- 同步优化种子数据文件和说明文档
+
+### v0.2.0-alpha (2025-10-07)
+
+**初版功能**:
+- ✅ 习惯CRUD基础功能
+- ✅ 打卡记录和统计
+- ✅ 明日计划系统
+- ✅ Frontmatter灵感记录
+- ✅ 习惯关联基础数据结构
