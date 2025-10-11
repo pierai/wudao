@@ -30,6 +30,7 @@ class _FrontmatterEditorScreenState
   late TextEditingController _contentController;
   late List<String> _selectedTags;
 
+  bool _isEditMode = false; // 是否为编辑模式
   bool _isPreviewMode = false;
   bool _hasUnsavedChanges = false;
   bool _isSavingDraft = false;
@@ -48,12 +49,17 @@ class _FrontmatterEditorScreenState
         TextEditingController(text: widget.frontmatter?.content ?? '');
     _selectedTags = widget.frontmatter?.tags ?? [];
 
-    // 监听内容变化
-    _titleController.addListener(_onContentChanged);
-    _contentController.addListener(_onContentChanged);
+    // 如果是新建感悟，默认进入编辑模式
+    // 如果是查看现有感悟，默认进入查看模式
+    _isEditMode = widget.frontmatter == null;
 
-    // 启动自动保存定时器
-    _startAutoSave();
+    // 只在编辑模式下监听内容变化
+    if (_isEditMode) {
+      _titleController.addListener(_onContentChanged);
+      _contentController.addListener(_onContentChanged);
+      // 启动自动保存定时器
+      _startAutoSave();
+    }
   }
 
   @override
@@ -70,6 +76,76 @@ class _FrontmatterEditorScreenState
         _hasUnsavedChanges = true;
       });
     }
+  }
+
+  /// 进入编辑模式
+  void _enterEditMode() {
+    setState(() {
+      _isEditMode = true;
+      _hasUnsavedChanges = false;
+    });
+
+    // 添加内容变化监听
+    _titleController.addListener(_onContentChanged);
+    _contentController.addListener(_onContentChanged);
+
+    // 启动自动保存定时器
+    _startAutoSave();
+  }
+
+  /// 取消编辑，返回查看模式
+  Future<void> _cancelEdit() async {
+    // 如果是新建感悟，直接返回
+    if (widget.frontmatter == null) {
+      final shouldPop = await _handleWillPop();
+      if (shouldPop && mounted) {
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+
+    // 如果有未保存的更改，提示用户
+    if (_hasUnsavedChanges) {
+      final shouldDiscard = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: const Text('放弃更改'),
+          content: const Text('你有未保存的更改，确定要放弃吗？'),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('取消'),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('放弃'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldDiscard != true) {
+        return;
+      }
+    }
+
+    // 恢复原始内容
+    setState(() {
+      _titleController.text = widget.frontmatter?.title ?? '';
+      _contentController.text = widget.frontmatter?.content ?? '';
+      _selectedTags = widget.frontmatter?.tags ?? [];
+      _isEditMode = false;
+      _hasUnsavedChanges = false;
+      _isPreviewMode = false;
+    });
+
+    // 移除监听器
+    _titleController.removeListener(_onContentChanged);
+    _contentController.removeListener(_onContentChanged);
+
+    // 停止自动保存定时器
+    _autoSaveTimer?.cancel();
   }
 
   /// 启动自动保存定时器
@@ -215,23 +291,53 @@ class _FrontmatterEditorScreenState
       });
 
       if (mounted) {
-        // 显示保存成功提示
-        showCupertinoDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: const Text('保存成功'),
-            content: const Text('你的感悟已保存'),
-            actions: [
-              CupertinoDialogAction(
-                onPressed: () {
-                  Navigator.of(context).pop(); // 关闭对话框
-                  Navigator.of(context).pop(); // 返回列表页
-                },
-                child: const Text('确定'),
-              ),
-            ],
-          ),
-        );
+        // 如果是编辑现有感悟，保存后返回查看模式
+        if (widget.frontmatter != null) {
+          setState(() {
+            _isEditMode = false;
+            _isPreviewMode = false;
+          });
+
+          // 移除监听器
+          _titleController.removeListener(_onContentChanged);
+          _contentController.removeListener(_onContentChanged);
+
+          // 停止自动保存定时器
+          _autoSaveTimer?.cancel();
+
+          // 显示保存成功提示
+          showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('保存成功'),
+              content: const Text('你的感悟已保存'),
+              actions: [
+                CupertinoDialogAction(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('确定'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          // 如果是新建感悟，保存后返回列表页
+          showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('保存成功'),
+              content: const Text('你的感悟已保存'),
+              actions: [
+                CupertinoDialogAction(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // 关闭对话框
+                    Navigator.of(context).pop(); // 返回列表页
+                  },
+                  child: const Text('确定'),
+                ),
+              ],
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -258,6 +364,12 @@ class _FrontmatterEditorScreenState
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
+        // 查看模式下可以直接返回
+        if (!_isEditMode) {
+          Navigator.of(context).pop();
+          return;
+        }
+        // 编辑模式下检查未保存的更改
         final shouldPop = await _handleWillPop();
         if (shouldPop && mounted) {
           Navigator.of(context).pop();
@@ -268,8 +380,12 @@ class _FrontmatterEditorScreenState
           middle: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(widget.frontmatter == null ? '新建感悟' : '编辑感悟'),
-              if (_lastAutoSaveTime != null)
+              Text(
+                _isEditMode
+                    ? (widget.frontmatter == null ? '新建感悟' : '编辑感悟')
+                    : '查看感悟',
+              ),
+              if (_isEditMode && _lastAutoSaveTime != null)
                 Text(
                   '已自动保存 ${_formatAutoSaveTime(_lastAutoSaveTime!)}',
                   style: const TextStyle(
@@ -277,7 +393,7 @@ class _FrontmatterEditorScreenState
                     color: CupertinoColors.systemGrey,
                   ),
                 ),
-              if (_isSavingDraft)
+              if (_isEditMode && _isSavingDraft)
                 const Text(
                   '保存中...',
                   style: TextStyle(
@@ -287,50 +403,66 @@ class _FrontmatterEditorScreenState
                 ),
             ],
           ),
-          leading: CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () async {
-              final shouldPop = await _handleWillPop();
-              if (shouldPop && mounted) {
-                Navigator.of(context).pop();
-              }
-            },
-            child: const Text('取消'),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 预览/编辑切换按钮
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  setState(() {
-                    _isPreviewMode = !_isPreviewMode;
-                  });
-                },
-                child: Icon(
-                  _isPreviewMode
-                      ? CupertinoIcons.pencil
-                      : CupertinoIcons.eye,
-                ),
-              ),
-              // 保存按钮
-              CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: _handleSave,
-                child: const Text(
-                  '保存',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
+          // 查看模式：无 leading，编辑模式：显示取消按钮
+          leading: _isEditMode
+              ? CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: _cancelEdit,
+                  child: const Text('取消'),
+                )
+              : null,
+          trailing: _buildTrailingButtons(),
         ),
         child: SafeArea(
-          child: _isPreviewMode ? _buildPreview() : _buildEditor(),
+          child: _isEditMode
+              ? (_isPreviewMode ? _buildPreview() : _buildEditor())
+              : _buildViewMode(),
         ),
       ),
     );
+  }
+
+  /// 构建导航栏右侧按钮
+  Widget _buildTrailingButtons() {
+    if (_isEditMode) {
+      // 编辑模式：显示预览/编辑切换按钮 + 保存按钮
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 预览/编辑切换按钮
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              setState(() {
+                _isPreviewMode = !_isPreviewMode;
+              });
+            },
+            child: Icon(
+              _isPreviewMode ? CupertinoIcons.pencil : CupertinoIcons.eye,
+            ),
+          ),
+          // 保存按钮
+          CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: _handleSave,
+            child: const Text(
+              '保存',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      );
+    } else {
+      // 查看模式：只显示编辑按钮
+      return CupertinoButton(
+        padding: EdgeInsets.zero,
+        onPressed: _enterEditMode,
+        child: const Text(
+          '编辑',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+      );
+    }
   }
 
   Widget _buildEditor() {
@@ -465,6 +597,98 @@ class _FrontmatterEditorScreenState
           if (_contentController.text.isNotEmpty)
             MarkdownBody(
               data: _contentController.text,
+              styleSheet: MarkdownStyleSheet(
+                p: const TextStyle(
+                  fontSize: 16,
+                  height: 1.6,
+                ),
+                h1: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+                h2: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+                h3: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
+                listBullet: const TextStyle(
+                  fontSize: 16,
+                ),
+                code: const TextStyle(
+                  backgroundColor: CupertinoColors.systemGrey6,
+                  fontFamily: 'Courier',
+                ),
+              ),
+            )
+          else
+            const Text(
+              '暂无内容',
+              style: TextStyle(
+                fontSize: 16,
+                color: CupertinoColors.systemGrey,
+              ),
+            ),
+
+          const SizedBox(height: 100), // 底部留白
+        ],
+      ),
+    );
+  }
+
+  /// 构建查看模式（只读）
+  Widget _buildViewMode() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 标题
+          Text(
+            widget.frontmatter?.title ?? '无标题',
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // 标签
+          if (_selectedTags.isNotEmpty)
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _selectedTags.map((tag) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.systemGrey5,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    tag,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: CupertinoColors.systemGrey,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+
+          const SizedBox(height: 24),
+
+          // Markdown 内容预览
+          if (widget.frontmatter?.content != null &&
+              widget.frontmatter!.content.isNotEmpty)
+            MarkdownBody(
+              data: widget.frontmatter!.content,
               styleSheet: MarkdownStyleSheet(
                 p: const TextStyle(
                   fontSize: 16,
