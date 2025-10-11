@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../domain/entities/habit.dart';
+import '../../domain/entities/habit_category.dart';
 
 /// Habit 数据模型转换器
 ///
@@ -17,11 +18,10 @@ extension HabitDataToEntity on HabitData {
       routine: routine,
       oldRoutine: oldRoutine,
       reward: reward,
-      type: type == 'POSITIVE' ? HabitType.positive : HabitType.replacement,
-      category: category,
+      type: HabitTypeX.fromString(type),
+      category: category != null ? HabitCategoryX.fromString(category!) : null,
       notes: notes,
       isActive: isActive,
-      isKeystone: isKeystone,
       createdAt: createdAt,
       updatedAt: updatedAt,
       deletedAt: deletedAt,
@@ -40,10 +40,9 @@ extension HabitEntityToData on Habit {
       oldRoutine: oldRoutine,
       reward: reward,
       type: typeString,
-      category: category,
+      category: category?.toDbString(),
       notes: notes,
       isActive: isActive,
-      isKeystone: isKeystone,
       createdAt: createdAt,
       updatedAt: updatedAt,
       deletedAt: deletedAt,
@@ -60,10 +59,11 @@ extension HabitEntityToData on Habit {
       oldRoutine: oldRoutine != null ? Value(oldRoutine) : const Value(null),
       reward: reward != null ? Value(reward) : const Value(null),
       type: typeString,
-      category: category != null ? Value(category) : const Value(null),
+      category: category != null
+          ? Value(category!.toDbString())
+          : const Value(null),
       notes: notes != null ? Value(notes) : const Value(null),
       isActive: Value(isActive),
-      isKeystone: Value(isKeystone),
       createdAt: createdAt,
       updatedAt: updatedAt,
       deletedAt: deletedAt != null ? Value(deletedAt) : const Value(null),

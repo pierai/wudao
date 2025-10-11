@@ -14,10 +14,9 @@ _Habit _$HabitFromJson(Map<String, dynamic> json) => _Habit(
   oldRoutine: json['oldRoutine'] as String?,
   reward: json['reward'] as String?,
   type: $enumDecode(_$HabitTypeEnumMap, json['type']),
-  category: json['category'] as String?,
+  category: $enumDecodeNullable(_$HabitCategoryEnumMap, json['category']),
   notes: json['notes'] as String?,
   isActive: json['isActive'] as bool,
-  isKeystone: json['isKeystone'] as bool? ?? false,
   createdAt: DateTime.parse(json['createdAt'] as String),
   updatedAt: DateTime.parse(json['updatedAt'] as String),
   deletedAt: json['deletedAt'] == null
@@ -33,10 +32,9 @@ Map<String, dynamic> _$HabitToJson(_Habit instance) => <String, dynamic>{
   'oldRoutine': ?instance.oldRoutine,
   'reward': ?instance.reward,
   'type': _$HabitTypeEnumMap[instance.type]!,
-  'category': ?instance.category,
+  'category': ?_$HabitCategoryEnumMap[instance.category],
   'notes': ?instance.notes,
   'isActive': instance.isActive,
-  'isKeystone': instance.isKeystone,
   'createdAt': instance.createdAt.toIso8601String(),
   'updatedAt': instance.updatedAt.toIso8601String(),
   'deletedAt': ?instance.deletedAt?.toIso8601String(),
@@ -44,5 +42,12 @@ Map<String, dynamic> _$HabitToJson(_Habit instance) => <String, dynamic>{
 
 const _$HabitTypeEnumMap = {
   HabitType.positive: 'positive',
+  HabitType.core: 'core',
   HabitType.replacement: 'replacement',
+};
+
+const _$HabitCategoryEnumMap = {
+  HabitCategory.life: 'life',
+  HabitCategory.work: 'work',
+  HabitCategory.sport: 'sport',
 };

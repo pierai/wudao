@@ -9,8 +9,13 @@ import 'check_in_dialog.dart';
 /// 习惯卡片组件
 class HabitCard extends ConsumerWidget {
   final Habit habit;
+  final bool showAssociatedHabits;
 
-  const HabitCard({super.key, required this.habit});
+  const HabitCard({
+    super.key,
+    required this.habit,
+    this.showAssociatedHabits = false,
+  });
 
   Future<void> _handleCheckIn(BuildContext context, WidgetRef ref) async {
     final repository = ref.read(habitRepositoryProvider);
@@ -87,7 +92,10 @@ class HabitCard extends ConsumerWidget {
               title: const Text('删除习惯'),
               content: Text('确定要删除"${habit.name}"吗？'),
               actions: [
-                CupertinoDialogAction(child: const Text('取消'), onPressed: () => Navigator.of(context).pop(false)),
+                CupertinoDialogAction(
+                  child: const Text('取消'),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
                 CupertinoDialogAction(
                   isDestructiveAction: true,
                   onPressed: () => Navigator.of(context).pop(true),
@@ -104,8 +112,15 @@ class HabitCard extends ConsumerWidget {
         background: Container(
           alignment: Alignment.centerRight,
           padding: const EdgeInsets.only(right: 20.0),
-          decoration: BoxDecoration(color: CupertinoColors.systemRed, borderRadius: BorderRadius.circular(12.0)),
-          child: const Icon(CupertinoIcons.delete, color: CupertinoColors.white, size: 28),
+          decoration: BoxDecoration(
+            color: CupertinoColors.systemRed,
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: const Icon(
+            CupertinoIcons.delete,
+            color: CupertinoColors.white,
+            size: 28,
+          ),
         ),
         child: GestureDetector(
           onTap: () => _handleViewDetail(context),
@@ -128,35 +143,54 @@ class HabitCard extends ConsumerWidget {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(habit.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text(
+                            habit.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 4),
                           // 习惯类型标签和核心习惯徽章
                           Row(
                             children: [
                               // 习惯类型标签
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: habit.isPositive
-                                      ? CupertinoColors.activeGreen.withOpacity(0.1)
-                                      : CupertinoColors.activeBlue.withOpacity(0.1),
+                                      ? CupertinoColors.activeGreen.withOpacity(
+                                          0.1,
+                                        )
+                                      : CupertinoColors.activeBlue.withOpacity(
+                                          0.1,
+                                        ),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
                                   habit.typeDisplayText,
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: habit.isPositive ? CupertinoColors.activeGreen : CupertinoColors.activeBlue,
+                                    color: habit.isPositive
+                                        ? CupertinoColors.activeGreen
+                                        : CupertinoColors.activeBlue,
                                   ),
                                 ),
                               ),
                               // 核心习惯徽章
-                              if (habit.isKeystone) ...[
+                              if (habit.isCore) ...[
                                 const SizedBox(width: 6),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: CupertinoColors.systemOrange.withOpacity(0.15),
+                                    color: CupertinoColors.systemOrange
+                                        .withOpacity(0.15),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: const Row(
@@ -191,24 +225,35 @@ class HabitCard extends ConsumerWidget {
                         data: (hasTodayRecord) {
                           return CupertinoButton(
                             padding: EdgeInsets.zero,
-                            onPressed: hasTodayRecord ? null : () => _handleCheckIn(context, ref),
+                            onPressed: hasTodayRecord
+                                ? null
+                                : () => _handleCheckIn(context, ref),
                             child: Container(
                               width: 44,
                               height: 44,
                               decoration: BoxDecoration(
-                                color: hasTodayRecord ? CupertinoColors.activeGreen : CupertinoColors.systemGrey5,
+                                color: hasTodayRecord
+                                    ? CupertinoColors.activeGreen
+                                    : CupertinoColors.systemGrey5,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                hasTodayRecord ? CupertinoIcons.check_mark : CupertinoIcons.circle,
-                                color: hasTodayRecord ? CupertinoColors.white : CupertinoColors.systemGrey,
+                                hasTodayRecord
+                                    ? CupertinoIcons.check_mark
+                                    : CupertinoIcons.circle,
+                                color: hasTodayRecord
+                                    ? CupertinoColors.white
+                                    : CupertinoColors.systemGrey,
                                 size: 24,
                               ),
                             ),
                           );
                         },
                         loading: () => const CupertinoActivityIndicator(),
-                        error: (_, __) => const Icon(CupertinoIcons.exclamationmark_circle, color: CupertinoColors.systemRed),
+                        error: (_, __) => const Icon(
+                          CupertinoIcons.exclamationmark_circle,
+                          color: CupertinoColors.systemRed,
+                        ),
                       ),
                     ),
                   ],
@@ -218,12 +263,19 @@ class HabitCard extends ConsumerWidget {
                 if (habit.cue != null && habit.cue!.isNotEmpty) ...[
                   Row(
                     children: [
-                      const Icon(CupertinoIcons.lightbulb, size: 16, color: CupertinoColors.systemGrey),
+                      const Icon(
+                        CupertinoIcons.lightbulb,
+                        size: 16,
+                        color: CupertinoColors.systemGrey,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           habit.cue!,
-                          style: const TextStyle(fontSize: 14, color: CupertinoColors.systemGrey),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: CupertinoColors.systemGrey,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -239,24 +291,48 @@ class HabitCard extends ConsumerWidget {
                       children: [
                         // 连续天数
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(color: CupertinoColors.systemGrey6, borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemGrey6,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           child: Row(
                             children: [
-                              Text(stats.currentStreakBadge, style: const TextStyle(fontSize: 14)),
+                              Text(
+                                stats.currentStreakBadge,
+                                style: const TextStyle(fontSize: 14),
+                              ),
                               const SizedBox(width: 4),
-                              Text('${stats.currentStreak} 天', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                              Text(
+                                '${stats.currentStreak} 天',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
                         // 完成率
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(color: CupertinoColors.systemGrey6, borderRadius: BorderRadius.circular(8)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: CupertinoColors.systemGrey6,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                           child: Text(
                             '完成率 ${stats.completionRatePercentage}',
-                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -265,11 +341,219 @@ class HabitCard extends ConsumerWidget {
                   loading: () => const CupertinoActivityIndicator(),
                   error: (_, __) => const SizedBox.shrink(),
                 ),
+                // 核心习惯展开功能
+                if (showAssociatedHabits)
+                  _buildAssociatedHabitsSection(context, ref),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+  /// 构建关联习惯展开区域
+  Widget _buildAssociatedHabitsSection(BuildContext context, WidgetRef ref) {
+    // 获取展开状态
+    final expandedMap = ref.watch(keystoneExpandedProvider);
+    final isExpanded = expandedMap[habit.id] ?? false;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox(height: 12),
+        // 展开/收起按钮
+        GestureDetector(
+          onTap: () {
+            final currentMap = ref.read(keystoneExpandedProvider);
+            ref.read(keystoneExpandedProvider.notifier).state = {
+              ...currentMap,
+              habit.id: !isExpanded,
+            };
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isExpanded
+                      ? CupertinoIcons.chevron_up
+                      : CupertinoIcons.chevron_down,
+                  size: 16,
+                  color: CupertinoColors.systemGrey,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  isExpanded ? '收起关联习惯' : '查看关联习惯',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: CupertinoColors.systemGrey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // 关联习惯列表
+        if (isExpanded) _buildAssociatedHabitsList(context, ref),
+      ],
+    );
+  }
+
+  /// 构建关联习惯列表
+  Widget _buildAssociatedHabitsList(BuildContext context, WidgetRef ref) {
+    final associatedHabitsAsync = ref.watch(associatedHabitsProvider(habit.id));
+
+    return associatedHabitsAsync.when(
+      data: (associatedHabits) {
+        if (associatedHabits.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: const Text(
+              '暂无关联习惯',
+              style: TextStyle(fontSize: 14, color: CupertinoColors.systemGrey),
+            ),
+          );
+        }
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            ...associatedHabits.map((associatedHabit) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: CupertinoColors.systemGrey6.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    // 关联习惯图标
+                    const Icon(
+                      CupertinoIcons.link,
+                      size: 16,
+                      color: CupertinoColors.systemGrey,
+                    ),
+                    const SizedBox(width: 8),
+                    // 关联习惯名称
+                    Expanded(
+                      child: Text(
+                        associatedHabit.name,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    // 移除关联按钮
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => _handleRemoveAssociation(
+                        context,
+                        ref,
+                        associatedHabit,
+                      ),
+                      child: const Icon(
+                        CupertinoIcons.xmark_circle_fill,
+                        size: 20,
+                        color: CupertinoColors.systemGrey2,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        );
+      },
+      loading: () => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: CupertinoActivityIndicator(),
+      ),
+      error: (error, stack) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Text(
+          '加载失败: $error',
+          style: const TextStyle(
+            fontSize: 14,
+            color: CupertinoColors.systemRed,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 处理移除关联
+  Future<void> _handleRemoveAssociation(
+    BuildContext context,
+    WidgetRef ref,
+    Habit associatedHabit,
+  ) async {
+    // 显示确认对话框
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('移除关联'),
+        content: Text('确定要移除"${associatedHabit.name}"的关联吗？'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('取消'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('移除'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        final repository = ref.read(habitRepositoryProvider);
+        await repository.removeHabitAssociation(
+          keystoneHabitId: habit.id,
+          associatedHabitId: associatedHabit.id,
+        );
+
+        // 刷新关联习惯列表
+        ref.invalidate(associatedHabitsProvider(habit.id));
+
+        if (context.mounted) {
+          // 显示成功提示
+          showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('成功'),
+              content: const Text('已移除关联'),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text('确定'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          // 显示错误提示
+          showCupertinoDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: const Text('失败'),
+              content: Text('移除关联失败: $e'),
+              actions: [
+                CupertinoDialogAction(
+                  child: const Text('确定'),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'habit_category.dart';
 
 part 'habit.freezed.dart';
 part 'habit.g.dart';
@@ -30,18 +31,14 @@ sealed class Habit with _$Habit {
     /// 习惯类型
     required HabitType type,
 
-    /// 分类（可选）
-    String? category,
+    /// 分类（可选）- 生活、工作、运动
+    HabitCategory? category,
 
     /// 备注说明
     String? notes,
 
     /// 是否活跃
     required bool isActive,
-
-    /// 是否为核心习惯（Keystone Habit）
-    /// 核心习惯能引发连锁反应，带动其他习惯的形成
-    @Default(false) bool isKeystone,
 
     /// 创建时间
     required DateTime createdAt,
@@ -63,17 +60,41 @@ sealed class Habit with _$Habit {
   /// 是否为正向习惯类型
   bool get isPositive => type == HabitType.positive;
 
+  /// 是否为核心习惯类型
+  bool get isCore => type == HabitType.core;
+
   /// 习惯类型字符串表示
-  String get typeString => type == HabitType.positive ? 'POSITIVE' : 'REPLACEMENT';
+  String get typeString {
+    switch (type) {
+      case HabitType.positive:
+        return 'POSITIVE';
+      case HabitType.core:
+        return 'CORE';
+      case HabitType.replacement:
+        return 'REPLACEMENT';
+    }
+  }
 
   /// 习惯类型显示文本
-  String get typeDisplayText => type == HabitType.positive ? '正向习惯' : '习惯替代';
+  String get typeDisplayText {
+    switch (type) {
+      case HabitType.positive:
+        return '正向习惯';
+      case HabitType.core:
+        return '核心习惯';
+      case HabitType.replacement:
+        return '习惯替代';
+    }
+  }
 }
 
 /// 习惯类型枚举
 enum HabitType {
   /// 正向习惯：建立新的良好习惯
   positive,
+
+  /// 核心习惯：能引发连锁反应，带动其他习惯的形成
+  core,
 
   /// 习惯替代：改变不良习惯（保持相同的暗示和奖赏，改变惯常行为）
   replacement,
@@ -82,6 +103,38 @@ enum HabitType {
 /// 扩展：从字符串创建 HabitType
 extension HabitTypeX on HabitType {
   static HabitType fromString(String value) {
-    return HabitType.values.firstWhere((type) => type.name.toUpperCase() == value.toUpperCase(), orElse: () => HabitType.positive);
+    return HabitType.values.firstWhere(
+      (type) => type.name.toUpperCase() == value.toUpperCase(),
+      orElse: () => HabitType.positive,
+    );
+  }
+
+  /// 获取类型的显示文本
+  String get displayText {
+    switch (this) {
+      case HabitType.positive:
+        return '正向习惯';
+      case HabitType.core:
+        return '核心习惯';
+      case HabitType.replacement:
+        return '习惯替代';
+    }
+  }
+
+  /// 获取类型的图标
+  String get icon {
+    switch (this) {
+      case HabitType.positive:
+        return '✅';
+      case HabitType.core:
+        return '💎';
+      case HabitType.replacement:
+        return '🔄';
+    }
+  }
+
+  /// 获取带图标的显示文本
+  String get displayTextWithIcon {
+    return '$icon $displayText';
   }
 }

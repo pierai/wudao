@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../routing/app_router.dart';
 import '../../domain/entities/habit.dart';
+import '../../domain/entities/habit_category.dart';
 import '../providers/habit_provider.dart';
 import '../widgets/habit_calendar_heatmap.dart';
 import '../widgets/habit_stats_card.dart';
@@ -11,10 +12,7 @@ import '../widgets/habit_stats_card.dart';
 class HabitDetailScreen extends ConsumerWidget {
   final String habitId;
 
-  const HabitDetailScreen({
-    super.key,
-    required this.habitId,
-  });
+  const HabitDetailScreen({super.key, required this.habitId});
 
   Future<void> _handleDelete(BuildContext context, WidgetRef ref) async {
     final confirmed = await showCupertinoDialog<bool>(
@@ -58,20 +56,14 @@ class HabitDetailScreen extends ConsumerWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(
-              middle: Text('加载中...'),
-            ),
-            child: Center(
-              child: CupertinoActivityIndicator(),
-            ),
+            navigationBar: CupertinoNavigationBar(middle: Text('加载中...')),
+            child: Center(child: CupertinoActivityIndicator()),
           );
         }
 
         if (snapshot.hasError || snapshot.data == null) {
           return CupertinoPageScaffold(
-            navigationBar: const CupertinoNavigationBar(
-              middle: Text('错误'),
-            ),
+            navigationBar: const CupertinoNavigationBar(middle: Text('错误')),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -153,7 +145,7 @@ class HabitDetailScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                    if (habit.isKeystone) ...[
+                    if (habit.isCore) ...[
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -213,10 +205,7 @@ class HabitDetailScreen extends ConsumerWidget {
       children: [
         const Text(
           '习惯循环',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
 
@@ -261,7 +250,7 @@ class HabitDetailScreen extends ConsumerWidget {
         if (habit.category != null || habit.notes != null) ...[
           const SizedBox(height: 16),
           if (habit.category != null)
-            _buildInfoRow('分类', habit.category!),
+            _buildInfoRow('分类', habit.category!.displayNameWithIcon),
           if (habit.notes != null) ...[
             const SizedBox(height: 8),
             _buildInfoRow('备注', habit.notes!),
@@ -282,10 +271,7 @@ class HabitDetailScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: CupertinoColors.systemBackground,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: CupertinoColors.separator,
-          width: 0.5,
-        ),
+        border: Border.all(color: CupertinoColors.separator, width: 0.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,13 +291,7 @@ class HabitDetailScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            content,
-            style: const TextStyle(
-              fontSize: 16,
-              height: 1.5,
-            ),
-          ),
+          Text(content, style: const TextStyle(fontSize: 16, height: 1.5)),
         ],
       ),
     );
@@ -328,12 +308,7 @@ class HabitDetailScreen extends ConsumerWidget {
             color: CupertinoColors.systemGrey,
           ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 14),
-          ),
-        ),
+        Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
       ],
     );
   }
@@ -346,10 +321,7 @@ class HabitDetailScreen extends ConsumerWidget {
       children: [
         const Text(
           '执行记录',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         recordsAsync.when(
@@ -463,15 +435,11 @@ class HabitDetailScreen extends ConsumerWidget {
               }).toList(),
             );
           },
-          loading: () => const Center(
-            child: CupertinoActivityIndicator(),
-          ),
+          loading: () => const Center(child: CupertinoActivityIndicator()),
           error: (error, stack) => Center(
             child: Text(
               '加载失败: $error',
-              style: const TextStyle(
-                color: CupertinoColors.systemRed,
-              ),
+              style: const TextStyle(color: CupertinoColors.systemRed),
             ),
           ),
         ),

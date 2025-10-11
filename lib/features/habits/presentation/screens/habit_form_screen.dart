@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/habit.dart';
+import '../../domain/entities/habit_category.dart';
 import '../providers/habit_provider.dart';
 
 /// 习惯创建/编辑表单页面
@@ -26,14 +27,13 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
   final _routineController = TextEditingController();
   final _oldRoutineController = TextEditingController();
   final _rewardController = TextEditingController();
-  final _categoryController = TextEditingController();
   final _notesController = TextEditingController();
 
   // 习惯类型选择
   HabitType _selectedType = HabitType.positive;
 
-  // 是否为核心习惯
-  bool _isKeystone = false;
+  // 分类选择
+  HabitCategory _selectedCategory = HabitCategory.life;
 
   // 表单验证错误信息
   String? _nameError;
@@ -64,10 +64,9 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
         _routineController.text = habit.routine;
         _oldRoutineController.text = habit.oldRoutine ?? '';
         _rewardController.text = habit.reward ?? '';
-        _categoryController.text = habit.category ?? '';
+        _selectedCategory = habit.category ?? HabitCategory.life;
         _notesController.text = habit.notes ?? '';
         _selectedType = habit.type;
-        _isKeystone = habit.isKeystone;
       });
     }
   }
@@ -79,7 +78,6 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
     _routineController.dispose();
     _oldRoutineController.dispose();
     _rewardController.dispose();
-    _categoryController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -172,14 +170,11 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
             ? _rewardController.text.trim()
             : null,
         type: _selectedType,
-        category: _categoryController.text.trim().isNotEmpty
-            ? _categoryController.text.trim()
-            : null,
+        category: _selectedCategory,
         notes: _notesController.text.trim().isNotEmpty
             ? _notesController.text.trim()
             : null,
         isActive: true,
-        isKeystone: _isKeystone,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,
@@ -259,21 +254,25 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
                 onValueChanged: (value) {
                   setState(() {
                     _selectedType = value;
-                    // 切换到正向习惯时清空原惯常行为
-                    if (value == HabitType.positive) {
+                    // 切换到非习惯替代类型时清空原惯常行为
+                    if (value != HabitType.replacement) {
                       _oldRoutineController.clear();
                       _oldRoutineError = null;
                     }
                   });
                 },
-                children: const {
+                children: {
                   HabitType.positive: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text('正向习惯'),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(HabitType.positive.displayText),
+                  ),
+                  HabitType.core: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(HabitType.core.displayText),
                   ),
                   HabitType.replacement: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text('习惯替代'),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(HabitType.replacement.displayText),
                   ),
                 },
               ),
@@ -286,6 +285,26 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
                 placeholder: '例如：每天阅读',
                 errorText: _nameError,
                 maxLength: 100,
+              ),
+              const SizedBox(height: 16),
+
+              // 分类选择
+              const Text(
+                '分类',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  _buildCategoryButton(HabitCategory.life),
+                  const SizedBox(width: 8),
+                  _buildCategoryButton(HabitCategory.work),
+                  const SizedBox(width: 8),
+                  _buildCategoryButton(HabitCategory.sport),
+                ],
               ),
               const SizedBox(height: 16),
 
@@ -345,59 +364,6 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 分类（可选）
-              _buildTextField(
-                label: '分类（可选）',
-                controller: _categoryController,
-                placeholder: '例如：健康、学习、工作',
-                maxLength: 50,
-              ),
-              const SizedBox(height: 24),
-
-              // 核心习惯开关
-              Container(
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '💎 核心习惯',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '核心习惯能引发连锁反应，带动其他习惯形成',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: CupertinoColors.systemGrey.resolveFrom(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    CupertinoSwitch(
-                      value: _isKeystone,
-                      onChanged: (value) {
-                        setState(() {
-                          _isKeystone = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-
               // 备注（可选）
               _buildTextField(
                 label: '备注（可选）',
@@ -408,6 +374,46 @@ class _HabitFormScreenState extends ConsumerState<HabitFormScreen> {
               ),
               const SizedBox(height: 32),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 构建分类选择按钮
+  Widget _buildCategoryButton(HabitCategory category) {
+    final isSelected = _selectedCategory == category;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _selectedCategory = category;
+          });
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? CupertinoColors.activeBlue
+                : CupertinoColors.systemGrey6,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected
+                  ? CupertinoColors.activeBlue
+                  : CupertinoColors.separator,
+              width: isSelected ? 1.5 : 0.5,
+            ),
+          ),
+          child: Text(
+            category.displayNameWithIcon,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              color: isSelected
+                  ? CupertinoColors.white
+                  : CupertinoColors.label,
+            ),
           ),
         ),
       ),

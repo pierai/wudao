@@ -5,7 +5,7 @@
 **悟道**是一款基于《高效能人士的七个习惯》和《习惯的力量》设计的个人成长应用，帮助用户：
 
 - 建立和追踪人生目标（以终为始）
-- 培养和监控核心习惯（触发机制）
+- 培养和监控核心习惯和习惯替代
 - 记录运动、工作、生活的灵感与感悟
 - 构建个人知识库和解决方案库
 
@@ -385,11 +385,14 @@ const InitializationSettings(...
 
 **Q: macOS 文件选择器无响应？**
 A: 需要在 entitlements 中添加文件访问权限：
+
 - `macos/Runner/DebugProfile.entitlements` 和 `macos/Runner/Release.entitlements` 中添加：
+
   ```xml
   <key>com.apple.security.files.user-selected.read-write</key>
   <true/>
   ```
+
 - 修改后执行 `flutter clean`
 
 ## 相关文档

@@ -1016,21 +1016,6 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
     ),
     defaultValue: const Constant(true),
   );
-  static const VerificationMeta _isKeystoneMeta = const VerificationMeta(
-    'isKeystone',
-  );
-  @override
-  late final GeneratedColumn<bool> isKeystone = GeneratedColumn<bool>(
-    'is_keystone',
-    aliasedName,
-    false,
-    type: DriftSqlType.bool,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'CHECK ("is_keystone" IN (0, 1))',
-    ),
-    defaultValue: const Constant(false),
-  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -1076,7 +1061,6 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
     category,
     notes,
     isActive,
-    isKeystone,
     createdAt,
     updatedAt,
     deletedAt,
@@ -1158,12 +1142,6 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
       );
     }
-    if (data.containsKey('is_keystone')) {
-      context.handle(
-        _isKeystoneMeta,
-        isKeystone.isAcceptableOrUnknown(data['is_keystone']!, _isKeystoneMeta),
-      );
-    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1235,10 +1213,6 @@ class $HabitsTable extends Habits with TableInfo<$HabitsTable, HabitData> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
-      isKeystone: attachedDatabase.typeMapping.read(
-        DriftSqlType.bool,
-        data['${effectivePrefix}is_keystone'],
-      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1283,7 +1257,7 @@ class HabitData extends DataClass implements Insertable<HabitData> {
   /// 示例："自律的实现让我精神满足"
   final String? reward;
 
-  /// 习惯类型：POSITIVE（正向习惯）或 REPLACEMENT（习惯替代）
+  /// 习惯类型：POSITIVE（正向习惯）、CORE（核心习惯）或 REPLACEMENT（习惯替代）
   final String type;
 
   /// 分类（可选）：运动、学习、健康、工作等
@@ -1294,11 +1268,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
 
   /// 是否活跃（用于软删除和归档）
   final bool isActive;
-
-  /// 是否为核心习惯（Keystone Habit）
-  /// 核心习惯能引发连锁反应，带动其他习惯的形成
-  /// 示例：运动 → 健康饮食 + 良好睡眠 + 提高效率
-  final bool isKeystone;
 
   /// 创建时间
   final DateTime createdAt;
@@ -1319,7 +1288,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     this.category,
     this.notes,
     required this.isActive,
-    required this.isKeystone,
     required this.createdAt,
     required this.updatedAt,
     this.deletedAt,
@@ -1347,7 +1315,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       map['notes'] = Variable<String>(notes);
     }
     map['is_active'] = Variable<bool>(isActive);
-    map['is_keystone'] = Variable<bool>(isKeystone);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
     if (!nullToAbsent || deletedAt != null) {
@@ -1376,7 +1343,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           ? const Value.absent()
           : Value(notes),
       isActive: Value(isActive),
-      isKeystone: Value(isKeystone),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
       deletedAt: deletedAt == null && nullToAbsent
@@ -1401,7 +1367,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       category: serializer.fromJson<String?>(json['category']),
       notes: serializer.fromJson<String?>(json['notes']),
       isActive: serializer.fromJson<bool>(json['isActive']),
-      isKeystone: serializer.fromJson<bool>(json['isKeystone']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
@@ -1421,7 +1386,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       'category': serializer.toJson<String?>(category),
       'notes': serializer.toJson<String?>(notes),
       'isActive': serializer.toJson<bool>(isActive),
-      'isKeystone': serializer.toJson<bool>(isKeystone),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
@@ -1439,7 +1403,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     Value<String?> category = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     bool? isActive,
-    bool? isKeystone,
     DateTime? createdAt,
     DateTime? updatedAt,
     Value<DateTime?> deletedAt = const Value.absent(),
@@ -1454,7 +1417,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     category: category.present ? category.value : this.category,
     notes: notes.present ? notes.value : this.notes,
     isActive: isActive ?? this.isActive,
-    isKeystone: isKeystone ?? this.isKeystone,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
@@ -1473,9 +1435,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
       category: data.category.present ? data.category.value : this.category,
       notes: data.notes.present ? data.notes.value : this.notes,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
-      isKeystone: data.isKeystone.present
-          ? data.isKeystone.value
-          : this.isKeystone,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
@@ -1495,7 +1454,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           ..write('category: $category, ')
           ..write('notes: $notes, ')
           ..write('isActive: $isActive, ')
-          ..write('isKeystone: $isKeystone, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt')
@@ -1515,7 +1473,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
     category,
     notes,
     isActive,
-    isKeystone,
     createdAt,
     updatedAt,
     deletedAt,
@@ -1534,7 +1491,6 @@ class HabitData extends DataClass implements Insertable<HabitData> {
           other.category == this.category &&
           other.notes == this.notes &&
           other.isActive == this.isActive &&
-          other.isKeystone == this.isKeystone &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.deletedAt == this.deletedAt);
@@ -1551,7 +1507,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
   final Value<String?> category;
   final Value<String?> notes;
   final Value<bool> isActive;
-  final Value<bool> isKeystone;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<DateTime?> deletedAt;
@@ -1567,7 +1522,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     this.category = const Value.absent(),
     this.notes = const Value.absent(),
     this.isActive = const Value.absent(),
-    this.isKeystone = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.deletedAt = const Value.absent(),
@@ -1584,7 +1538,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     this.category = const Value.absent(),
     this.notes = const Value.absent(),
     this.isActive = const Value.absent(),
-    this.isKeystone = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
     this.deletedAt = const Value.absent(),
@@ -1606,7 +1559,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     Expression<String>? category,
     Expression<String>? notes,
     Expression<bool>? isActive,
-    Expression<bool>? isKeystone,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<DateTime>? deletedAt,
@@ -1623,7 +1575,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
       if (category != null) 'category': category,
       if (notes != null) 'notes': notes,
       if (isActive != null) 'is_active': isActive,
-      if (isKeystone != null) 'is_keystone': isKeystone,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (deletedAt != null) 'deleted_at': deletedAt,
@@ -1642,7 +1593,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     Value<String?>? category,
     Value<String?>? notes,
     Value<bool>? isActive,
-    Value<bool>? isKeystone,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
     Value<DateTime?>? deletedAt,
@@ -1659,7 +1609,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
       category: category ?? this.category,
       notes: notes ?? this.notes,
       isActive: isActive ?? this.isActive,
-      isKeystone: isKeystone ?? this.isKeystone,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       deletedAt: deletedAt ?? this.deletedAt,
@@ -1700,9 +1649,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
     }
-    if (isKeystone.present) {
-      map['is_keystone'] = Variable<bool>(isKeystone.value);
-    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1731,7 +1677,6 @@ class HabitsCompanion extends UpdateCompanion<HabitData> {
           ..write('category: $category, ')
           ..write('notes: $notes, ')
           ..write('isActive: $isActive, ')
-          ..write('isKeystone: $isKeystone, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('deletedAt: $deletedAt, ')
@@ -3843,6 +3788,341 @@ class HabitFrontmattersCompanion extends UpdateCompanion<HabitFrontmatterData> {
   }
 }
 
+class $HabitAssociationsTable extends HabitAssociations
+    with TableInfo<$HabitAssociationsTable, HabitAssociationData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $HabitAssociationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _keystoneHabitIdMeta = const VerificationMeta(
+    'keystoneHabitId',
+  );
+  @override
+  late final GeneratedColumn<String> keystoneHabitId = GeneratedColumn<String>(
+    'keystone_habit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _associatedHabitIdMeta = const VerificationMeta(
+    'associatedHabitId',
+  );
+  @override
+  late final GeneratedColumn<String> associatedHabitId =
+      GeneratedColumn<String>(
+        'associated_habit_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    keystoneHabitId,
+    associatedHabitId,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'habit_associations';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<HabitAssociationData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('keystone_habit_id')) {
+      context.handle(
+        _keystoneHabitIdMeta,
+        keystoneHabitId.isAcceptableOrUnknown(
+          data['keystone_habit_id']!,
+          _keystoneHabitIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_keystoneHabitIdMeta);
+    }
+    if (data.containsKey('associated_habit_id')) {
+      context.handle(
+        _associatedHabitIdMeta,
+        associatedHabitId.isAcceptableOrUnknown(
+          data['associated_habit_id']!,
+          _associatedHabitIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_associatedHabitIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  HabitAssociationData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return HabitAssociationData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      keystoneHabitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}keystone_habit_id'],
+      )!,
+      associatedHabitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}associated_habit_id'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $HabitAssociationsTable createAlias(String alias) {
+    return $HabitAssociationsTable(attachedDatabase, alias);
+  }
+}
+
+class HabitAssociationData extends DataClass
+    implements Insertable<HabitAssociationData> {
+  /// 唯一标识符（UUID）
+  final String id;
+
+  /// 核心习惯ID（必须是 isKeystone = true 的习惯）
+  final String keystoneHabitId;
+
+  /// 关联的普通习惯ID（伴随习惯）
+  final String associatedHabitId;
+
+  /// 创建时间
+  final DateTime createdAt;
+  const HabitAssociationData({
+    required this.id,
+    required this.keystoneHabitId,
+    required this.associatedHabitId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['keystone_habit_id'] = Variable<String>(keystoneHabitId);
+    map['associated_habit_id'] = Variable<String>(associatedHabitId);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  HabitAssociationsCompanion toCompanion(bool nullToAbsent) {
+    return HabitAssociationsCompanion(
+      id: Value(id),
+      keystoneHabitId: Value(keystoneHabitId),
+      associatedHabitId: Value(associatedHabitId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory HabitAssociationData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return HabitAssociationData(
+      id: serializer.fromJson<String>(json['id']),
+      keystoneHabitId: serializer.fromJson<String>(json['keystoneHabitId']),
+      associatedHabitId: serializer.fromJson<String>(json['associatedHabitId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'keystoneHabitId': serializer.toJson<String>(keystoneHabitId),
+      'associatedHabitId': serializer.toJson<String>(associatedHabitId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  HabitAssociationData copyWith({
+    String? id,
+    String? keystoneHabitId,
+    String? associatedHabitId,
+    DateTime? createdAt,
+  }) => HabitAssociationData(
+    id: id ?? this.id,
+    keystoneHabitId: keystoneHabitId ?? this.keystoneHabitId,
+    associatedHabitId: associatedHabitId ?? this.associatedHabitId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  HabitAssociationData copyWithCompanion(HabitAssociationsCompanion data) {
+    return HabitAssociationData(
+      id: data.id.present ? data.id.value : this.id,
+      keystoneHabitId: data.keystoneHabitId.present
+          ? data.keystoneHabitId.value
+          : this.keystoneHabitId,
+      associatedHabitId: data.associatedHabitId.present
+          ? data.associatedHabitId.value
+          : this.associatedHabitId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HabitAssociationData(')
+          ..write('id: $id, ')
+          ..write('keystoneHabitId: $keystoneHabitId, ')
+          ..write('associatedHabitId: $associatedHabitId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, keystoneHabitId, associatedHabitId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is HabitAssociationData &&
+          other.id == this.id &&
+          other.keystoneHabitId == this.keystoneHabitId &&
+          other.associatedHabitId == this.associatedHabitId &&
+          other.createdAt == this.createdAt);
+}
+
+class HabitAssociationsCompanion extends UpdateCompanion<HabitAssociationData> {
+  final Value<String> id;
+  final Value<String> keystoneHabitId;
+  final Value<String> associatedHabitId;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const HabitAssociationsCompanion({
+    this.id = const Value.absent(),
+    this.keystoneHabitId = const Value.absent(),
+    this.associatedHabitId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  HabitAssociationsCompanion.insert({
+    required String id,
+    required String keystoneHabitId,
+    required String associatedHabitId,
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       keystoneHabitId = Value(keystoneHabitId),
+       associatedHabitId = Value(associatedHabitId),
+       createdAt = Value(createdAt);
+  static Insertable<HabitAssociationData> custom({
+    Expression<String>? id,
+    Expression<String>? keystoneHabitId,
+    Expression<String>? associatedHabitId,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (keystoneHabitId != null) 'keystone_habit_id': keystoneHabitId,
+      if (associatedHabitId != null) 'associated_habit_id': associatedHabitId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  HabitAssociationsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? keystoneHabitId,
+    Value<String>? associatedHabitId,
+    Value<DateTime>? createdAt,
+    Value<int>? rowid,
+  }) {
+    return HabitAssociationsCompanion(
+      id: id ?? this.id,
+      keystoneHabitId: keystoneHabitId ?? this.keystoneHabitId,
+      associatedHabitId: associatedHabitId ?? this.associatedHabitId,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (keystoneHabitId.present) {
+      map['keystone_habit_id'] = Variable<String>(keystoneHabitId.value);
+    }
+    if (associatedHabitId.present) {
+      map['associated_habit_id'] = Variable<String>(associatedHabitId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('HabitAssociationsCompanion(')
+          ..write('id: $id, ')
+          ..write('keystoneHabitId: $keystoneHabitId, ')
+          ..write('associatedHabitId: $associatedHabitId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   _$AppDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -3853,6 +4133,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $DailyPlansTable dailyPlans = $DailyPlansTable(this);
   late final $HabitFrontmattersTable habitFrontmatters =
       $HabitFrontmattersTable(this);
+  late final $HabitAssociationsTable habitAssociations =
+      $HabitAssociationsTable(this);
   late final GoalDao goalDao = GoalDao(this as AppDatabase);
   late final HabitDao habitDao = HabitDao(this as AppDatabase);
   late final HabitRecordDao habitRecordDao = HabitRecordDao(
@@ -3860,6 +4142,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final DailyPlanDao dailyPlanDao = DailyPlanDao(this as AppDatabase);
   late final FrontmatterDao frontmatterDao = FrontmatterDao(
+    this as AppDatabase,
+  );
+  late final HabitAssociationDao habitAssociationDao = HabitAssociationDao(
     this as AppDatabase,
   );
   @override
@@ -3872,6 +4157,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     habitRecords,
     dailyPlans,
     habitFrontmatters,
+    habitAssociations,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -4432,7 +4718,6 @@ typedef $$HabitsTableCreateCompanionBuilder =
       Value<String?> category,
       Value<String?> notes,
       Value<bool> isActive,
-      Value<bool> isKeystone,
       required DateTime createdAt,
       required DateTime updatedAt,
       Value<DateTime?> deletedAt,
@@ -4450,7 +4735,6 @@ typedef $$HabitsTableUpdateCompanionBuilder =
       Value<String?> category,
       Value<String?> notes,
       Value<bool> isActive,
-      Value<bool> isKeystone,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
       Value<DateTime?> deletedAt,
@@ -4554,11 +4838,6 @@ class $$HabitsTableFilterComposer
 
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<bool> get isKeystone => $composableBuilder(
-    column: $table.isKeystone,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4687,11 +4966,6 @@ class $$HabitsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<bool> get isKeystone => $composableBuilder(
-    column: $table.isKeystone,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -4748,11 +5022,6 @@ class $$HabitsTableAnnotationComposer
 
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
-
-  GeneratedColumn<bool> get isKeystone => $composableBuilder(
-    column: $table.isKeystone,
-    builder: (column) => column,
-  );
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -4852,7 +5121,6 @@ class $$HabitsTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
-                Value<bool> isKeystone = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -4868,7 +5136,6 @@ class $$HabitsTableTableManager
                 category: category,
                 notes: notes,
                 isActive: isActive,
-                isKeystone: isKeystone,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -4886,7 +5153,6 @@ class $$HabitsTableTableManager
                 Value<String?> category = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
-                Value<bool> isKeystone = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
                 Value<DateTime?> deletedAt = const Value.absent(),
@@ -4902,7 +5168,6 @@ class $$HabitsTableTableManager
                 category: category,
                 notes: notes,
                 isActive: isActive,
-                isKeystone: isKeystone,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
                 deletedAt: deletedAt,
@@ -6374,6 +6639,204 @@ typedef $$HabitFrontmattersTableProcessedTableManager =
       HabitFrontmatterData,
       PrefetchHooks Function()
     >;
+typedef $$HabitAssociationsTableCreateCompanionBuilder =
+    HabitAssociationsCompanion Function({
+      required String id,
+      required String keystoneHabitId,
+      required String associatedHabitId,
+      required DateTime createdAt,
+      Value<int> rowid,
+    });
+typedef $$HabitAssociationsTableUpdateCompanionBuilder =
+    HabitAssociationsCompanion Function({
+      Value<String> id,
+      Value<String> keystoneHabitId,
+      Value<String> associatedHabitId,
+      Value<DateTime> createdAt,
+      Value<int> rowid,
+    });
+
+class $$HabitAssociationsTableFilterComposer
+    extends Composer<_$AppDatabase, $HabitAssociationsTable> {
+  $$HabitAssociationsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get keystoneHabitId => $composableBuilder(
+    column: $table.keystoneHabitId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get associatedHabitId => $composableBuilder(
+    column: $table.associatedHabitId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$HabitAssociationsTableOrderingComposer
+    extends Composer<_$AppDatabase, $HabitAssociationsTable> {
+  $$HabitAssociationsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get keystoneHabitId => $composableBuilder(
+    column: $table.keystoneHabitId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get associatedHabitId => $composableBuilder(
+    column: $table.associatedHabitId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$HabitAssociationsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $HabitAssociationsTable> {
+  $$HabitAssociationsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get keystoneHabitId => $composableBuilder(
+    column: $table.keystoneHabitId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get associatedHabitId => $composableBuilder(
+    column: $table.associatedHabitId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$HabitAssociationsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $HabitAssociationsTable,
+          HabitAssociationData,
+          $$HabitAssociationsTableFilterComposer,
+          $$HabitAssociationsTableOrderingComposer,
+          $$HabitAssociationsTableAnnotationComposer,
+          $$HabitAssociationsTableCreateCompanionBuilder,
+          $$HabitAssociationsTableUpdateCompanionBuilder,
+          (
+            HabitAssociationData,
+            BaseReferences<
+              _$AppDatabase,
+              $HabitAssociationsTable,
+              HabitAssociationData
+            >,
+          ),
+          HabitAssociationData,
+          PrefetchHooks Function()
+        > {
+  $$HabitAssociationsTableTableManager(
+    _$AppDatabase db,
+    $HabitAssociationsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$HabitAssociationsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$HabitAssociationsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$HabitAssociationsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> keystoneHabitId = const Value.absent(),
+                Value<String> associatedHabitId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => HabitAssociationsCompanion(
+                id: id,
+                keystoneHabitId: keystoneHabitId,
+                associatedHabitId: associatedHabitId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String keystoneHabitId,
+                required String associatedHabitId,
+                required DateTime createdAt,
+                Value<int> rowid = const Value.absent(),
+              }) => HabitAssociationsCompanion.insert(
+                id: id,
+                keystoneHabitId: keystoneHabitId,
+                associatedHabitId: associatedHabitId,
+                createdAt: createdAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$HabitAssociationsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $HabitAssociationsTable,
+      HabitAssociationData,
+      $$HabitAssociationsTableFilterComposer,
+      $$HabitAssociationsTableOrderingComposer,
+      $$HabitAssociationsTableAnnotationComposer,
+      $$HabitAssociationsTableCreateCompanionBuilder,
+      $$HabitAssociationsTableUpdateCompanionBuilder,
+      (
+        HabitAssociationData,
+        BaseReferences<
+          _$AppDatabase,
+          $HabitAssociationsTable,
+          HabitAssociationData
+        >,
+      ),
+      HabitAssociationData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6388,4 +6851,6 @@ class $AppDatabaseManager {
       $$DailyPlansTableTableManager(_db, _db.dailyPlans);
   $$HabitFrontmattersTableTableManager get habitFrontmatters =>
       $$HabitFrontmattersTableTableManager(_db, _db.habitFrontmatters);
+  $$HabitAssociationsTableTableManager get habitAssociations =>
+      $$HabitAssociationsTableTableManager(_db, _db.habitAssociations);
 }

@@ -129,7 +129,7 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
             _priorities.remove(habit.id);
           } else {
             _selectedHabitIds.add(habit.id);
-            _priorities[habit.id] = habit.isKeystone ? 8 : 5; // 核心习惯默认高优先级
+            _priorities[habit.id] = habit.isCore ? 8 : 5; // 核心习惯默认高优先级
           }
         });
       },
@@ -192,7 +192,7 @@ class _PlanGeneratorDialogState extends ConsumerState<PlanGeneratorDialog> {
                           ),
                         ),
                       ),
-                      if (habit.isKeystone) ...[
+                      if (habit.isCore) ...[
                         const SizedBox(width: 8),
                         const Text('💎', style: TextStyle(fontSize: 14)),
                       ],

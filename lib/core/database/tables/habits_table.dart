@@ -27,7 +27,7 @@ class Habits extends Table {
   /// 示例："自律的实现让我精神满足"
   TextColumn get reward => text().withLength(max: 500).nullable()();
 
-  /// 习惯类型：POSITIVE（正向习惯）或 REPLACEMENT（习惯替代）
+  /// 习惯类型：POSITIVE（正向习惯）、CORE（核心习惯）或 REPLACEMENT（习惯替代）
   TextColumn get type => text()();
 
   /// 分类（可选）：运动、学习、健康、工作等
@@ -38,11 +38,6 @@ class Habits extends Table {
 
   /// 是否活跃（用于软删除和归档）
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
-
-  /// 是否为核心习惯（Keystone Habit）
-  /// 核心习惯能引发连锁反应，带动其他习惯的形成
-  /// 示例：运动 → 健康饮食 + 良好睡眠 + 提高效率
-  BoolColumn get isKeystone => boolean().withDefault(const Constant(false))();
 
   /// 创建时间
   DateTimeColumn get createdAt => dateTime()();

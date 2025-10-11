@@ -357,8 +357,7 @@ class DataImportService {
         current.reward != imported.reward ||
         current.type != imported.type ||
         current.category != imported.category ||
-        current.notes != imported.notes ||
-        current.isKeystone != imported.isKeystone;
+        current.notes != imported.notes;
   }
 
   /// 判断打卡记录是否不同

@@ -25,6 +25,7 @@ final habitRepositoryProvider = Provider<HabitRepository>((ref) {
     recordDao: database.habitRecordDao,
     planDao: database.dailyPlanDao,
     frontmatterDao: database.frontmatterDao,
+    associationDao: database.habitAssociationDao,
     reminderScheduler: reminderScheduler,
   );
 });
@@ -222,13 +223,53 @@ final filteredHabitsProvider = StreamProvider<List<Habit>>((ref) {
           return Stream.value(habits);
         case KeystoneFilterType.keystoneOnly:
           return Stream.value(
-              habits.where((habit) => habit.isKeystone).toList());
+              habits.where((habit) => habit.type == HabitType.core).toList());
         case KeystoneFilterType.regularOnly:
           return Stream.value(
-              habits.where((habit) => !habit.isKeystone).toList());
+              habits.where((habit) => habit.type != HabitType.core).toList());
       }
     },
     loading: () => const Stream.empty(),
     error: (error, stack) => Stream.error(error, stack),
   );
 });
+
+// ========== 习惯关联相关 Providers ==========
+
+/// 获取核心习惯的关联习惯列表 Provider
+final associatedHabitsProvider =
+    StreamProvider.family<List<Habit>, String>((ref, keystoneHabitId) {
+  final repository = ref.watch(habitRepositoryProvider);
+  return repository.watchAssociatedHabits(keystoneHabitId);
+});
+
+/// 未关联到任何核心习惯的习惯列表 Provider
+/// 仅包含 type != core 且未被关联的活跃习惯
+final unassociatedHabitsProvider = StreamProvider<List<Habit>>((ref) {
+  final repository = ref.watch(habitRepositoryProvider);
+  return repository.watchUnassociatedHabits();
+});
+
+/// 检查习惯是否已被关联到某个核心习惯 Provider
+final isHabitAssociatedProvider = StreamProvider.family<bool, String>((ref, habitId) async* {
+  // 获取所有关联关系
+  final repository = ref.watch(habitRepositoryProvider);
+  final allHabits = await ref.watch(activeHabitsProvider.future);
+
+  // 检查所有核心习惯，看是否有关联到此习惯
+  for (final habit in allHabits) {
+    if (habit.type == HabitType.core) {
+      final associatedHabits = await repository.getAssociatedHabits(habit.id);
+      if (associatedHabits.any((h) => h.id == habitId)) {
+        yield true;
+        return;
+      }
+    }
+  }
+
+  yield false;
+});
+
+/// 核心习惯展开状态 Provider (使用Map存储每个习惯的展开状态)
+final keystoneExpandedProvider =
+    StateProvider<Map<String, bool>>((ref) => {});

@@ -3,6 +3,7 @@ import '../../../../core/database/daos/habit_dao.dart';
 import '../../../../core/database/daos/habit_record_dao.dart';
 import '../../../../core/database/daos/daily_plan_dao.dart';
 import '../../../../core/database/daos/frontmatter_dao.dart';
+import '../../../../core/database/daos/habit_association_dao.dart';
 import '../../../../core/services/reminder_scheduler_service.dart';
 import '../../domain/entities/habit.dart';
 import '../../domain/entities/habit_record.dart';
@@ -26,6 +27,7 @@ class HabitRepositoryImpl implements HabitRepository {
   final HabitRecordDao _recordDao;
   final DailyPlanDao _planDao;
   final FrontmatterDao _frontmatterDao;
+  final HabitAssociationDao _associationDao;
   final ReminderSchedulerService? _reminderScheduler;
 
   HabitRepositoryImpl({
@@ -33,11 +35,13 @@ class HabitRepositoryImpl implements HabitRepository {
     required HabitRecordDao recordDao,
     required DailyPlanDao planDao,
     required FrontmatterDao frontmatterDao,
+    required HabitAssociationDao associationDao,
     ReminderSchedulerService? reminderScheduler,
   })  : _habitDao = habitDao,
         _recordDao = recordDao,
         _planDao = planDao,
         _frontmatterDao = frontmatterDao,
+        _associationDao = associationDao,
         _reminderScheduler = reminderScheduler;
 
   // ========== 习惯管理 ==========
@@ -109,6 +113,62 @@ class HabitRepositoryImpl implements HabitRepository {
   Future<List<Habit>> getAllHabits({bool includeDeleted = false}) async {
     final list = await _habitDao.getAllHabits(includeDeleted: includeDeleted);
     return list.map((data) => data.toEntity()).toList();
+  }
+
+  // ========== 习惯关联管理 ==========
+
+  @override
+  Future<void> addHabitAssociation({
+    required String keystoneHabitId,
+    required String associatedHabitId,
+  }) async {
+    await _associationDao.addAssociation(
+      keystoneHabitId: keystoneHabitId,
+      associatedHabitId: associatedHabitId,
+    );
+  }
+
+  @override
+  Future<void> removeHabitAssociation({
+    required String keystoneHabitId,
+    required String associatedHabitId,
+  }) async {
+    await _associationDao.removeAssociation(
+      keystoneHabitId: keystoneHabitId,
+      associatedHabitId: associatedHabitId,
+    );
+  }
+
+  @override
+  Future<List<Habit>> getAssociatedHabits(String keystoneHabitId) async {
+    final habitDataList =
+        await _associationDao.getAssociatedHabits(keystoneHabitId);
+    return habitDataList.map((data) => data.toEntity()).toList();
+  }
+
+  @override
+  Stream<List<Habit>> watchAssociatedHabits(String keystoneHabitId) {
+    return _associationDao.watchAssociatedHabits(keystoneHabitId).map(
+          (list) => list.map((data) => data.toEntity()).toList(),
+        );
+  }
+
+  @override
+  Future<bool> isHabitAssociated({
+    required String keystoneHabitId,
+    required String associatedHabitId,
+  }) {
+    return _associationDao.isAssociated(
+      keystoneHabitId: keystoneHabitId,
+      associatedHabitId: associatedHabitId,
+    );
+  }
+
+  @override
+  Stream<List<Habit>> watchUnassociatedHabits() {
+    return _associationDao.watchUnassociatedHabits().map(
+          (list) => list.map((data) => data.toEntity()).toList(),
+        );
   }
 
   // ========== 执行记录管理 ==========

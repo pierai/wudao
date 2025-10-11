@@ -47,6 +47,36 @@ abstract class HabitRepository {
   /// 获取所有习惯（包括已删除的，可选）
   Future<List<Habit>> getAllHabits({bool includeDeleted = false});
 
+  // ========== 习惯关联管理 ==========
+
+  /// 添加习惯关联（将普通习惯关联到核心习惯）
+  Future<void> addHabitAssociation({
+    required String keystoneHabitId,
+    required String associatedHabitId,
+  });
+
+  /// 删除习惯关联
+  Future<void> removeHabitAssociation({
+    required String keystoneHabitId,
+    required String associatedHabitId,
+  });
+
+  /// 获取核心习惯的所有伴随习惯
+  Future<List<Habit>> getAssociatedHabits(String keystoneHabitId);
+
+  /// 监听核心习惯的所有伴随习惯
+  Stream<List<Habit>> watchAssociatedHabits(String keystoneHabitId);
+
+  /// 检查习惯是否已关联
+  Future<bool> isHabitAssociated({
+    required String keystoneHabitId,
+    required String associatedHabitId,
+  });
+
+  /// 获取未关联到任何核心习惯的习惯列表
+  /// 仅返回 type != core 的习惯
+  Stream<List<Habit>> watchUnassociatedHabits();
+
   // ========== 执行记录管理 ==========
 
   /// 记录习惯执行（打卡）
