@@ -22,7 +22,7 @@ extension HabitTabTypeX on HabitTabType {
       case HabitTabType.core:
         return '💪 核心习惯';
       case HabitTabType.replacement:
-        return '↔️ 习惯替代';
+        return '🔄 习惯替代';
     }
   }
 
