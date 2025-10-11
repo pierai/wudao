@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../routing/app_router.dart';
 import '../../domain/entities/habit.dart';
+import '../../domain/entities/habit_category.dart';
 import '../providers/habit_provider.dart';
 import 'check_in_dialog.dart';
 
@@ -45,11 +46,6 @@ class HabitCard extends ConsumerWidget {
   /// 标题字体大小
   double _titleFontSize(BuildContext context) {
     return _isCompactMode(context) ? 16.0 : 18.0;
-  }
-
-  /// 标题下方间隔
-  double _titleBottomSpacing(BuildContext context) {
-    return _isCompactMode(context) ? 3.0 : 4.0;
   }
 
   /// 类型标签字体大小
@@ -106,6 +102,37 @@ class HabitCard extends ConsumerWidget {
     // iPhone 上如果暗示内容较长，可以考虑隐藏
     // 这里先保留显示，用户可以根据需要调整
     return true; // _isCompactMode(context) ? false : true;
+  }
+
+  /// 标签之间的间隔
+  double _badgeSpacing(BuildContext context) {
+    return _isCompactMode(context) ? 4.0 : 6.0;
+  }
+
+  // ========== 标签辅助方法 ==========
+
+  /// 获取类型标签图标
+  String _getTypeIcon(Habit habit) {
+    switch (habit.type) {
+      case HabitType.positive:
+        return '✅';
+      case HabitType.core:
+        return '💎';
+      case HabitType.replacement:
+        return '🔄';
+    }
+  }
+
+  /// 获取类型标签背景色
+  Color _getTypeBadgeColor(Habit habit) {
+    switch (habit.type) {
+      case HabitType.positive:
+        return CupertinoColors.activeGreen.withOpacity(0.15);
+      case HabitType.core:
+        return CupertinoColors.systemOrange.withOpacity(0.15);
+      case HabitType.replacement:
+        return CupertinoColors.activeBlue.withOpacity(0.15);
+    }
   }
 
   Future<void> _handleCheckIn(BuildContext context, WidgetRef ref) async {
@@ -229,82 +256,56 @@ class HabitCard extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 标题行：习惯名称 + 快速打卡按钮
+                // 标题行：习惯名称 + 标签 + 快速打卡按钮
                 Row(
                   children: [
                     Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(
-                            habit.name,
-                            style: TextStyle(
-                              fontSize: _titleFontSize(context),
-                              fontWeight: FontWeight.bold,
+                          // 习惯名称
+                          Flexible(
+                            child: Text(
+                              habit.name,
+                              style: TextStyle(
+                                fontSize: _titleFontSize(context),
+                                fontWeight: FontWeight.bold,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          SizedBox(height: _titleBottomSpacing(context)),
-                          // 习惯类型标签和核心习惯徽章
-                          Row(
-                            children: [
-                              // 习惯类型标签
-                              Container(
-                                padding: _typeBadgePadding(context),
-                                decoration: BoxDecoration(
-                                  color: habit.isPositive
-                                      ? CupertinoColors.activeGreen.withOpacity(
-                                          0.1,
-                                        )
-                                      : CupertinoColors.activeBlue.withOpacity(
-                                          0.1,
-                                        ),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  habit.typeDisplayText,
-                                  style: TextStyle(
-                                    fontSize: _typeBadgeFontSize(context),
-                                    color: habit.isPositive
-                                        ? CupertinoColors.activeGreen
-                                        : CupertinoColors.activeBlue,
-                                  ),
+                          SizedBox(width: _badgeSpacing(context)),
+                          // 习惯类型标签
+                          Container(
+                            padding: _typeBadgePadding(context),
+                            decoration: BoxDecoration(
+                              color: _getTypeBadgeColor(habit),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              _getTypeIcon(habit),
+                              style: TextStyle(
+                                fontSize: _typeBadgeFontSize(context),
+                              ),
+                            ),
+                          ),
+                          // 分类标签
+                          if (habit.category != null) ...[
+                            SizedBox(width: _badgeSpacing(context)),
+                            Container(
+                              padding: _typeBadgePadding(context),
+                              decoration: BoxDecoration(
+                                color: CupertinoColors.systemGrey5,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                habit.category!.icon,
+                                style: TextStyle(
+                                  fontSize: _typeBadgeFontSize(context),
                                 ),
                               ),
-                              // 核心习惯徽章
-                              if (habit.isCore) ...[
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: _typeBadgePadding(context),
-                                  decoration: BoxDecoration(
-                                    color: CupertinoColors.systemOrange
-                                        .withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        '💎',
-                                        style: TextStyle(
-                                          fontSize: _typeBadgeFontSize(context) - 1,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 2),
-                                      Text(
-                                        '核心习惯',
-                                        style: TextStyle(
-                                          fontSize: _typeBadgeFontSize(context),
-                                          color: CupertinoColors.systemOrange,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
+                            ),
+                          ],
                         ],
                       ),
                     ),

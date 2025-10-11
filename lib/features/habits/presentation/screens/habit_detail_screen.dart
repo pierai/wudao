@@ -120,32 +120,40 @@ class HabitDetailScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // 习惯类型和核心习惯徽章
+                // 习惯类型和分类标签
                 Row(
                   children: [
+                    // 类型标签（带图标）
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: habit.isPositive
-                            ? CupertinoColors.activeGreen.withOpacity(0.1)
-                            : CupertinoColors.activeBlue.withOpacity(0.1),
+                        color: _getTypeBadgeColor(habit),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(
-                        habit.typeDisplayText,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: habit.isPositive
-                              ? CupertinoColors.activeGreen
-                              : CupertinoColors.activeBlue,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _getTypeIcon(habit),
+                            style: const TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            habit.typeDisplayText,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: _getTypeTextColor(habit),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    if (habit.isCore) ...[
+                    // 分类标签
+                    if (habit.category != null) ...[
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -153,20 +161,23 @@ class HabitDetailScreen extends ConsumerWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: CupertinoColors.systemOrange.withOpacity(0.15),
+                          color: CupertinoColors.systemGrey5,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('💎', style: TextStyle(fontSize: 12)),
-                            SizedBox(width: 4),
                             Text(
-                              '核心习惯',
-                              style: TextStyle(
+                              habit.category!.icon,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              habit.category!.displayName,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: CupertinoColors.systemOrange,
+                                color: CupertinoColors.systemGrey,
                               ),
                             ),
                           ],
@@ -469,5 +480,43 @@ class HabitDetailScreen extends ConsumerWidget {
         '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
 
     return '$dateStr $timeStr';
+  }
+
+  // ========== 标签辅助方法 ==========
+
+  /// 获取类型标签图标
+  String _getTypeIcon(Habit habit) {
+    switch (habit.type) {
+      case HabitType.positive:
+        return '✅';
+      case HabitType.core:
+        return '💎';
+      case HabitType.replacement:
+        return '🔄';
+    }
+  }
+
+  /// 获取类型标签背景色
+  Color _getTypeBadgeColor(Habit habit) {
+    switch (habit.type) {
+      case HabitType.positive:
+        return CupertinoColors.activeGreen.withOpacity(0.15);
+      case HabitType.core:
+        return CupertinoColors.systemOrange.withOpacity(0.15);
+      case HabitType.replacement:
+        return CupertinoColors.activeBlue.withOpacity(0.15);
+    }
+  }
+
+  /// 获取类型标签文字颜色
+  Color _getTypeTextColor(Habit habit) {
+    switch (habit.type) {
+      case HabitType.positive:
+        return CupertinoColors.activeGreen;
+      case HabitType.core:
+        return CupertinoColors.systemOrange;
+      case HabitType.replacement:
+        return CupertinoColors.activeBlue;
+    }
   }
 }
